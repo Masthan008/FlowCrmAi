@@ -13,9 +13,10 @@ export const validateRequest = (schema: ZodSchema) => {
       })) as any;
       
       // Re-assign validated properties back to the request
-      req.body = parsed.body;
-      req.query = parsed.query;
-      req.params = parsed.params;
+      // Use Object.defineProperty to handle getter-only properties in Node.js 21+
+      Object.defineProperty(req, 'body', { value: parsed.body, writable: true, configurable: true });
+      Object.defineProperty(req, 'query', { value: parsed.query, writable: true, configurable: true });
+      Object.defineProperty(req, 'params', { value: parsed.params, writable: true, configurable: true });
       
       next();
     } catch (error) {

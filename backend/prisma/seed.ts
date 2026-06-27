@@ -102,7 +102,7 @@ async function main() {
     { name: 'tasks:export', module: 'tasks', action: 'export', description: 'Export task lists' },
   ];
 
-  const dbPermissions = [];
+  const dbPermissions: any[] = [];
   for (const perm of permissionsData) {
     const dbPerm = await prisma.permission.upsert({
       where: { name: perm.name },
@@ -141,43 +141,82 @@ async function main() {
   console.log(`Upserted ${roles.length} roles.`);
 
   // 3. Link permissions to roles (RolePermissions)
-  // Super Admin gets all permissions
-  const superAdminRole = dbRoles['Super Admin'];
-  for (const perm of dbPermissions) {
-    await prisma.rolePermission.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: superAdminRole.id,
-          permissionId: perm.id,
-        },
-      },
-      update: {},
-      create: {
-        roleId: superAdminRole.id,
-        permissionId: perm.id,
-      },
-    });
-  }
+  // Helper to assign permissions to a role by name match
+  const assignPermissions = async (roleName: string, filterFn: (p: any) => boolean) => {
+    const role = dbRoles[roleName];
+    if (!role) return;
+    const perms = dbPermissions.filter(filterFn);
+    for (const perm of perms) {
+      await prisma.rolePermission.upsert({
+        where: { roleId_permissionId: { roleId: role.id, permissionId: perm.id } },
+        update: {},
+        create: { roleId: role.id, permissionId: perm.id },
+      });
+    }
+  };
 
-  // Viewer role gets only view permissions
-  const viewerRole = dbRoles['Viewer'];
-  const viewPermissions = dbPermissions.filter((p) => p.action === 'view' || p.action === 'access');
-  for (const perm of viewPermissions) {
-    await prisma.rolePermission.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: viewerRole.id,
-          permissionId: perm.id,
-        },
-      },
-      update: {},
-      create: {
-        roleId: viewerRole.id,
-        permissionId: perm.id,
-      },
-    });
-  }
-  console.log('Linked permissions to Super Admin & Viewer roles.');
+  // Super Admin & Admin: ALL permissions
+  await assignPermissions('Super Admin', () => true);
+  await assignPermissions('Admin', () => true);
+
+  // Sales Manager: full leads, contacts, companies, deals, tasks; view reports
+  await assignPermissions('Sales Manager', (p) =>
+    p.module === 'dashboard' ||
+    (p.module === 'leads' && !p.action.startsWith('workflow') && !p.action.startsWith('score') && !p.action.startsWith('insights')) ||
+    (p.module === 'contacts' && !p.action.startsWith('workflow') && !p.action.startsWith('segment') && !p.action.startsWith('score') && !p.action.startsWith('risk') && !p.action.startsWith('preferences')) ||
+    p.module === 'companies' ||
+    p.module === 'deals' ||
+    (p.module === 'tasks') ||
+    (p.module === 'reports') ||
+    p.name === 'relationship:view' || p.name === 'communication:view' || p.name === 'health:view' || p.name === 'journey:view'
+  );
+
+  // Sales Executive: leads create/edit/view, contacts create/edit/view, companies view, tasks
+  await assignPermissions('Sales Executive', (p) =>
+    p.module === 'dashboard' ||
+    (p.module === 'leads' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'assign' || p.action === 'convert' || p.action === 'notes:create' || p.action === 'notes:edit' || p.action === 'activities:create' || p.action === 'activities:edit' || p.action === 'files:upload' || p.action === 'score-view')) ||
+    (p.module === 'contacts' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'notes:create' || p.action === 'notes:edit' || p.action === 'activities:create' || p.action === 'activities:edit' || p.action === 'files:upload' || p.name === 'relationship:view' || p.name === 'communication:view' || p.name === 'journey:view')) ||
+    (p.module === 'companies' && (p.action === 'view' || p.action === 'create' || p.action === 'edit')) ||
+    (p.module === 'deals' && (p.action === 'view' || p.action === 'create' || p.action === 'edit')) ||
+    (p.module === 'tasks' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'complete' || p.action === 'assign'))
+  );
+
+  // Marketing: leads view/create, contacts view, dashboard
+  await assignPermissions('Marketing', (p) =>
+    p.module === 'dashboard' ||
+    (p.module === 'leads' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'export' || p.action === 'insights-view')) ||
+    (p.module === 'contacts' && (p.action === 'view')) ||
+    (p.module === 'tasks' && (p.action === 'view' || p.action === 'create')) ||
+    p.module === 'reports'
+  );
+
+  // Support: contacts view/edit, companies view, tasks
+  await assignPermissions('Support', (p) =>
+    p.module === 'dashboard' ||
+    (p.module === 'contacts' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'notes:create' || p.action === 'notes:edit')) ||
+    (p.module === 'companies' && p.action === 'view') ||
+    (p.module === 'tasks' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'complete'))
+  );
+
+  // Finance: dashboard, reports, deals/companies view
+  await assignPermissions('Finance', (p) =>
+    p.module === 'dashboard' ||
+    (p.module === 'companies' && p.action === 'view') ||
+    (p.module === 'deals' && p.action === 'view') ||
+    p.module === 'reports'
+  );
+
+  // HR: users view, dashboard, settings
+  await assignPermissions('HR', (p) =>
+    p.module === 'dashboard' ||
+    p.module === 'settings' ||
+    (p.module === 'users' && p.action === 'view')
+  );
+
+  // Viewer: only view & access actions
+  await assignPermissions('Viewer', (p) => p.action === 'view' || p.action === 'access');
+
+  console.log('Linked permissions to all 9 roles.');
 
   // 5. Seed Lead Sources
   const leadSourcesData = [
@@ -229,6 +268,7 @@ async function main() {
   console.log(`Upserted ${leadStatusesData.length} lead statuses.`);
 
   // 7. Seed default Super Admin user if not exists
+  const superAdminRole = dbRoles['Super Admin'];
   const defaultAdminEmail = 'admin@flowcrm.ai';
   const existingUser = await prisma.user.findUnique({
     where: { email: defaultAdminEmail },

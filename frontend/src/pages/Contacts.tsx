@@ -132,6 +132,7 @@ export const Contacts: React.FC = () => {
     register,
     handleSubmit,
     setValue,
+    setError,
     reset,
     watch,
     formState: { errors, isDirty }
@@ -314,7 +315,14 @@ export const Contacts: React.FC = () => {
       }
       setShowAddEditModal(false);
     } catch (err: any) {
-      toast.error('Operation Failed', err.response?.data?.message || 'Error occurred while saving contact');
+      const serverErrors = err.response?.data?.errors;
+      if (Array.isArray(serverErrors) && serverErrors.length > 0) {
+        serverErrors.forEach((e: any) => {
+          if (e.field) setError(e.field as any, { message: e.message });
+        });
+      } else {
+        toast.error('Operation Failed', err.response?.data?.message || 'Error occurred while saving contact');
+      }
     }
   };
 

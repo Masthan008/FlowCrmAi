@@ -1595,3 +1595,276 @@
 {"level":"info","message":"Environment: development","timestamp":"2026-06-27 23:14:25"}
 {"level":"info","message":"=========================================","timestamp":"2026-06-27 23:14:25"}
 {"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 23:14:26"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 1604.193 ms","timestamp":"2026-06-27 23:26:19"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 1716.731 ms","timestamp":"2026-06-27 23:26:19"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 1603.593 ms","timestamp":"2026-06-27 23:26:19"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 1654.456 ms","timestamp":"2026-06-27 23:26:19"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 1713.930 ms","timestamp":"2026-06-27 23:26:19"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1762.179 ms","timestamp":"2026-06-27 23:26:19"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 337.231 ms","timestamp":"2026-06-27 23:26:19"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 621.201 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 616.371 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 611.176 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 3.245 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 138.812 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 3.491 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 2.928 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 253.388 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 245.874 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 270.656 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 238.062 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 1.784 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.688 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 0.668 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 0.452 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 449.787 ms","timestamp":"2026-06-27 23:26:20"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.256 ms","timestamp":"2026-06-27 23:26:20"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 401 217 - 3.973 ms","timestamp":"2026-06-27 23:32:50"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 401 217 - 1.917 ms","timestamp":"2026-06-27 23:32:50"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 401 217 - 2.306 ms","timestamp":"2026-06-27 23:32:50"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 401 217 - 1.428 ms","timestamp":"2026-06-27 23:32:50"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 401 217 - 1.368 ms","timestamp":"2026-06-27 23:32:50"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 401 217 - 1.101 ms","timestamp":"2026-06-27 23:32:50"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 401 217 - 22.922 ms","timestamp":"2026-06-27 23:32:50"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 401 217 - 1.178 ms","timestamp":"2026-06-27 23:32:50"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 401 217 - 4.422 ms","timestamp":"2026-06-27 23:32:50"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 401 217 - 3.825 ms","timestamp":"2026-06-27 23:32:50"}
+{"level":"info","message":"POST /api/v1/auth/refresh 200 882 - 1599.992 ms","timestamp":"2026-06-27 23:32:52"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 534.698 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 1.126 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 557.177 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 1.447 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 605.314 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1.549 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 652.203 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 730.356 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 198.984 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 135.542 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.109 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 174.850 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 230.018 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 177.878 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 118.437 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 368.722 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1.049 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 347.018 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 0.512 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 0.416 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.423 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 0.303 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 0.508 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 0.584 ms","timestamp":"2026-06-27 23:32:53"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"5a36a6a0-ae1f-48ef-b2dc-432ee711b7d3","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:10","url":"/api/v1/leads?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 500 208 - 14.530 ms","timestamp":"2026-06-27 23:33:10"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"0d679799-59ad-498a-8ea8-591fe78c8a35","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:10","url":"/api/v1/leads?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 500 208 - 4.251 ms","timestamp":"2026-06-27 23:33:10"}
+{"level":"info","message":"GET /api/v1/leads/views 403 216 - 0.818 ms","timestamp":"2026-06-27 23:33:10"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"3002fc9a-092b-47c5-85e6-de45155bf671","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:10","url":"/api/v1/leads?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 500 208 - 3.199 ms","timestamp":"2026-06-27 23:33:10"}
+{"level":"info","message":"GET /api/v1/leads/views 403 216 - 1.263 ms","timestamp":"2026-06-27 23:33:10"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"e359e7f0-a675-4f62-a2eb-8699958d0463","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:10","url":"/api/v1/leads?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 500 208 - 2.075 ms","timestamp":"2026-06-27 23:33:10"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"ebdbabec-0bec-42ce-b9fe-b55fb5ae0e21","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:10","url":"/api/v1/leads?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 500 208 - 3.163 ms","timestamp":"2026-06-27 23:33:10"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"967bc9f0-0cb6-49ad-9d21-c981e8d34193","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:10","url":"/api/v1/leads?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 500 208 - 2.452 ms","timestamp":"2026-06-27 23:33:10"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"ad1d31bd-94b0-4a4d-92fa-fde1606051e8","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:10","url":"/api/v1/leads?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 500 208 - 1.429 ms","timestamp":"2026-06-27 23:33:10"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"85399572-3f97-4b94-a879-48a033845924","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:10","url":"/api/v1/leads?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 500 208 - 2.228 ms","timestamp":"2026-06-27 23:33:10"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 573.661 ms","timestamp":"2026-06-27 23:33:11"}
+{"level":"info","message":"GET /api/v1/leads/statuses 200 - - 612.726 ms","timestamp":"2026-06-27 23:33:11"}
+{"level":"info","message":"GET /api/v1/leads/sources 200 - - 608.029 ms","timestamp":"2026-06-27 23:33:11"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 73.471 ms","timestamp":"2026-06-27 23:33:11"}
+{"level":"info","message":"GET /api/v1/leads/statuses 200 - - 111.071 ms","timestamp":"2026-06-27 23:33:11"}
+{"level":"info","message":"GET /api/v1/leads/sources 200 - - 104.740 ms","timestamp":"2026-06-27 23:33:11"}
+{"level":"info","message":"GET /api/v1/leads/statistics 200 296 - 1173.996 ms","timestamp":"2026-06-27 23:33:12"}
+{"level":"info","message":"GET /api/v1/leads/statistics 200 296 - 188.576 ms","timestamp":"2026-06-27 23:33:12"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"9d7397a2-5728-460c-86f8-59dd124c6a6a","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:51","url":"/api/v1/companies"}
+{"level":"info","message":"GET /api/v1/companies 500 208 - 6.967 ms","timestamp":"2026-06-27 23:33:51"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"8889d121-d0a9-4f58-91aa-5aefc1e2e3ee","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:51","url":"/api/v1/leads?limit=100"}
+{"level":"info","message":"GET /api/v1/leads?limit=100 500 208 - 3.433 ms","timestamp":"2026-06-27 23:33:51"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"28e14000-549c-4d67-8d47-691c63ab4cb1","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:51","url":"/api/v1/companies"}
+{"level":"info","message":"GET /api/v1/companies 500 208 - 6.449 ms","timestamp":"2026-06-27 23:33:51"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"7e3d90c8-b694-4f4e-a8d4-2fdba7d72382","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:33:51","url":"/api/v1/leads?limit=100"}
+{"level":"info","message":"GET /api/v1/leads?limit=100 500 208 - 5.949 ms","timestamp":"2026-06-27 23:33:51"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 554.404 ms","timestamp":"2026-06-27 23:33:52"}
+{"level":"info","message":"GET /api/v1/contacts/statistics 200 299 - 603.017 ms","timestamp":"2026-06-27 23:33:52"}
+{"level":"error","message":"Prisma Error: \nInvalid `prisma.contact.findMany()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\contacts\\repository\\contact.repository.ts:164:22\n\n  161 }\n  162 \n  163 const [items, totalItems] = await Promise.all([\n→ 164   prisma.contact.findMany(\nThe column `companies.website` does not exist in the current database.","timestamp":"2026-06-27 23:33:52"}
+{"level":"error","message":"\nInvalid `prisma.contact.findMany()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\contacts\\repository\\contact.repository.ts:164:22\n\n  161 }\n  162 \n  163 const [items, totalItems] = await Promise.all([\n→ 164   prisma.contact.findMany(\nThe column `companies.website` does not exist in the current database.","method":"GET","requestId":"e65226b3-58dc-4dd2-8a42-1d5d6b4769e6","stack":"PrismaClientKnownRequestError: \nInvalid `prisma.contact.findMany()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\contacts\\repository\\contact.repository.ts:164:22\n\n  161 }\n  162 \n  163 const [items, totalItems] = await Promise.all([\n→ 164   prisma.contact.findMany(\nThe column `companies.website` does not exist in the current database.\n    at zr.handleRequestError (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:237:13)\n    at zr.handleAndLogRequestError (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:183:12)\n    at zr.request (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:152:12)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at a (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\getPrismaClient.ts:963:24)\n    at async Promise.all (index 0)\n    at ContactRepository.paginateWithRelations (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\contacts\\repository\\contact.repository.ts:163:33)\n    at list (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\contacts\\controller\\contact.controller.ts:12:22)","statusCode":500,"timestamp":"2026-06-27 23:33:52","url":"/api/v1/contacts?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/contacts?page=1&limit=20 400 417 - 842.216 ms","timestamp":"2026-06-27 23:33:52"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 260.772 ms","timestamp":"2026-06-27 23:33:52"}
+{"level":"error","message":"Prisma Error: \nInvalid `prisma.contact.findMany()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\contacts\\repository\\contact.repository.ts:164:22\n\n  161 }\n  162 \n  163 const [items, totalItems] = await Promise.all([\n→ 164   prisma.contact.findMany(\nThe column `companies.website` does not exist in the current database.","timestamp":"2026-06-27 23:33:52"}
+{"level":"error","message":"\nInvalid `prisma.contact.findMany()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\contacts\\repository\\contact.repository.ts:164:22\n\n  161 }\n  162 \n  163 const [items, totalItems] = await Promise.all([\n→ 164   prisma.contact.findMany(\nThe column `companies.website` does not exist in the current database.","method":"GET","requestId":"29ceac1a-7ad4-4341-98fd-30a75747dbb7","stack":"PrismaClientKnownRequestError: \nInvalid `prisma.contact.findMany()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\contacts\\repository\\contact.repository.ts:164:22\n\n  161 }\n  162 \n  163 const [items, totalItems] = await Promise.all([\n→ 164   prisma.contact.findMany(\nThe column `companies.website` does not exist in the current database.\n    at zr.handleRequestError (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:237:13)\n    at zr.handleAndLogRequestError (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:183:12)\n    at zr.request (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:152:12)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at a (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\getPrismaClient.ts:963:24)\n    at async Promise.all (index 0)\n    at ContactRepository.paginateWithRelations (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\contacts\\repository\\contact.repository.ts:163:33)\n    at list (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\contacts\\controller\\contact.controller.ts:12:22)","statusCode":500,"timestamp":"2026-06-27 23:33:52","url":"/api/v1/contacts?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/contacts?page=1&limit=20 400 417 - 183.789 ms","timestamp":"2026-06-27 23:33:52"}
+{"level":"info","message":"GET /api/v1/contacts/statistics 200 299 - 641.427 ms","timestamp":"2026-06-27 23:33:53"}
+{"level":"info","message":"POST /api/v1/contacts 403 213 - 2.691 ms","timestamp":"2026-06-27 23:34:13"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"60a09db0-4d1c-43c9-be70-396a0927e357","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:34:33","url":"/api/v1/companies?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 500 208 - 2.569 ms","timestamp":"2026-06-27 23:34:33"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"d7b8aaa6-4ef8-4582-aee6-b29c3331f5cf","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:34:33","url":"/api/v1/companies?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 500 208 - 3.175 ms","timestamp":"2026-06-27 23:34:33"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"5789860d-091b-4fa9-9094-5b5d2f60e312","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:34:33","url":"/api/v1/companies?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 500 208 - 2.616 ms","timestamp":"2026-06-27 23:34:33"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"732ce6b3-7944-472f-b118-ecfecf6d8a2f","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:34:33","url":"/api/v1/companies?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 500 208 - 2.435 ms","timestamp":"2026-06-27 23:34:33"}
+{"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"7c4ad14d-0c04-403f-887f-16d4f03967ff","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 23:34:33","url":"/api/v1/companies?page=1&limit=20"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 500 208 - 2.929 ms","timestamp":"2026-06-27 23:34:33"}
+{"level":"error","message":"Prisma Error: \nInvalid `prisma.company.count()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\companies\\repository\\company.repository.ts:166:22\n\n  163 prisma.company.count({ where: { ...baseWhere, status: 'Customer' } }),\n  164 prisma.company.count({ where: { ...baseWhere, status: 'Partner' } }),\n  165 prisma.company.count({ where: { ...baseWhere, status: 'Prospect' } }),\n→ 166 prisma.company.count(\nThe column `companies.annualRevenue` does not exist in the current database.","timestamp":"2026-06-27 23:34:33"}
+{"level":"error","message":"\nInvalid `prisma.company.count()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\companies\\repository\\company.repository.ts:166:22\n\n  163 prisma.company.count({ where: { ...baseWhere, status: 'Customer' } }),\n  164 prisma.company.count({ where: { ...baseWhere, status: 'Partner' } }),\n  165 prisma.company.count({ where: { ...baseWhere, status: 'Prospect' } }),\n→ 166 prisma.company.count(\nThe column `companies.annualRevenue` does not exist in the current database.","method":"GET","requestId":"01d61a34-4153-4752-a081-fde09178c9dc","stack":"PrismaClientKnownRequestError: \nInvalid `prisma.company.count()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\companies\\repository\\company.repository.ts:166:22\n\n  163 prisma.company.count({ where: { ...baseWhere, status: 'Customer' } }),\n  164 prisma.company.count({ where: { ...baseWhere, status: 'Partner' } }),\n  165 prisma.company.count({ where: { ...baseWhere, status: 'Prospect' } }),\n→ 166 prisma.company.count(\nThe column `companies.annualRevenue` does not exist in the current database.\n    at zr.handleRequestError (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:237:13)\n    at zr.handleAndLogRequestError (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:183:12)\n    at zr.request (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:152:12)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at a (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\getPrismaClient.ts:963:24)\n    at async Promise.all (index 4)\n    at CompanyRepository.getStatistics (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\companies\\repository\\company.repository.ts:161:84)\n    at getStatistics (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\companies\\controller\\company.controller.ts:23:20)","statusCode":500,"timestamp":"2026-06-27 23:34:33","url":"/api/v1/companies/statistics"}
+{"level":"info","message":"GET /api/v1/companies/statistics 400 429 - 610.917 ms","timestamp":"2026-06-27 23:34:33"}
+{"level":"info","message":"GET /api/v1/companies/employees 200 179 - 598.429 ms","timestamp":"2026-06-27 23:34:33"}
+{"level":"error","message":"Prisma Error: \nInvalid `prisma.company.count()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\companies\\repository\\company.repository.ts:166:22\n\n  163 prisma.company.count({ where: { ...baseWhere, status: 'Customer' } }),\n  164 prisma.company.count({ where: { ...baseWhere, status: 'Partner' } }),\n  165 prisma.company.count({ where: { ...baseWhere, status: 'Prospect' } }),\n→ 166 prisma.company.count(\nThe column `companies.annualRevenue` does not exist in the current database.","timestamp":"2026-06-27 23:34:34"}
+{"level":"error","message":"\nInvalid `prisma.company.count()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\companies\\repository\\company.repository.ts:166:22\n\n  163 prisma.company.count({ where: { ...baseWhere, status: 'Customer' } }),\n  164 prisma.company.count({ where: { ...baseWhere, status: 'Partner' } }),\n  165 prisma.company.count({ where: { ...baseWhere, status: 'Prospect' } }),\n→ 166 prisma.company.count(\nThe column `companies.annualRevenue` does not exist in the current database.","method":"GET","requestId":"0976c121-9f99-4509-958a-8b3d31970ec9","stack":"PrismaClientKnownRequestError: \nInvalid `prisma.company.count()` invocation in\nC:\\valli\\FlowCRM AI Enterprise\\backend\\src\\companies\\repository\\company.repository.ts:166:22\n\n  163 prisma.company.count({ where: { ...baseWhere, status: 'Customer' } }),\n  164 prisma.company.count({ where: { ...baseWhere, status: 'Partner' } }),\n  165 prisma.company.count({ where: { ...baseWhere, status: 'Prospect' } }),\n→ 166 prisma.company.count(\nThe column `companies.annualRevenue` does not exist in the current database.\n    at zr.handleRequestError (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:237:13)\n    at zr.handleAndLogRequestError (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:183:12)\n    at zr.request (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:152:12)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at a (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\getPrismaClient.ts:963:24)\n    at async Promise.all (index 4)\n    at CompanyRepository.getStatistics (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\companies\\repository\\company.repository.ts:161:84)\n    at getStatistics (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\companies\\controller\\company.controller.ts:23:20)","statusCode":500,"timestamp":"2026-06-27 23:34:34","url":"/api/v1/companies/statistics"}
+{"level":"info","message":"GET /api/v1/companies/statistics 400 429 - 101.358 ms","timestamp":"2026-06-27 23:34:34"}
+{"level":"info","message":"GET /api/v1/companies/employees 200 179 - 460.946 ms","timestamp":"2026-06-27 23:34:34"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 619.819 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 2.536 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 678.427 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 2.062 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 755.914 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 772.884 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 2.319 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 846.542 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 1.919 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 2.297 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 160.423 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 3.455 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 2.583 ms","timestamp":"2026-06-27 23:35:03"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 193.345 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 199.235 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 159.022 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 256.674 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 0.983 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 0.817 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 0.859 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.421 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.908 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 0.979 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 1.709 ms","timestamp":"2026-06-27 23:35:04"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 884.875 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 2.124 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 975.468 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 3.795 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 995.754 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 1037.865 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 366.554 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 1478.169 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 2.227 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 482.823 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 2.647 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 249.487 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 269.708 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 2.079 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 2.449 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 2.892 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 281.392 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 2.240 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 324.263 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 2.294 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 316.259 ms","timestamp":"2026-06-27 23:37:58"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 4.258 ms","timestamp":"2026-06-27 23:37:59"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 408.054 ms","timestamp":"2026-06-27 23:37:59"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 2.395 ms","timestamp":"2026-06-27 23:37:59"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 549.420 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 2.711 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 568.129 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 7.105 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 647.089 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 648.676 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1.637 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 740.911 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 172.154 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 183.574 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.528 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 209.516 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 198.684 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 324.628 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 235.327 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1.281 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 1.246 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 0.978 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 1.040 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.216 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 104.505 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 2.270 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 342.952 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.599 ms","timestamp":"2026-06-27 23:45:16"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 1.411 ms","timestamp":"2026-06-27 23:45:19"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 0.962 ms","timestamp":"2026-06-27 23:45:19"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 0.891 ms","timestamp":"2026-06-27 23:45:19"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 1.047 ms","timestamp":"2026-06-27 23:45:19"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1.220 ms","timestamp":"2026-06-27 23:45:19"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 0.569 ms","timestamp":"2026-06-27 23:45:19"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 161.974 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 273.094 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1.292 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 0.919 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 1.048 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.074 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 1.399 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 157.599 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.379 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 1.638 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 270.298 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1.194 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 1.313 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 0.945 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 0.951 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.741 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 0.822 ms","timestamp":"2026-06-27 23:45:20"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 1.851 ms","timestamp":"2026-06-27 23:45:20"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 401 217 - 2.030 ms","timestamp":"2026-06-27 23:55:28"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 401 217 - 1.016 ms","timestamp":"2026-06-27 23:55:28"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 401 217 - 1.263 ms","timestamp":"2026-06-27 23:55:28"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 401 217 - 1.088 ms","timestamp":"2026-06-27 23:55:28"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 401 217 - 0.982 ms","timestamp":"2026-06-27 23:55:28"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 401 217 - 0.943 ms","timestamp":"2026-06-27 23:55:28"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 401 217 - 0.962 ms","timestamp":"2026-06-27 23:55:28"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 401 217 - 0.989 ms","timestamp":"2026-06-27 23:55:28"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 401 217 - 1.240 ms","timestamp":"2026-06-27 23:55:28"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 401 217 - 1.149 ms","timestamp":"2026-06-27 23:55:28"}
+{"level":"info","message":"POST /api/v1/auth/refresh 200 882 - 4195.390 ms","timestamp":"2026-06-27 23:55:33"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 2303.798 ms","timestamp":"2026-06-27 23:55:35"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 2291.084 ms","timestamp":"2026-06-27 23:55:35"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 1.527 ms","timestamp":"2026-06-27 23:55:35"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1.202 ms","timestamp":"2026-06-27 23:55:35"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 2372.917 ms","timestamp":"2026-06-27 23:55:35"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 2.340 ms","timestamp":"2026-06-27 23:55:35"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 2387.148 ms","timestamp":"2026-06-27 23:55:35"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 2432.875 ms","timestamp":"2026-06-27 23:55:35"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 270.941 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 269.948 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 2.242 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 191.538 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 2.333 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 2.553 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 399.728 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 425.844 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 1.627 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 1.682 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 573.934 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 537.506 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 2.175 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 2.726 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 715.256 ms","timestamp":"2026-06-27 23:55:36"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.695 ms","timestamp":"2026-06-27 23:55:36"}

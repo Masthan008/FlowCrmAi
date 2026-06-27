@@ -91,8 +91,18 @@ const LeadAdd: React.FC = () => {
     try {
       await createLead(formData);
       navigate('/leads');
-    } catch {
-      // Error is handled by store
+    } catch (err: any) {
+      const serverErrors = err.response?.data?.errors;
+      if (Array.isArray(serverErrors)) {
+        const fieldErrors: Record<string, string> = {};
+        serverErrors.forEach((e: any) => {
+          if (e.field) fieldErrors[e.field] = e.message;
+        });
+        if (Object.keys(fieldErrors).length > 0) {
+          setValidationErrors((prev) => ({ ...prev, ...fieldErrors }));
+          return;
+        }
+      }
     }
   };
 
