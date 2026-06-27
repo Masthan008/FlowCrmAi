@@ -1,31 +1,28 @@
 import { Router } from 'express';
-import { ResponseHelper } from '../../helpers/response';
+import { authController } from '../../controllers/auth.controller';
+import { requireAuth } from '../../middlewares/auth';
+import { authRateLimiter } from '../../middlewares/rateLimiter';
 
 const router = Router();
 
-router.post('/login', (req, res) => {
-  const email = req.body.email || 'admin@flowcrm.ai';
-  ResponseHelper.sendSuccess(req, res, 200, 'Mock Login Successful', {
-    token: 'mock_jwt_token_flowcrm_ai',
-    refreshToken: 'mock_jwt_refresh_token_flowcrm_ai',
-    user: {
-      id: 'd3b07384-d113-4ec2-a542-3146b4dd546d',
-      email: email,
-      name: 'Alex Mercer',
-      role: 'Super Admin',
-      permissions: ['*']
-    }
-  });
-});
+// Rate limited public auth routes
+router.post('/register', authRateLimiter, authController.register);
+router.post('/login', authRateLimiter, authController.login);
+router.post('/forgot-password', authRateLimiter, authController.forgotPassword);
+router.post('/reset-password', authRateLimiter, authController.resetPassword);
 
-router.post('/logout', (req, res) => {
-  ResponseHelper.sendSuccess(req, res, 200, 'Mock Logout Successful');
-});
+// Public token session controls
+router.post('/refresh', authController.refresh);
+router.post('/logout', authController.logout);
 
-router.post('/refresh', (req, res) => {
-  ResponseHelper.sendSuccess(req, res, 200, 'Mock Refresh Successful', {
-    token: 'mock_jwt_token_flowcrm_ai_rotated'
-  });
-});
+// Protected profile management
+router.get('/me', requireAuth, authController.me);
+router.put('/profile', requireAuth, authController.updateProfile);
+router.put('/change-password', requireAuth, authController.changePassword);
+
+// Protected session/device tracking
+router.get('/sessions', requireAuth, authController.getSessions);
+router.delete('/sessions/:id', requireAuth, authController.logoutSession);
+router.delete('/sessions', requireAuth, authController.logoutAllSessions);
 
 export default router;

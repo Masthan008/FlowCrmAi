@@ -78,14 +78,25 @@ model RolePermission {
 
 // 4. USERS
 model User {
-  id           String          @id @default(uuid()) @db.Uuid
-  email        String          @unique
-  password     String
-  name         String
-  phone        String?
-  status       String          @default("active")
-  roleId       String          @db.Uuid
-  role         Role            @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  id              String          @id @default(uuid()) @db.Uuid
+  email           String          @unique
+  password        String
+  firstName       String
+  lastName        String
+  fullName        String?
+  phone           String?
+  profileImage    String?
+  department      String?
+  jobTitle        String?
+  status          String          @default("active")
+  roleId          String          @db.Uuid
+  role            Role            @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  emailVerified   Boolean         @default(false)
+  phoneVerified   Boolean         @default(false)
+  timezone        String          @default("UTC")
+  language        String          @default("en")
+  themePreference String          @default("white-glossy")
+  lastLogin       DateTime?
 
   // Auditing
   createdBy    String?
@@ -104,6 +115,9 @@ model User {
   notifications Notification[]
   auditLogs    AuditLog[]
   comments     Comment[]
+  loginHistories LoginHistory[]
+  passwordResets PasswordReset[]
+  refreshTokens  RefreshToken[]
 
   @@index([email])
   @@index([phone])
@@ -278,10 +292,10 @@ model Team {
   createdBy   String?
   updatedBy   String?
   deletedBy   String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  deletedAt   DateTime?
-  version     Int          @default(1)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  version       Int          @default(1)
 
   // Relations
   members     TeamMember[]
@@ -998,4 +1012,73 @@ model Setting {
   version   Int       @default(1)
 
   @@map("settings")
+}
+
+// 41. LOGIN HISTORY
+model LoginHistory {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  loginTime  DateTime  @default(now())
+  logoutTime DateTime?
+  ipAddress  String?
+  userAgent  String?
+  browser    String?
+  os         String?
+  device     String?
+  country    String?
+
+  // Auditing
+  createdBy  String?
+  updatedBy  String?
+  deletedBy  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  version    Int       @default(1)
+
+  @@map("login_history")
+}
+
+// 42. PASSWORD RESETS
+model PasswordReset {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  // Auditing
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  @@map("password_resets")
+}
+
+// 43. REFRESH TOKENS
+model RefreshToken {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @db.Uuid
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token           String    @unique
+  expiresAt       DateTime
+  isRevoked       Boolean   @default(false)
+  replacedByToken String?
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  version         Int       @default(1)
+
+  @@map("refresh_tokens")
 }

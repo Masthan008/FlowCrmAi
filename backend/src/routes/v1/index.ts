@@ -3,6 +3,7 @@ import { db } from '../../database/db';
 import { config } from '../../config';
 import { createPlaceholderRouter } from './placeholder';
 import authRouter from './auth';
+import dashboardRouter from '../../dashboard/routes/dashboard.routes';
 
 const router = Router();
 
@@ -28,10 +29,10 @@ router.get('/health', async (req, res) => {
 
 // Custom routes
 router.use('/auth', authRouter);
+router.use('/dashboard', dashboardRouter);
 
-// Generate placeholder routers for all 21 remaining CRM infrastructure modules
+// Generate placeholder routers for all 20 remaining CRM infrastructure modules
 const placeholderModules = [
-  'dashboard',
   'users',
   'roles',
   'permissions',

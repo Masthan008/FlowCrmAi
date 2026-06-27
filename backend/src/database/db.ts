@@ -1,8 +1,19 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 import { logger } from '../middlewares/logger';
+import { config } from '../config';
 
-// Create a singleton instance of PrismaClient
+// Initialize direct pg Pool connection client
+export const pool = new pg.Pool({
+  connectionString: config.databaseUrl,
+});
+
+const adapter = new PrismaPg(pool);
+
+// Create a singleton instance of PrismaClient using pg Driver Adapter
 export const prisma = new PrismaClient({
+  adapter,
   log: [
     { emit: 'event', level: 'query' },
     { emit: 'event', level: 'info' },

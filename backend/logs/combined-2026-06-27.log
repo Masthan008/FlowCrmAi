@@ -1,0 +1,51 @@
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 18:41:47"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 18:41:47"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 18:41:47"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 18:41:47"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 18:41:47"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 18:41:48"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 18:44:56"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 18:44:56"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 18:44:56"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 18:44:56"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 18:44:56"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 18:44:57"}
+{"level":"warn","message":"Security breach detected: Revoked refresh token reuse for User: 5c9cf259-5f76-4fbb-a5da-1b318e4b2086","timestamp":"2026-06-27 18:45:11"}
+{"level":"error","message":"Invalid email or password","method":"POST","requestId":"e0c35441-08d8-4e74-8399-42f8babe171e","stack":"Error: Invalid email or password\n    at AuthService.login (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\services\\auth.service.ts:109:19)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at login (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\controllers\\auth.controller.ts:70:22)","statusCode":401,"timestamp":"2026-06-27 18:53:06","url":"/api/v1/auth/login"}
+{"level":"info","message":"POST /api/v1/auth/login 401 162 - 2880.431 ms","timestamp":"2026-06-27 18:53:06"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 18:56:09"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 18:56:09"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 18:56:09"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 18:56:09"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 18:56:09"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 18:56:10"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 18:59:45"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 18:59:45"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 18:59:45"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 18:59:45"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 18:59:45"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 18:59:47"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 19:00:13"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 19:00:13"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 19:00:13"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 19:00:13"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 19:00:13"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 19:00:14"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 19:00:19"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 19:00:19"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 19:00:19"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 19:00:19"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 19:00:19"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 19:00:19"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 19:00:23"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 19:00:23"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 19:00:23"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 19:00:23"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 19:00:23"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 19:00:23"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 19:01:22"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 19:01:22"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 19:01:22"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 19:01:22"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 19:01:22"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 19:01:23"}

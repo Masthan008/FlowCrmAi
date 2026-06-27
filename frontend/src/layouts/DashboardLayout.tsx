@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users2,
@@ -26,18 +26,24 @@ import {
   Building,
   LogOut,
   User,
+  Shield,
+  Clock,
   X
 } from 'lucide-react';
 import { useSettingsStore } from '../store/settingsStore';
-import { useUserStore } from '../store/userStore';
+import { useAuthStore } from '../store/authStore';
+import { useToast } from '../components/ui/ToastProvider';
 import { Avatar } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { api } from '../services/api';
 
 export const DashboardLayout: React.FC = () => {
   const { settings, toggleSidebar } = useSettingsStore();
-  const { profile } = useUserStore();
+  const { user, role, permissions, logout: storeLogout } = useAuthStore();
   const location = useLocation();
+  const navigate = useNavigate();
+  const toast = useToast();
   
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -46,25 +52,46 @@ export const DashboardLayout: React.FC = () => {
 
   const menuItems = [
     { label: 'Dashboard', icon: <LayoutDashboard size={18} />, path: '/' },
-    { label: 'Leads', icon: <Users2 size={18} />, path: '/leads' },
-    { label: 'Contacts', icon: <Contact2 size={18} />, path: '/contacts' },
-    { label: 'Companies', icon: <Building2 size={18} />, path: '/companies' },
-    { label: 'Deals', icon: <Briefcase size={18} />, path: '/deals' },
+    { label: 'Leads', icon: <Users2 size={18} />, path: '/leads', requiredPermission: 'leads:view' },
+    { label: 'Contacts', icon: <Contact2 size={18} />, path: '/contacts', requiredPermission: 'contacts:view' },
+    { label: 'Companies', icon: <Building2 size={18} />, path: '/companies', requiredPermission: 'companies:view' },
+    { label: 'Deals', icon: <Briefcase size={18} />, path: '/deals', requiredPermission: 'deals:view' },
     { label: 'Activities', icon: <Activity size={18} />, path: '/activities' },
     { label: 'Calendar', icon: <Calendar size={18} />, path: '/calendar' },
     { label: 'Tasks', icon: <CheckSquare size={18} />, path: '/tasks' },
     { label: 'Products', icon: <Package size={18} />, path: '/products' },
     { label: 'Quotes', icon: <FileText size={18} />, path: '/quotes' },
     { label: 'Invoices', icon: <Receipt size={18} />, path: '/invoices' },
-    { label: 'Reports', icon: <BarChart3 size={18} />, path: '/reports' },
+    { label: 'Reports', icon: <BarChart3 size={18} />, path: '/reports', requiredPermission: 'reports:view' },
     { label: 'Analytics', icon: <TrendingUp size={18} />, path: '/analytics' },
     { label: 'Team', icon: <Users size={18} />, path: '/team' },
     { label: 'Notifications', icon: <Bell size={18} />, path: '/notifications' },
-    { label: 'Settings', icon: <Settings size={18} />, path: '/settings' },
+    { label: 'Settings', icon: <Settings size={18} />, path: '/settings', requiredPermission: 'settings:access' },
   ];
+
+  // Dynamically filter menu items based on assigned user permissions
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (!item.requiredPermission) return true;
+    return permissions.includes(item.requiredPermission) || permissions.includes('*');
+  });
 
   const handleLinkClick = () => {
     setMobileOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const refreshToken = useAuthStore.getState().refreshToken;
+      if (refreshToken) {
+        await api.post('/auth/logout', { refreshToken });
+      }
+    } catch (e) {
+      // Ignore network failures on logout
+    } finally {
+      storeLogout();
+      toast.success('Logged Out', 'You have been successfully signed out.');
+      navigate('/login');
+    }
   };
 
   const isActive = (path: string) => {
@@ -90,7 +117,7 @@ export const DashboardLayout: React.FC = () => {
 
       {/* Nav Menu */}
       <nav className="flex-grow space-y-1 overflow-y-auto pr-1">
-        {menuItems.map((item) => {
+        {filteredMenuItems.map((item) => {
           const active = isActive(item.path);
           return (
             <Link
@@ -116,12 +143,12 @@ export const DashboardLayout: React.FC = () => {
       </nav>
 
       {/* Sidebar Footer */}
-      {!settings.sidebarCollapsed && profile && (
-        <div className="mt-auto border-t border-slate-100/60 pt-4 flex items-center gap-3">
-          <Avatar name={profile.name} size="sm" />
+      {!settings.sidebarCollapsed && user && (
+        <div className="mt-auto border-t border-slate-100/60 pt-4 flex items-center gap-3 cursor-pointer" onClick={() => navigate('/profile')}>
+          <Avatar name={user.fullName} size="sm" />
           <div className="flex-grow min-w-0">
-            <p className="text-xs font-bold text-slate-800 truncate leading-none mb-1">{profile.name}</p>
-            <p className="text-[10px] font-semibold text-slate-400 truncate">{profile.email}</p>
+            <p className="text-xs font-bold text-slate-800 truncate leading-none mb-1">{user.fullName}</p>
+            <p className="text-[10px] font-semibold text-slate-400 truncate">{role || 'Viewer'}</p>
           </div>
         </div>
       )}
@@ -185,7 +212,7 @@ export const DashboardLayout: React.FC = () => {
 
             {/* Company Selector Placeholder */}
             <div className="relative">
-              <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-100/60 hover:bg-slate-50 text-xs font-semibold text-slate-600 bg-white/60 shadow-glossy-sm">
+              <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-100/60 hover:bg-slate-50 text-xs font-semibold text-slate-650 bg-white/60 shadow-glossy-sm">
                 <Building size={14} className="text-brand-550" />
                 <span>{activeCompany}</span>
               </button>
@@ -194,7 +221,7 @@ export const DashboardLayout: React.FC = () => {
 
           {/* Center search bar */}
           <div className="hidden lg:flex items-center relative max-w-sm w-full mx-8">
-            <Search className="absolute left-3.5 text-slate-450 w-4 h-4" />
+            <Search className="absolute left-3.5 text-slate-455 w-4 h-4" />
             <input
               type="text"
               placeholder="Search leads, deals, contacts..."
@@ -259,39 +286,49 @@ export const DashboardLayout: React.FC = () => {
               )}
             </div>
 
-            {/* Profile Dropdown Placeholder */}
+            {/* Profile Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
                 className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-50/80 transition-colors"
               >
-                {profile && <Avatar name={profile.name} size="sm" />}
+                {user && <Avatar name={user.fullName} size="sm" />}
               </button>
 
               {profileOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setProfileOpen(false)} />
                   <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-100 shadow-glossy-md p-2 z-20">
-                    {profile && (
+                    {user && (
                       <div className="px-3 py-2.5 border-b border-slate-100">
-                        <p className="text-xs font-bold text-slate-800 truncate leading-none mb-1">{profile.name}</p>
-                        <p className="text-[10px] font-semibold text-slate-450 truncate">{profile.role}</p>
+                        <p className="text-xs font-bold text-slate-800 truncate leading-none mb-1">{user.fullName}</p>
+                        <p className="text-[10px] font-semibold text-slate-450 truncate">{role || 'Viewer'}</p>
                       </div>
                     )}
                     <div className="py-1">
-                      <button className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
+                      <button onClick={() => { setProfileOpen(false); navigate('/profile'); }} className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-slate-650 hover:bg-slate-50 rounded-lg transition-colors">
                         <User size={14} className="text-slate-400" />
                         <span>My Profile</span>
                       </button>
-                      <button className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
+                      <button onClick={() => { setProfileOpen(false); navigate('/account-settings'); }} className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-slate-650 hover:bg-slate-50 rounded-lg transition-colors">
                         <Settings size={14} className="text-slate-400" />
                         <span>Account Settings</span>
                       </button>
+                      <button onClick={() => { setProfileOpen(false); navigate('/sessions'); }} className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-slate-650 hover:bg-slate-50 rounded-lg transition-colors">
+                        <Clock size={14} className="text-slate-400" />
+                        <span>My Sessions</span>
+                      </button>
+                      {permissions.includes('settings:access') && (
+                        <button onClick={() => { setProfileOpen(false); navigate('/settings'); }} className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-slate-650 hover:bg-slate-50 rounded-lg transition-colors border-t border-slate-100/60 mt-1 pt-2">
+                          <Shield size={14} className="text-slate-400" />
+                          <span>System Settings</span>
+                        </button>
+                      )}
                     </div>
                     <div className="h-px bg-slate-100 my-1" />
                     <div className="p-1">
-                      <button className="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                        <LogOut size={14} className="text-red-500" />
+                      <button onClick={() => { setProfileOpen(false); handleLogout(); }} className="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                        <LogOut size={14} className="text-rose-500" />
                         <span>Log Out</span>
                       </button>
                     </div>
