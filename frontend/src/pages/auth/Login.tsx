@@ -179,7 +179,7 @@ export const Login: React.FC = () => {
               to="/register"
               className="font-bold text-brand-600 hover:text-brand-700 transition-colors"
             >
-              Request Access
+              Create Account
             </Link>
           </p>
         </div>
