@@ -332,3 +332,47 @@
 {"level":"info","message":"GET /api/v1/dashboard/activities 429 200 - 0.269 ms","timestamp":"2026-06-27 21:27:56"}
 {"level":"info","message":"GET /api/v1/dashboard/tasks 429 200 - 0.426 ms","timestamp":"2026-06-27 21:27:56"}
 {"level":"info","message":"GET /api/v1/dashboard/deals 429 200 - 0.908 ms","timestamp":"2026-06-27 21:27:56"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 429 200 - 0.424 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads/statistics 429 200 - 0.632 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads/statuses 429 200 - 0.541 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads/sources 429 200 - 0.349 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads/employees 429 200 - 0.653 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads/statistics 429 200 - 0.728 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads/employees 429 200 - 0.404 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads/views 429 200 - 1.148 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 429 200 - 0.363 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads/statuses 429 200 - 0.451 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads/sources 429 200 - 1.207 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads/views 429 200 - 1.402 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 429 200 - 0.509 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 429 200 - 0.598 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 429 200 - 0.596 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 429 200 - 0.397 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 429 200 - 0.402 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 429 200 - 0.488 ms","timestamp":"2026-06-27 21:29:51"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 429 200 - 0.460 ms","timestamp":"2026-06-27 21:29:56"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 429 200 - 0.405 ms","timestamp":"2026-06-27 21:29:56"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 429 200 - 0.491 ms","timestamp":"2026-06-27 21:29:56"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 429 200 - 0.812 ms","timestamp":"2026-06-27 21:29:56"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 429 200 - 0.441 ms","timestamp":"2026-06-27 21:29:56"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 429 200 - 2.990 ms","timestamp":"2026-06-27 21:29:56"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 429 200 - 0.965 ms","timestamp":"2026-06-27 21:29:56"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 429 200 - 0.489 ms","timestamp":"2026-06-27 21:29:56"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 429 200 - 0.467 ms","timestamp":"2026-06-27 21:29:56"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 429 200 - 0.933 ms","timestamp":"2026-06-27 21:29:56"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 429 200 - 0.369 ms","timestamp":"2026-06-27 21:30:01"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 429 200 - 0.593 ms","timestamp":"2026-06-27 21:30:01"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 429 200 - 0.240 ms","timestamp":"2026-06-27 21:30:01"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 429 200 - 2.329 ms","timestamp":"2026-06-27 21:30:01"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 429 200 - 0.525 ms","timestamp":"2026-06-27 21:30:01"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 429 200 - 0.385 ms","timestamp":"2026-06-27 21:30:01"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 429 200 - 0.251 ms","timestamp":"2026-06-27 21:30:01"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 429 200 - 0.278 ms","timestamp":"2026-06-27 21:30:01"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 429 200 - 0.367 ms","timestamp":"2026-06-27 21:30:01"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 429 200 - 0.283 ms","timestamp":"2026-06-27 21:30:01"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 21:33:56"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 21:33:56"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 21:33:56"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 21:33:56"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 21:33:56"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 21:34:00"}

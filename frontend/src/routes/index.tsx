@@ -6,6 +6,7 @@ import LeadAdd from '../pages/leads/LeadAdd';
 import LeadEdit from '../pages/leads/LeadEdit';
 import LeadView from '../pages/leads/LeadView';
 import Contacts from '../pages/Contacts';
+import ContactProfile from '../pages/contacts/ContactProfile';
 import Companies from '../pages/Companies';
 import Deals from '../pages/Deals';
 import Activities from '../pages/Activities';
@@ -127,6 +128,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredPermission="contacts:view">
             <Contacts />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'contacts/:id',
+        element: (
+          <ProtectedRoute requiredPermission="contacts:view">
+            <ContactProfile />
           </ProtectedRoute>
         ),
       },

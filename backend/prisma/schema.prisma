@@ -222,6 +222,7 @@ model Company {
   employees   Employee[]
   customers   Customer[]
   tasks       Task[]
+  contacts    Contact[]  @relation("CompanyContacts")
 
   @@index([name])
   @@index([phone])
@@ -293,6 +294,7 @@ model Employee {
   leadFollowups     LeadFollowup[]
   leadApprovals     LeadApproval[]
   leadNotifications LeadNotification[]
+  contacts          Contact[]          @relation("ContactOwner")
 
   @@map("employees")
 }
@@ -379,29 +381,83 @@ model Customer {
 
 // 14. CONTACTS
 model Contact {
-  id          String     @id @default(uuid()) @db.Uuid
-  customerId  String?    @db.Uuid
-  customer    Customer?  @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  firstName   String
-  lastName    String
-  email       String?
-  phone       String?
-  designation String?
-
-  // Auditing
-  createdBy   String?
-  updatedBy   String?
-  deletedBy   String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  deletedAt   DateTime?
-  version     Int        @default(1)
-
+  id                     String           @id @default(uuid()) @db.Uuid
+  contactNumber          String           @unique
+  firstName              String
+  middleName             String?
+  lastName               String
+  fullName               String
+  profilePhoto           String?
+  gender                 String?
+  dateOfBirth            DateTime?
+  jobTitle               String?
+  department             String?
+  
   // Relations
-  tasks       Task[]
+  companyId              String?          @db.Uuid
+  company                Company?         @relation("CompanyContacts", fields: [companyId], references: [id], onDelete: SetNull)
+  
+  leadId                 String?          @db.Uuid
+  lead                   Lead?            @relation("LeadContacts", fields: [leadId], references: [id], onDelete: SetNull)
+  
+  customerId             String?          @db.Uuid
+  customer               Customer?        @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  // Communication
+  email                  String?
+  secondaryEmail         String?
+  phone                  String?
+  alternatePhone         String?
+  whatsApp               String?
+  website                String?
+  
+  // Social Profiles
+  linkedin               String?
+  twitter                String?
+  facebook               String?
+  instagram              String?
+  
+  // Address
+  country                String?
+  state                  String?
+  city                   String?
+  postalCode             String?
+  addressLine1           String?
+  addressLine2           String?
+  
+  // Status
+  status                 String           @default("Active") // Active, Inactive, VIP, Prospect, Customer, Partner, Vendor, Former Customer, Archived
+  
+  // Owner (Employee)
+  ownerId                String?          @db.Uuid
+  owner                  Employee?        @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  
+  // Preferences
+  preferredLanguage      String?          @default("en")
+  preferredContactMethod String?          @default("Email")
+  timezone               String?          @default("UTC")
+  
+  // Tags & Notes
+  tags                   String[]         @default([])
+  description            String?          @db.Text
+  
+  // Auditing
+  createdBy              String?
+  updatedBy              String?
+  deletedBy              String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  deletedAt              DateTime?
+  version                Int              @default(1)
+  
+  // Relations
+  tasks                  Task[]
 
   @@index([email])
   @@index([phone])
+  @@index([contactNumber])
+  @@index([fullName])
+  @@index([status])
   @@map("contacts")
 }
 
@@ -528,6 +584,7 @@ model Lead {
   health             LeadHealth?
   sla                LeadSla?
   approvals          LeadApproval[]
+  contacts           Contact[]         @relation("LeadContacts")
 
   @@index([leadNumber])
   @@index([fullName])

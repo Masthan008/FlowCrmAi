@@ -54,6 +54,8 @@ async function main() {
     { name: 'contacts:create', module: 'contacts', action: 'create', description: 'Create new contacts' },
     { name: 'contacts:edit', module: 'contacts', action: 'edit', description: 'Edit contacts' },
     { name: 'contacts:delete', module: 'contacts', action: 'delete', description: 'Delete contacts' },
+    { name: 'contacts:assign', module: 'contacts', action: 'assign', description: 'Assign contacts to owners' },
+    { name: 'contacts:export', module: 'contacts', action: 'export', description: 'Export contacts list' },
 
     // Companies
     { name: 'companies:view', module: 'companies', action: 'view', description: 'View client companies' },
