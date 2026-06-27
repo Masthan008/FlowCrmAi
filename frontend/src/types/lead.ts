@@ -122,3 +122,68 @@ export interface LeadPagination {
   totalItems: number;
   totalPages: number;
 }
+
+export interface LeadNote {
+  id: string;
+  leadId: string;
+  content: string;
+  isPinned: boolean;
+  title: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeadActivity {
+  id: string;
+  leadId: string;
+  type: string;
+  title: string;
+  description: string | null;
+  activityDate: string;
+  status: string;
+  priority: string;
+  isCompleted: boolean;
+  assignedToId: string | null;
+  assignedTo?: { id: string; firstName: string; lastName: string; email: string } | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeadFile {
+  id: string;
+  leadId: string;
+  name: string;
+  path: string;
+  mimeType: string;
+  size: number;
+  createdBy?: string | null;
+  createdAt: string;
+}
+
+export interface LeadTimeline {
+  id: string;
+  leadId: string;
+  type: string;
+  title: string;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  eventDate: string;
+  createdBy?: string | null;
+}
+
+export interface LeadHistory {
+  id: string;
+  leadId: string;
+  action: string;
+  fieldName: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+  userId: string | null;
+  createdAt: string;
+}
+

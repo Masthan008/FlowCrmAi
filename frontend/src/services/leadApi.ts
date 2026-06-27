@@ -75,6 +75,70 @@ export const leadApi = {
    */
   getStatuses: () =>
     api.get(`${LEADS_URL}/statuses`),
+
+  /**
+   * Get all employees (master data)
+   */
+  getEmployees: () =>
+    api.get(`${LEADS_URL}/employees`),
+
+  /**
+   * Get comprehensive lead profile 360 view details
+   */
+  getProfile: (id: string) =>
+    api.get(`${LEADS_URL}/${id}/profile`),
+
+  /**
+   * Notes endpoints
+   */
+  getNotes: (id: string) =>
+    api.get(`${LEADS_URL}/${id}/notes`),
+  createNote: (id: string, data: { title?: string; content: string; isPinned?: boolean }) =>
+    api.post(`${LEADS_URL}/${id}/notes`, data),
+  updateNote: (id: string, noteId: string, data: { title?: string; content: string; isPinned?: boolean }) =>
+    api.put(`${LEADS_URL}/${id}/notes/${noteId}`, data),
+  deleteNote: (id: string, noteId: string) =>
+    api.delete(`${LEADS_URL}/${id}/notes/${noteId}`),
+
+  /**
+   * Activities endpoints
+   */
+  getActivities: (id: string, params?: Record<string, any>) =>
+    api.get(`${LEADS_URL}/${id}/activities`, { params }),
+  createActivity: (id: string, data: any) =>
+    api.post(`${LEADS_URL}/${id}/activities`, data),
+  updateActivity: (id: string, activityId: string, data: any) =>
+    api.put(`${LEADS_URL}/${id}/activities/${activityId}`, data),
+  deleteActivity: (id: string, activityId: string) =>
+    api.delete(`${LEADS_URL}/${id}/activities/${activityId}`),
+
+  /**
+   * Files endpoints
+   */
+  getFiles: (id: string) =>
+    api.get(`${LEADS_URL}/${id}/files`),
+  getStorageSummary: (id: string) =>
+    api.get(`${LEADS_URL}/${id}/files/summary`),
+  uploadFile: (id: string, formData: FormData) =>
+    api.post(`${LEADS_URL}/${id}/files`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
+  deleteFile: (id: string, fileId: string) =>
+    api.delete(`${LEADS_URL}/${id}/files/${fileId}`),
+
+  /**
+   * Timeline endpoints
+   */
+  getTimeline: (id: string, params?: Record<string, any>) =>
+    api.get(`${LEADS_URL}/${id}/timeline`, { params }),
+
+  /**
+   * History endpoints
+   */
+  getHistory: (id: string, params?: Record<string, any>) =>
+    api.get(`${LEADS_URL}/${id}/history`, { params }),
 };
 
 export default leadApi;

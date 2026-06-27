@@ -1,14 +1,37 @@
 import { create } from 'zustand';
 import { leadApi } from '../services/leadApi';
-import type { Lead, LeadSource, LeadStatus, LeadStatistics, LeadFilters, LeadPagination, LeadFormData } from '../types/lead';
+import type {
+  Lead,
+  LeadSource,
+  LeadStatus,
+  LeadStatistics,
+  LeadFilters,
+  LeadPagination,
+  LeadFormData,
+  LeadNote,
+  LeadActivity,
+  LeadFile,
+  LeadTimeline,
+  LeadHistory,
+} from '../types/lead';
 
 interface LeadState {
-  // Data
+  // Core Data
   leads: Lead[];
   currentLead: Lead | null;
   statistics: LeadStatistics | null;
   sources: LeadSource[];
   statuses: LeadStatus[];
+  employees: { id: string; firstName: string; lastName: string; email: string }[];
+
+  // 360° Workspace Data
+  profile: any | null;
+  timeline: LeadTimeline[];
+  activities: LeadActivity[];
+  notes: LeadNote[];
+  files: LeadFile[];
+  storageSummary: { totalSize: number; fileCount: number } | null;
+  history: LeadHistory[];
 
   // UI State
   loading: boolean;
@@ -16,8 +39,10 @@ interface LeadState {
   filters: LeadFilters;
   pagination: LeadPagination;
   selectedIds: string[];
+  selectedTab: string;
+  tabLoading: Record<string, boolean>;
 
-  // Actions
+  // Core Actions
   fetchLeads: () => Promise<void>;
   fetchLead: (id: string) => Promise<void>;
   createLead: (data: LeadFormData) => Promise<Lead>;
@@ -26,6 +51,7 @@ interface LeadState {
   fetchStatistics: () => Promise<void>;
   fetchSources: () => Promise<void>;
   fetchStatuses: () => Promise<void>;
+  fetchEmployees: () => Promise<void>;
   setFilters: (filters: Partial<LeadFilters>) => void;
   setPage: (page: number) => void;
   setSort: (sortBy: string, sortDir: 'asc' | 'desc') => void;
@@ -33,6 +59,30 @@ interface LeadState {
   clearSelection: () => void;
   clearCurrentLead: () => void;
   clearError: () => void;
+
+  // 360° Workspace Actions
+  fetchProfile: (id: string) => Promise<void>;
+  fetchTimeline: (id: string, filters?: any) => Promise<void>;
+  fetchActivities: (id: string, filters?: any) => Promise<void>;
+  fetchNotes: (id: string) => Promise<void>;
+  fetchFiles: (id: string) => Promise<void>;
+  fetchStorageSummary: (id: string) => Promise<void>;
+  fetchHistory: (id: string, filters?: any) => Promise<void>;
+  setSelectedTab: (tab: string) => void;
+  
+  // Note CRUD Actions
+  createNote: (id: string, data: { title?: string; content: string; isPinned?: boolean }) => Promise<void>;
+  updateNote: (id: string, noteId: string, data: { title?: string; content: string; isPinned?: boolean }) => Promise<void>;
+  deleteNote: (id: string, noteId: string) => Promise<void>;
+
+  // Activity CRUD Actions
+  createActivity: (id: string, data: any) => Promise<void>;
+  updateActivity: (id: string, activityId: string, data: any) => Promise<void>;
+  deleteActivity: (id: string, activityId: string) => Promise<void>;
+
+  // File Upload Actions
+  uploadFile: (id: string, formData: FormData) => Promise<void>;
+  deleteFile: (id: string, fileId: string) => Promise<void>;
 }
 
 export const useLeadStore = create<LeadState>((set, get) => ({
@@ -42,11 +92,21 @@ export const useLeadStore = create<LeadState>((set, get) => ({
   statistics: null,
   sources: [],
   statuses: [],
+  profile: null,
+  timeline: [],
+  activities: [],
+  notes: [],
+  files: [],
+  storageSummary: null,
+  history: [],
+  employees: [],
   loading: false,
   error: null,
   filters: {},
   pagination: { page: 1, limit: 20, totalItems: 0, totalPages: 0 },
   selectedIds: [],
+  selectedTab: 'Overview',
+  tabLoading: {},
 
   fetchLeads: async () => {
     set({ loading: true, error: null });
@@ -116,6 +176,10 @@ export const useLeadStore = create<LeadState>((set, get) => ({
       const res = await leadApi.updateLead(id, data);
       const updatedLead = res.data.data;
       set({ currentLead: updatedLead, loading: false });
+      // If profile is loaded, refresh it too
+      if (get().profile) {
+        get().fetchProfile(id);
+      }
       get().fetchLeads();
       return updatedLead;
     } catch (err: any) {
@@ -170,6 +234,15 @@ export const useLeadStore = create<LeadState>((set, get) => ({
     }
   },
 
+  fetchEmployees: async () => {
+    try {
+      const res = await leadApi.getEmployees();
+      set({ employees: res.data.data || [] });
+    } catch {
+      // Silently fail
+    }
+  },
+
   setFilters: (filters: Partial<LeadFilters>) => {
     set((state) => ({
       filters: { ...state.filters, ...filters },
@@ -202,8 +275,212 @@ export const useLeadStore = create<LeadState>((set, get) => ({
   },
 
   clearSelection: () => set({ selectedIds: [] }),
-  clearCurrentLead: () => set({ currentLead: null }),
+  clearCurrentLead: () => set({ currentLead: null, profile: null, timeline: [], activities: [], notes: [], files: [], history: [] }),
   clearError: () => set({ error: null }),
+
+  // 360° Workspace Actions
+  fetchProfile: async (id: string) => {
+    set((state) => ({ tabLoading: { ...state.tabLoading, Overview: true }, error: null }));
+    try {
+      const res = await leadApi.getProfile(id);
+      set((state) => ({
+        profile: res.data.data,
+        currentLead: res.data.data, // Keep currentLead synchronized
+        tabLoading: { ...state.tabLoading, Overview: false },
+      }));
+    } catch (err: any) {
+      set((state) => ({
+        error: err.response?.data?.message || 'Failed to fetch lead profile',
+        tabLoading: { ...state.tabLoading, Overview: false },
+      }));
+    }
+  },
+
+  fetchTimeline: async (id: string, filters?: any) => {
+    set((state) => ({ tabLoading: { ...state.tabLoading, Timeline: true } }));
+    try {
+      const res = await leadApi.getTimeline(id, filters);
+      set((state) => ({
+        timeline: res.data.data || [],
+        tabLoading: { ...state.tabLoading, Timeline: false },
+      }));
+    } catch (err: any) {
+      set((state) => ({
+        error: err.response?.data?.message || 'Failed to fetch timeline',
+        tabLoading: { ...state.tabLoading, Timeline: false },
+      }));
+    }
+  },
+
+  fetchActivities: async (id: string, filters?: any) => {
+    set((state) => ({ tabLoading: { ...state.tabLoading, Activities: true } }));
+    try {
+      const res = await leadApi.getActivities(id, filters);
+      set((state) => ({
+        activities: res.data.data || [],
+        tabLoading: { ...state.tabLoading, Activities: false },
+      }));
+    } catch (err: any) {
+      set((state) => ({
+        error: err.response?.data?.message || 'Failed to fetch activities',
+        tabLoading: { ...state.tabLoading, Activities: false },
+      }));
+    }
+  },
+
+  fetchNotes: async (id: string) => {
+    set((state) => ({ tabLoading: { ...state.tabLoading, Notes: true } }));
+    try {
+      const res = await leadApi.getNotes(id);
+      set((state) => ({
+        notes: res.data.data || [],
+        tabLoading: { ...state.tabLoading, Notes: false },
+      }));
+    } catch (err: any) {
+      set((state) => ({
+        error: err.response?.data?.message || 'Failed to fetch notes',
+        tabLoading: { ...state.tabLoading, Notes: false },
+      }));
+    }
+  },
+
+  fetchFiles: async (id: string) => {
+    set((state) => ({ tabLoading: { ...state.tabLoading, Files: true } }));
+    try {
+      const res = await leadApi.getFiles(id);
+      set((state) => ({
+        files: res.data.data || [],
+        tabLoading: { ...state.tabLoading, Files: false },
+      }));
+    } catch (err: any) {
+      set((state) => ({
+        error: err.response?.data?.message || 'Failed to fetch files',
+        tabLoading: { ...state.tabLoading, Files: false },
+      }));
+    }
+  },
+
+  fetchStorageSummary: async (id: string) => {
+    try {
+      const res = await leadApi.getStorageSummary(id);
+      set({ storageSummary: res.data.data });
+    } catch {
+      // Silently fail
+    }
+  },
+
+  fetchHistory: async (id: string, filters?: any) => {
+    set((state) => ({ tabLoading: { ...state.tabLoading, History: true } }));
+    try {
+      const res = await leadApi.getHistory(id, filters);
+      set((state) => ({
+        history: res.data.data || [],
+        tabLoading: { ...state.tabLoading, History: false },
+      }));
+    } catch (err: any) {
+      set((state) => ({
+        error: err.response?.data?.message || 'Failed to fetch audit history',
+        tabLoading: { ...state.tabLoading, History: false },
+      }));
+    }
+  },
+
+  setSelectedTab: (tab: string) => set({ selectedTab: tab }),
+
+  // Note CRUD Actions
+  createNote: async (id: string, data: { title?: string; content: string; isPinned?: boolean }) => {
+    try {
+      await leadApi.createNote(id, data);
+      get().fetchNotes(id);
+      get().fetchTimeline(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to create note' });
+      throw err;
+    }
+  },
+
+  updateNote: async (id: string, noteId: string, data: { title?: string; content: string; isPinned?: boolean }) => {
+    try {
+      await leadApi.updateNote(id, noteId, data);
+      get().fetchNotes(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update note' });
+      throw err;
+    }
+  },
+
+  deleteNote: async (id: string, noteId: string) => {
+    try {
+      await leadApi.deleteNote(id, noteId);
+      get().fetchNotes(id);
+      get().fetchTimeline(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete note' });
+      throw err;
+    }
+  },
+
+  // Activity CRUD Actions
+  createActivity: async (id: string, data: any) => {
+    try {
+      await leadApi.createActivity(id, data);
+      get().fetchActivities(id);
+      get().fetchTimeline(id);
+      get().fetchProfile(id); // Recalculate stats like first/last contact
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to create activity' });
+      throw err;
+    }
+  },
+
+  updateActivity: async (id: string, activityId: string, data: any) => {
+    try {
+      await leadApi.updateActivity(id, activityId, data);
+      get().fetchActivities(id);
+      get().fetchTimeline(id);
+      get().fetchProfile(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update activity' });
+      throw err;
+    }
+  },
+
+  deleteActivity: async (id: string, activityId: string) => {
+    try {
+      await leadApi.deleteActivity(id, activityId);
+      get().fetchActivities(id);
+      get().fetchTimeline(id);
+      get().fetchProfile(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete activity' });
+      throw err;
+    }
+  },
+
+  // File Upload Actions
+  uploadFile: async (id: string, formData: FormData) => {
+    try {
+      await leadApi.uploadFile(id, formData);
+      get().fetchFiles(id);
+      get().fetchStorageSummary(id);
+      get().fetchTimeline(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to upload file' });
+      throw err;
+    }
+  },
+
+  deleteFile: async (id: string, fileId: string) => {
+    try {
+      await leadApi.deleteFile(id, fileId);
+      get().fetchFiles(id);
+      get().fetchStorageSummary(id);
+      get().fetchTimeline(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete file' });
+      throw err;
+    }
+  },
 }));
 
 export default useLeadStore;

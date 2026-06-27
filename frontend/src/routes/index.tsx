@@ -11,6 +11,9 @@ import Deals from '../pages/Deals';
 import Activities from '../pages/Activities';
 import Calendar from '../pages/Calendar';
 import Tasks from '../pages/Tasks';
+import TaskAdd from '../pages/tasks/TaskAdd';
+import TaskEdit from '../pages/tasks/TaskEdit';
+import TaskView from '../pages/tasks/TaskView';
 import Products from '../pages/Products';
 import Quotes from '../pages/Quotes';
 import Invoices from '../pages/Invoices';
@@ -171,7 +174,39 @@ export const router = createBrowserRouter([
       // General utility modules
       { path: 'activities', element: <Activities /> },
       { path: 'calendar', element: <Calendar /> },
-      { path: 'tasks', element: <Tasks /> },
+      // Tasks with view protection
+      {
+        path: 'tasks',
+        element: (
+          <ProtectedRoute requiredPermission="tasks:view">
+            <Tasks />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'tasks/new',
+        element: (
+          <ProtectedRoute requiredPermission="tasks:create">
+            <TaskAdd />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'tasks/:id',
+        element: (
+          <ProtectedRoute requiredPermission="tasks:view">
+            <TaskView />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'tasks/:id/edit',
+        element: (
+          <ProtectedRoute requiredPermission="tasks:edit">
+            <TaskEdit />
+          </ProtectedRoute>
+        ),
+      },
       { path: 'products', element: <Products /> },
       { path: 'quotes', element: <Quotes /> },
       { path: 'invoices', element: <Invoices /> },

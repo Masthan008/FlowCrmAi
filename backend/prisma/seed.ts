@@ -27,6 +27,14 @@ async function main() {
     { name: 'leads:delete', module: 'leads', action: 'delete', description: 'Delete leads' },
     { name: 'leads:export', module: 'leads', action: 'export', description: 'Export leads data' },
     { name: 'leads:assign', module: 'leads', action: 'assign', description: 'Assign leads to team members' },
+    { name: 'leads:notes:create', module: 'leads', action: 'notes:create', description: 'Create lead notes' },
+    { name: 'leads:notes:edit', module: 'leads', action: 'notes:edit', description: 'Edit lead notes' },
+    { name: 'leads:notes:delete', module: 'leads', action: 'notes:delete', description: 'Delete lead notes' },
+    { name: 'leads:files:upload', module: 'leads', action: 'files:upload', description: 'Upload lead files' },
+    { name: 'leads:files:delete', module: 'leads', action: 'files:delete', description: 'Delete lead files' },
+    { name: 'leads:activities:create', module: 'leads', action: 'activities:create', description: 'Create lead activities' },
+    { name: 'leads:activities:edit', module: 'leads', action: 'activities:edit', description: 'Edit lead activities' },
+    { name: 'leads:activities:delete', module: 'leads', action: 'activities:delete', description: 'Delete lead activities' },
 
     // Contacts
     { name: 'contacts:view', module: 'contacts', action: 'view', description: 'View customer contacts' },
@@ -49,6 +57,15 @@ async function main() {
     // Reports & Analytics
     { name: 'reports:view', module: 'reports', action: 'view', description: 'View reports' },
     { name: 'reports:export', module: 'reports', action: 'export', description: 'Export report data' },
+
+    // Tasks Management
+    { name: 'tasks:view', module: 'tasks', action: 'view', description: 'View tasks' },
+    { name: 'tasks:create', module: 'tasks', action: 'create', description: 'Create new tasks' },
+    { name: 'tasks:edit', module: 'tasks', action: 'edit', description: 'Edit tasks' },
+    { name: 'tasks:delete', module: 'tasks', action: 'delete', description: 'Delete tasks' },
+    { name: 'tasks:assign', module: 'tasks', action: 'assign', description: 'Assign tasks to team members' },
+    { name: 'tasks:complete', module: 'tasks', action: 'complete', description: 'Mark tasks as completed' },
+    { name: 'tasks:export', module: 'tasks', action: 'export', description: 'Export task lists' },
   ];
 
   const dbPermissions = [];

@@ -87,7 +87,7 @@ export class DashboardRepository {
       // Followup task logs in period
       prisma.task.count({
         where: {
-          subject: { contains: 'Follow-up', mode: 'insensitive' },
+          title: { contains: 'Follow-up', mode: 'insensitive' },
           createdAt: { gte: startDate, lte: endDate },
           deletedAt: null
         }
@@ -326,14 +326,14 @@ export class DashboardRepository {
         take: 3,
         where: { status: 'pending', deletedAt: null },
         orderBy: { dueDate: 'asc' },
-        select: { id: true, subject: true, dueDate: true, priority: true }
+        select: { id: true, title: true, dueDate: true, priority: true }
       })
     ]);
 
     return {
       todayMeetings: todayMeetings.map(m => ({ id: m.id, title: m.title, time: m.startTime.toISOString(), desc: m.description })),
       tomorrowMeetings: tomorrowMeetings.map(m => ({ id: m.id, title: m.title, time: m.startTime.toISOString() })),
-      upcomingCalls: upcomingTasks.map(t => ({ id: t.id, title: t.subject, dueDate: t.dueDate?.toISOString(), priority: t.priority }))
+      upcomingCalls: upcomingTasks.map(t => ({ id: t.id, title: t.title, dueDate: t.dueDate?.toISOString(), priority: t.priority }))
     };
   }
 

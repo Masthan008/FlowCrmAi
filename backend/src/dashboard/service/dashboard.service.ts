@@ -134,7 +134,7 @@ export class DashboardService {
     const rawTasks = await dashboardRepository.getUpcomingTasks();
     return rawTasks.map((t) => ({
       id: t.id,
-      subject: t.subject,
+      subject: t.title,
       priority: t.priority,
       status: t.status,
       dueDate: t.dueDate,

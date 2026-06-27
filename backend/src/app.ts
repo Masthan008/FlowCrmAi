@@ -34,6 +34,11 @@ app.use(requestLogger);
 // Rate limiter on api namespace
 app.use('/api', apiRateLimiter);
 
+// Serve file uploads statically
+import path from 'path';
+import { config } from './config';
+app.use('/uploads', express.static(path.resolve(config.uploadPath)));
+
 // Mount API versioned routes
 app.use('/api/v1', apiV1Router);
 

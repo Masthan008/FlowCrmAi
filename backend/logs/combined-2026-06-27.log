@@ -68,3 +68,9 @@
 {"level":"info","message":"=========================================","timestamp":"2026-06-27 19:12:35"}
 {"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 19:12:36"}
 {"level":"error","message":"Prisma Error: Client has encountered a connection error and is not queryable","timestamp":"2026-06-27 19:38:25"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 19:53:55"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 19:53:55"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 19:53:55"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 19:53:55"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 19:53:55"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 19:53:56"}

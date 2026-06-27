@@ -68,12 +68,40 @@ export const leadController = {
   },
 
   /**
+   * GET /leads/employees
+   */
+  getEmployees: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await leadService.getEmployees();
+      ResponseHelper.sendSuccess(req, res, 200, 'Employees retrieved successfully.', data);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
    * GET /leads/:id
    */
   getById: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const lead = await leadService.getById(req.params.id as string);
       ResponseHelper.sendSuccess(req, res, 200, 'Lead retrieved successfully.', lead);
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        ResponseHelper.sendError(req, res, 404, error.message);
+        return;
+      }
+      next(error);
+    }
+  },
+
+  /**
+   * GET /leads/:id/profile
+   */
+  getProfile: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const profile = await leadService.getProfile(req.params.id as string);
+      ResponseHelper.sendSuccess(req, res, 200, 'Lead profile retrieved successfully.', profile);
     } catch (error: any) {
       if (error.statusCode === 404) {
         ResponseHelper.sendError(req, res, 404, error.message);

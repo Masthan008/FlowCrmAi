@@ -217,6 +217,7 @@ model Company {
   branches    Branch[]
   employees   Employee[]
   customers   Customer[]
+  tasks       Task[]
 
   @@index([name])
   @@index([phone])
@@ -274,8 +275,10 @@ model Employee {
   leads       Lead[]
   deals       Deal[]
   activities  Activity[]
-  tasks       Task[]
+  assignedTasks Task[]      @relation("TaskAssignedTo")
+  delegatedTasks Task[]     @relation("TaskAssignedBy")
   meetings    Meeting[]
+  leadActivities LeadActivity[]
 
   @@map("employees")
 }
@@ -380,6 +383,9 @@ model Contact {
   deletedAt   DateTime?
   version     Int        @default(1)
 
+  // Relations
+  tasks       Task[]
+
   @@index([email])
   @@index([phone])
   @@map("contacts")
@@ -480,6 +486,15 @@ model Lead {
   updatedAt          DateTime    @updatedAt
   deletedAt          DateTime?
   version            Int         @default(1)
+
+  // Extra fields & relations
+  socialLinks        Json?
+  notes              LeadNote[]
+  activities         LeadActivity[]
+  files              LeadFile[]
+  timeline           LeadTimeline[]
+  history            LeadHistory[]
+  tasks              Task[]
 
   @@index([leadNumber])
   @@index([fullName])
@@ -623,29 +638,58 @@ model Activity {
 
 // 23. TASKS
 model Task {
-  id           String    @id @default(uuid()) @db.Uuid
-  assignedToId String    @db.Uuid
-  assignedTo   Employee  @relation(fields: [assignedToId], references: [id], onDelete: Restrict)
-  customerId   String?   @db.Uuid
-  customer     Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  dealId       String?   @db.Uuid
-  deal         Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
-  subject      String
-  description  String?
-  dueDate      DateTime?
-  status       String    @default("pending")
-  priority     String    @default("medium")
+  id                 String           @id @default(uuid()) @db.Uuid
+  taskNumber         String           @unique
+  title              String
+  description        String?          @db.Text
+  priority           String           @default("Medium") // Critical, High, Medium, Low
+  status             String           @default("Pending") // Pending, In Progress, Waiting, Completed, Cancelled, Overdue
+  taskType           String           @default("General") // Call, Meeting, Email, Follow-up, Documentation, Sales, Support, General, Custom
+  relatedModule      String?          // Leads, Contacts, Companies, Deals, etc.
+  relatedRecordId    String?          @db.Uuid
+
+  // Relationships
+  leadId             String?          @db.Uuid
+  lead               Lead?            @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  contactId          String?          @db.Uuid
+  contact            Contact?         @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  companyId          String?          @db.Uuid
+  company            Company?         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customerId         String?          @db.Uuid
+  customer           Customer?        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  dealId             String?          @db.Uuid
+  deal               Deal?            @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  assignedToId       String           @db.Uuid
+  assignedTo         Employee         @relation("TaskAssignedTo", fields: [assignedToId], references: [id], onDelete: Restrict)
+  assignedById       String?          @db.Uuid
+  assignedBy         Employee?        @relation("TaskAssignedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+  comments           TaskComment[]
+  attachments        TaskAttachment[]
+
+  // Fields
+  department         String?
+  startDate          DateTime?
+  dueDate            DateTime?
+  completedDate      DateTime?
+  estimatedHours     Float?
+  actualHours        Float?
+  reminderDate       DateTime?
+  reminderTime       String?
+  progressPercentage Int              @default(0)
+  tags               String[]         @default([])
 
   // Auditing
-  createdBy    String?
-  updatedBy    String?
-  deletedBy    String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  deletedAt    DateTime?
-  version      Int       @default(1)
+  createdBy          String?
+  updatedBy          String?
+  deletedBy          String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  deletedAt          DateTime?
+  version            Int              @default(1)
 
   @@index([status])
+  @@index([priority])
+  @@index([assignedToId])
   @@map("tasks")
 }
 
@@ -1117,3 +1161,162 @@ model RefreshToken {
 
   @@map("refresh_tokens")
 }
+
+// 44. LEAD NOTES
+model LeadNote {
+  id          String    @id @default(uuid()) @db.Uuid
+  leadId      String    @db.Uuid
+  lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  content     String    @db.Text
+  isPinned    Boolean   @default(false)
+  title       String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("lead_notes")
+}
+
+// 45. LEAD ACTIVITIES
+model LeadActivity {
+  id            String    @id @default(uuid()) @db.Uuid
+  leadId        String    @db.Uuid
+  lead          Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type          String    // Call, Meeting, Email, SMS, Task, Follow-up, Demo, Visit, Custom
+  title         String
+  description   String?   @db.Text
+  activityDate  DateTime
+  status        String    @default("Planned") // Planned, Completed, Cancelled
+  priority      String    @default("Medium")  // Low, Medium, High
+  isCompleted   Boolean   @default(false)
+  assignedToId  String?   @db.Uuid
+  assignedTo    Employee? @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("lead_activities")
+}
+
+// 46. LEAD FILES
+model LeadFile {
+  id          String    @id @default(uuid()) @db.Uuid
+  leadId      String    @db.Uuid
+  lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  name        String
+  path        String
+  mimeType    String
+  size        Int
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("lead_files")
+}
+
+// 47. LEAD TIMELINE
+model LeadTimeline {
+  id          String    @id @default(uuid()) @db.Uuid
+  leadId      String    @db.Uuid
+  lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type        String    // LEAD_CREATED, LEAD_UPDATED, STATUS_CHANGED, OWNER_CHANGED, MEETING_SCHEDULED, TASK_CREATED, FILE_UPLOADED, NOTE_ADDED, EMAIL_SENT, CALL_LOGGED, DEAL_CONVERTED, LOST, WON
+  title       String
+  description String?   @db.Text
+  icon        String?
+  color       String?
+  eventDate   DateTime  @default(now())
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("lead_timeline")
+}
+
+// 48. LEAD HISTORY
+model LeadHistory {
+  id          String    @id @default(uuid()) @db.Uuid
+  leadId      String    @db.Uuid
+  lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  action      String    // Created, Updated, Viewed, Assigned, Deleted, Status Changed, Priority Changed, Rating Changed
+  fieldName   String?
+  oldValue    String?   @db.Text
+  newValue    String?   @db.Text
+  userId      String?   @db.Uuid
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("lead_history")
+}
+
+// 49. TASK COMMENTS
+model TaskComment {
+  id          String    @id @default(uuid()) @db.Uuid
+  taskId      String    @db.Uuid
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  content     String    @db.Text
+  
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("task_comments")
+}
+
+// 50. TASK ATTACHMENTS
+model TaskAttachment {
+  id          String    @id @default(uuid()) @db.Uuid
+  taskId      String    @db.Uuid
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  name        String
+  path        String
+  mimeType    String
+  size        Int
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("task_attachments")
+}
+

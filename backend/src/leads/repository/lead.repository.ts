@@ -267,6 +267,22 @@ export class LeadRepository extends BaseRepository<any> {
       orderBy: { order: 'asc' },
     });
   }
+
+  /**
+   * Get all assignable employees
+   */
+  async getEmployees() {
+    return prisma.employee.findMany({
+      where: { deletedAt: null },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
+      orderBy: { firstName: 'asc' },
+    });
+  }
 }
 
 export const leadRepository = new LeadRepository();
