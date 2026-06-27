@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -48,6 +48,29 @@ export const DashboardLayout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [createMenuOpen, setCreateMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem('flowcrm_theme') || 'white-glossy');
+
+  useEffect(() => {
+    const currentTheme = localStorage.getItem('flowcrm_theme') || 'white-glossy';
+    if (currentTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'white-glossy' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem('flowcrm_theme', nextTheme);
+    if (nextTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    toast.success('Theme Toggled', `Switched to ${nextTheme === 'dark' ? 'Dark Mode' : 'Light Mode'}.`);
+  };
   const activeCompany = 'Acme Enterprise';
 
   const menuItems = [
@@ -71,6 +94,7 @@ export const DashboardLayout: React.FC = () => {
 
   // Dynamically filter menu items based on assigned user permissions
   const filteredMenuItems = menuItems.filter((item) => {
+    if (role === 'Super Admin') return true;
     if (!item.requiredPermission) return true;
     return permissions.includes(item.requiredPermission) || permissions.includes('*');
   });
@@ -231,19 +255,64 @@ export const DashboardLayout: React.FC = () => {
 
           {/* Right Action Icons */}
           <div className="flex items-center gap-3">
-            {/* Quick Create Placeholder */}
-            <Button size="sm" variant="glass" className="hidden sm:flex items-center gap-1.5 border-slate-200/80">
-              <Plus size={14} className="text-brand-550" />
-              <span>Create</span>
-            </Button>
+            <div className="relative">
+              <Button
+                onClick={() => setCreateMenuOpen(!createMenuOpen)}
+                size="sm"
+                variant="glass"
+                className="hidden sm:flex items-center gap-1.5 border-slate-200/80"
+              >
+                <Plus size={14} className="text-brand-550" />
+                <span>Create</span>
+              </Button>
+              {createMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-150 rounded-2xl shadow-glossy-lg py-2 z-50 animate-fade-in dark:bg-slate-900 dark:border-slate-800">
+                  <Link
+                    to="/leads/new"
+                    onClick={() => setCreateMenuOpen(false)}
+                    className="block px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  >
+                    New Lead
+                  </Link>
+                  <Link
+                    to="/contacts"
+                    onClick={() => setCreateMenuOpen(false)}
+                    className="block px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  >
+                    New Contact
+                  </Link>
+                  <Link
+                    to="/companies"
+                    onClick={() => setCreateMenuOpen(false)}
+                    className="block px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  >
+                    New Company
+                  </Link>
+                  <Link
+                    to="/deals"
+                    onClick={() => setCreateMenuOpen(false)}
+                    className="block px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  >
+                    New Deal
+                  </Link>
+                  <Link
+                    to="/tasks/new"
+                    onClick={() => setCreateMenuOpen(false)}
+                    className="block px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  >
+                    New Task
+                  </Link>
+                </div>
+              )}
+            </div>
 
-            {/* Disabled Dark Mode Placeholder */}
+            {/* Dark Mode Switcher */}
             <button
-              disabled
-              title="Dark Mode is currently disabled in this phase"
-              className="text-slate-300 cursor-not-allowed p-2 rounded-xl border border-transparent/5"
+              onClick={toggleTheme}
+              title="Toggle Dark/Light Mode"
+              className="text-slate-500 hover:text-slate-850 p-2 rounded-xl hover:bg-slate-50 border border-slate-100/50 transition-colors"
             >
-              <Moon size={18} />
+              <Moon size={18} className={theme === 'dark' ? 'text-amber-500 fill-amber-500' : 'text-slate-550'} />
             </button>
 
             {/* Notifications Dropdown Trigger */}

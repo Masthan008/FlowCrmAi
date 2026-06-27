@@ -8,6 +8,9 @@ import LeadView from '../pages/leads/LeadView';
 import Contacts from '../pages/Contacts';
 import ContactProfile from '../pages/contacts/ContactProfile';
 import Companies from '../pages/Companies';
+import CompanyAdd from '../pages/companies/CompanyAdd';
+import CompanyEdit from '../pages/companies/CompanyEdit';
+import CompanyProfile from '../pages/companies/CompanyProfile';
 import Deals from '../pages/Deals';
 import Activities from '../pages/Activities';
 import Calendar from '../pages/Calendar';
@@ -146,6 +149,30 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredPermission="companies:view">
             <Companies />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'companies/new',
+        element: (
+          <ProtectedRoute requiredPermission="companies:create">
+            <CompanyAdd />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'companies/:id',
+        element: (
+          <ProtectedRoute requiredPermission="companies:view">
+            <CompanyProfile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'companies/:id/edit',
+        element: (
+          <ProtectedRoute requiredPermission="companies:edit">
+            <CompanyEdit />
           </ProtectedRoute>
         ),
       },

@@ -103,3 +103,108 @@
 .gloss-shine:hover::after {
   transform: translate(50%, 0) rotate(30deg);
 }
+
+/* ==========================================
+   DARK MODE PREMIUM STYLING SYSTEM
+   ========================================== */
+.dark, .dark body {
+  background-color: #0b0f19 !important;
+  color: #cbd5e1 !important;
+}
+
+.dark #root {
+  background-color: #0b0f19 !important;
+}
+
+.dark div.bg-slate-50\/50,
+.dark div.bg-slate-50,
+.dark div.bg-slate-100,
+.dark div.bg-white,
+.dark header,
+.dark header.bg-white\/70,
+.dark aside,
+.dark aside.bg-white,
+.dark aside.bg-slate-900,
+.dark .bg-white {
+  background-color: #111827 !important;
+}
+
+.dark aside, .dark header, .dark div, .dark table, .dark tr, .dark td, .dark th, .dark border {
+  border-color: #1f2937 !important;
+}
+
+.dark .glass-card {
+  background: rgba(17, 24, 39, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .glass-card-hover:hover {
+  background: rgba(17, 24, 39, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark .glass-panel {
+  background: rgba(17, 24, 39, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+.dark .text-slate-800, .dark .text-slate-850, .dark .text-slate-900, .dark .text-slate-750 {
+  color: #f1f5f9 !important;
+}
+
+.dark p, .dark span, .dark label, .dark td, .dark th, .dark svg:not(.text-brand-550):not(.text-emerald-500):not(.text-rose-500):not(.text-amber-500),
+.dark .text-slate-500, .dark .text-slate-600, .dark .text-slate-650, .dark .text-slate-655, .dark .text-slate-700, .dark .text-slate-450, .dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+.dark input, .dark select, .dark textarea {
+  background-color: #1f2937 !important;
+  color: #f1f5f9 !important;
+  border-color: #374151 !important;
+}
+
+.dark input::placeholder, .dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+.dark input:focus, .dark select:focus, .dark textarea:focus {
+  border-color: #3b82f6 !important;
+  --tw-ring-color: rgba(59, 130, 246, 0.2) !important;
+  background-color: #111827 !important;
+}
+
+.dark button:not(.bg-brand-550):not(.bg-slate-800):not(.bg-rose-600):not(.bg-emerald-600) {
+  color: #cbd5e1 !important;
+}
+
+.dark button:not(.bg-brand-550):not(.bg-slate-800):not(.bg-rose-600):not(.bg-emerald-600):hover {
+  background-color: #374151 !important;
+  color: #f1f5f9 !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-50\/70,
+.dark .bg-slate-50\/50,
+.dark .bg-slate-50\/30,
+.dark .bg-slate-100,
+.dark .bg-slate-100\/50,
+.dark .bg-slate-200 {
+  background-color: #1f2937 !important;
+}
+
+.dark .border-slate-100,
+.dark .border-slate-150,
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: #374151 !important;
+}
+
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-slate-100\/50:hover,
+.dark .hover\:bg-slate-50\/80:hover {
+  background-color: #374151 !important;
+}
+

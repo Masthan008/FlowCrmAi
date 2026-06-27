@@ -7,6 +7,7 @@ import dashboardRouter from '../../dashboard/routes/dashboard.routes';
 import leadRouter from '../../leads/routes/lead.routes';
 import taskRouter from '../../tasks/routes/task.routes';
 import contactRouter from '../../contacts/routes/contact.routes';
+import companyRouter from '../../companies/routes/company.routes';
 
 const router = Router();
 
@@ -36,6 +37,7 @@ router.use('/dashboard', dashboardRouter);
 router.use('/leads', leadRouter);
 router.use('/tasks', taskRouter);
 router.use('/contacts', contactRouter);
+router.use('/companies', companyRouter);
 
 // Generate placeholder routers for all 20 remaining CRM infrastructure modules
 const placeholderModules = [
@@ -43,7 +45,6 @@ const placeholderModules = [
   'roles',
   'permissions',
   'customers',
-  'companies',
   'deals',
   'activities',
   'calendar',

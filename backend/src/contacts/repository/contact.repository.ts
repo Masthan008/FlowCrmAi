@@ -2,7 +2,7 @@ import { BaseRepository } from '../../repositories/base.repository';
 import { prisma } from '../../database/db';
 
 const contactInclude = {
-  company: { select: { id: true, name: true, domain: true, phone: true, industry: true, status: true } },
+  company: { select: { id: true, name: true, website: true, primaryPhone: true, industry: true, status: true } },
   lead: { select: { id: true, leadNumber: true, firstName: true, lastName: true, fullName: true } },
   owner: { select: { id: true, firstName: true, lastName: true, email: true } },
   customer: { select: { id: true, name: true, email: true, phone: true, type: true, status: true } },

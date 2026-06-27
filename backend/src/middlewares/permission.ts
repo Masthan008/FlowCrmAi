@@ -38,6 +38,12 @@ export const requirePermission = (permission: string) => {
       return;
     }
 
+    // Super Admin role has access to all actions and bypasses checking
+    if (req.user.role === 'Super Admin') {
+      next();
+      return;
+    }
+
     const hasAccess = hasPermissionMatch(req.user.permissions, permission);
     if (!hasAccess) {
       res.status(403);

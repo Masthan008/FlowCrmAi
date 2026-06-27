@@ -23,7 +23,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Enforce role guards if specified
   if (requiredRoles && role && !requiredRoles.includes(role)) {
-    return <Navigate to="/unauthorized" replace />;
+    if (role !== 'Super Admin') {
+      return <Navigate to="/unauthorized" replace />;
+    }
+  }
+
+  // Super Admin automatically bypasses permission checks
+  if (role === 'Super Admin') {
+    return <>{children}</>;
   }
 
   // Enforce permission guards if specified
