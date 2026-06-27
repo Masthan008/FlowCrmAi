@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-slate-800 antialiased selection:bg-brand-100 selection:text-brand-700 overflow-x-hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom Scrollbar for Glossy Look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 190, 255, 0.2);
+  border-radius: 9999px;
+  transition: all 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(37, 99, 235, 0.4);
+}
+
+/* Glassmorphism/Glossy Classes */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.03),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.90);
+  @apply rounded-2xl transition-all duration-300;
+}
+
+.glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 16px 40px 0 rgba(31, 38, 135, 0.06),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.95);
+  @apply -translate-y-0.5;
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  @apply rounded-xl transition-all duration-200 focus:outline-none focus:border-brand-550 focus:bg-white focus:ring-4 focus:ring-brand-100;
+}
+
+.glass-select {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  @apply rounded-xl transition-all duration-200 focus:outline-none focus:border-brand-550 focus:bg-white focus:ring-4 focus:ring-brand-100;
+}
+
+/* Glossy White Nav/Sidebar overlay */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: rgba(241, 245, 249, 0.8);
+}
+
+/* Subtle gloss shine overlay */
+.gloss-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.gloss-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  transition: transform 0.5s;
+  pointer-events: none;
+}
+
+.gloss-shine:hover::after {
+  transform: translate(50%, 0) rotate(30deg);
+}

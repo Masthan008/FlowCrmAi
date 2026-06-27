@@ -1,0 +1,1001 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. ROLES
+model Role {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String           @unique
+  description String?
+  
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+  version     Int              @default(1)
+
+  // Relations
+  users       User[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+// 2. PERMISSIONS
+model Permission {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String           @unique
+  module      String
+  action      String
+  description String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+  version     Int              @default(1)
+
+  // Relations
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+// 3. ROLE PERMISSIONS
+model RolePermission {
+  roleId       String     @db.Uuid
+  permissionId String     @db.Uuid
+  
+  // Relations
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+  version     Int              @default(1)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// 4. USERS
+model User {
+  id           String          @id @default(uuid()) @db.Uuid
+  email        String          @unique
+  password     String
+  name         String
+  phone        String?
+  status       String          @default("active")
+  roleId       String          @db.Uuid
+  role         Role            @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  // Auditing
+  createdBy    String?
+  updatedBy    String?
+  deletedBy    String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  deletedAt    DateTime?
+  version      Int             @default(1)
+
+  // Relations
+  preferences  UserPreference?
+  sessions     Session[]
+  apiKeys      ApiKey[]
+  employee     Employee?
+  notifications Notification[]
+  auditLogs    AuditLog[]
+  comments     Comment[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([status])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// 5. USER PREFERENCES
+model UserPreference {
+  id                   String    @id @default(uuid()) @db.Uuid
+  userId               String    @unique @db.Uuid
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme                String    @default("white-glossy")
+  language             String    @default("en")
+  timezone             String    @default("UTC")
+  compactMode          Boolean   @default(false)
+  notificationsEnabled Boolean   @default(true)
+
+  // Auditing
+  createdBy            String?
+  updatedBy            String?
+  deletedBy            String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+  version              Int       @default(1)
+
+  @@map("user_preferences")
+}
+
+// 6. SESSIONS
+model Session {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String    @unique
+  userAgent    String?
+  ipAddress    String?
+  deviceInfo   String?
+  expiresAt    DateTime
+  isValid      Boolean   @default(true)
+
+  // Auditing
+  createdBy    String?
+  updatedBy    String?
+  deletedBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  version      Int       @default(1)
+
+  @@map("sessions")
+}
+
+// 7. API KEYS
+model ApiKey {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  key         String    @unique
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("api_keys")
+}
+
+// 8. COMPANIES
+model Company {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String
+  domain      String?
+  phone       String?
+  industry    String?
+  status      String     @default("active")
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  version     Int        @default(1)
+
+  // Relations
+  branches    Branch[]
+  employees   Employee[]
+  customers   Customer[]
+
+  @@index([name])
+  @@index([phone])
+  @@index([status])
+  @@map("companies")
+}
+
+// 9. BRANCHES
+model Branch {
+  id          String     @id @default(uuid()) @db.Uuid
+  companyId   String     @db.Uuid
+  company     Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name        String
+  phone       String?
+  address     String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  version     Int        @default(1)
+
+  @@map("branches")
+}
+
+// 10. EMPLOYEES
+model Employee {
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String?       @unique @db.Uuid
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  companyId   String        @db.Uuid
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  department  String?
+  designation String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+  version     Int           @default(1)
+
+  // Relations
+  teamLeaders Team[]        @relation("TeamLeader")
+  teamMembers TeamMember[]
+  leads       Lead[]
+  deals       Deal[]
+  activities  Activity[]
+  tasks       Task[]
+  meetings    Meeting[]
+
+  @@map("employees")
+}
+
+// 11. TEAMS
+model Team {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  leaderId    String       @db.Uuid
+  leader      Employee     @relation("TeamLeader", fields: [leaderId], references: [id], onDelete: Restrict)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+  version     Int          @default(1)
+
+  // Relations
+  members     TeamMember[]
+
+  @@map("teams")
+}
+
+// 12. TEAM MEMBERS
+model TeamMember {
+  id          String    @id @default(uuid()) @db.Uuid
+  teamId      String    @db.Uuid
+  team        Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  employeeId  String    @db.Uuid
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("team_members")
+}
+
+// 13. CUSTOMERS
+model Customer {
+  id          String     @id @default(uuid()) @db.Uuid
+  companyId   String?    @db.Uuid
+  company     Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  name        String
+  email       String?
+  phone       String?
+  type        String     @default("lead") // lead / client
+  status      String     @default("active")
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  version     Int        @default(1)
+
+  // Relations
+  contacts    Contact[]
+  leads       Lead[]
+  deals       Deal[]
+  activities  Activity[]
+  tasks       Task[]
+  meetings    Meeting[]
+  quotes      Quote[]
+  invoices    Invoice[]
+
+  @@index([name])
+  @@index([email])
+  @@index([phone])
+  @@index([status])
+  @@map("customers")
+}
+
+// 14. CONTACTS
+model Contact {
+  id          String     @id @default(uuid()) @db.Uuid
+  customerId  String?    @db.Uuid
+  customer    Customer?  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  firstName   String
+  lastName    String
+  email       String?
+  phone       String?
+  designation String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  version     Int        @default(1)
+
+  @@index([email])
+  @@index([phone])
+  @@map("contacts")
+}
+
+// 15. LEAD SOURCES
+model LeadSource {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @unique
+  description String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  // Relations
+  leads       Lead[]
+
+  @@map("lead_sources")
+}
+
+// 16. LEAD STATUS
+model LeadStatus {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @unique
+  description String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  // Relations
+  leads       Lead[]
+
+  @@map("lead_status")
+}
+
+// 17. LEADS
+model Lead {
+  id           String      @id @default(uuid()) @db.Uuid
+  customerId   String?     @db.Uuid
+  customer     Customer?   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  name         String
+  email        String?
+  phone        String?
+  sourceId     String?     @db.Uuid
+  source       LeadSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  statusId     String?     @db.Uuid
+  status       LeadStatus? @relation(fields: [statusId], references: [id], onDelete: SetNull)
+  assignedToId String?     @db.Uuid
+  assignedTo   Employee?   @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  value        Float       @default(0.0)
+
+  // Auditing
+  createdBy    String?
+  updatedBy    String?
+  deletedBy    String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  deletedAt    DateTime?
+  version      Int         @default(1)
+
+  @@index([name])
+  @@index([email])
+  @@index([phone])
+  @@index([createdAt])
+  @@map("leads")
+}
+
+// 18. PIPELINES
+model Pipeline {
+  id          String          @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+  version     Int             @default(1)
+
+  // Relations
+  stages      PipelineStage[]
+
+  @@map("pipelines")
+}
+
+// 19. PIPELINE STAGES
+model PipelineStage {
+  id          String    @id @default(uuid()) @db.Uuid
+  pipelineId  String    @db.Uuid
+  pipeline    Pipeline  @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  name        String
+  order       Int
+  probability Float     @default(0.0)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  // Relations
+  deals       Deal[]
+
+  @@map("pipeline_stages")
+}
+
+// 20. DEALS
+model Deal {
+  id           String        @id @default(uuid()) @db.Uuid
+  customerId   String        @db.Uuid
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  name         String
+  stageId      String        @db.Uuid
+  stage        PipelineStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  assignedToId String?       @db.Uuid
+  assignedTo   Employee?     @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  value        Float         @default(0.0)
+  closeDate    DateTime?
+
+  // Auditing
+  createdBy    String?
+  updatedBy    String?
+  deletedBy    String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  version      Int           @default(1)
+
+  // Relations
+  activities   Activity[]
+  tasks        Task[]
+  meetings     Meeting[]
+  quotes       Quote[]
+  invoices     Invoice[]
+
+  @@index([name])
+  @@index([createdAt])
+  @@map("deals")
+}
+
+// 21. ACTIVITY TYPES
+model ActivityType {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @unique
+  description String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  version     Int        @default(1)
+
+  // Relations
+  activities  Activity[]
+
+  @@map("activity_types")
+}
+
+// 22. ACTIVITIES
+model Activity {
+  id           String        @id @default(uuid()) @db.Uuid
+  customerId   String?       @db.Uuid
+  customer     Customer?     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  dealId       String?       @db.Uuid
+  deal         Deal?         @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  typeId       String        @db.Uuid
+  type         ActivityType  @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  subject      String
+  description  String?
+  loggedById   String        @db.Uuid
+  loggedBy     Employee      @relation(fields: [loggedById], references: [id], onDelete: Restrict)
+  activityDate DateTime
+
+  // Auditing
+  createdBy    String?
+  updatedBy    String?
+  deletedBy    String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  version      Int           @default(1)
+
+  @@map("activities")
+}
+
+// 23. TASKS
+model Task {
+  id           String    @id @default(uuid()) @db.Uuid
+  assignedToId String    @db.Uuid
+  assignedTo   Employee  @relation(fields: [assignedToId], references: [id], onDelete: Restrict)
+  customerId   String?   @db.Uuid
+  customer     Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  dealId       String?   @db.Uuid
+  deal         Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  subject      String
+  description  String?
+  dueDate      DateTime?
+  status       String    @default("pending")
+  priority     String    @default("medium")
+
+  // Auditing
+  createdBy    String?
+  updatedBy    String?
+  deletedBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  version      Int       @default(1)
+
+  @@index([status])
+  @@map("tasks")
+}
+
+// 24. MEETINGS
+model Meeting {
+  id          String    @id @default(uuid()) @db.Uuid
+  organizerId String    @db.Uuid
+  organizer   Employee  @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+  customerId  String?   @db.Uuid
+  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  dealId      String?   @db.Uuid
+  deal         Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  location    String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("meetings")
+}
+
+// 25. PRODUCT CATEGORIES
+model ProductCategory {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  // Relations
+  products    Product[]
+
+  @@map("product_categories")
+}
+
+// 26. PRODUCTS
+model Product {
+  id          String          @id @default(uuid()) @db.Uuid
+  categoryId  String          @db.Uuid
+  category    ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  name        String
+  sku         String          @unique
+  price       Float
+  isActive    Boolean         @default(true)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+  version     Int             @default(1)
+
+  // Relations
+  quoteItems  QuoteItem[]
+  invoiceItems InvoiceItem[]
+
+  @@map("products")
+}
+
+// 27. QUOTES
+model Quote {
+  id          String      @id @default(uuid()) @db.Uuid
+  customerId  String      @db.Uuid
+  customer    Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  dealId      String?     @db.Uuid
+  deal        Deal?       @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  number      String      @unique
+  status      String      @default("draft")
+  validUntil  DateTime
+  subtotal    Float       @default(0.0)
+  tax         Float       @default(0.0)
+  discount    Float       @default(0.0)
+  total       Float       @default(0.0)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+  version     Int         @default(1)
+
+  // Relations
+  items       QuoteItem[]
+
+  @@index([status])
+  @@map("quotes")
+}
+
+// 28. QUOTE ITEMS
+model QuoteItem {
+  id        String  @id @default(uuid()) @db.Uuid
+  quoteId   String  @db.Uuid
+  quote     Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity  Int
+  unitPrice Float
+  subtotal  Float   @default(0.0)
+
+  // Auditing
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  version   Int      @default(1)
+
+  @@map("quote_items")
+}
+
+// 29. INVOICES
+model Invoice {
+  id         String        @id @default(uuid()) @db.Uuid
+  customerId String        @db.Uuid
+  customer   Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  dealId     String?       @db.Uuid
+  deal       Deal?         @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  number     String        @unique
+  status     String        @default("unpaid")
+  dueDate    DateTime
+  subtotal   Float         @default(0.0)
+  tax        Float         @default(0.0)
+  discount   Float         @default(0.0)
+  total      Float         @default(0.0)
+
+  // Auditing
+  createdBy  String?
+  updatedBy  String?
+  deletedBy  String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  deletedAt  DateTime?
+  version    Int           @default(1)
+
+  // Relations
+  items      InvoiceItem[]
+  payments   Payment[]
+
+  @@index([status])
+  @@map("invoices")
+}
+
+// 30. INVOICE ITEMS
+model InvoiceItem {
+  id        String  @id @default(uuid()) @db.Uuid
+  invoiceId String  @db.Uuid
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity  Int
+  unitPrice Float
+  subtotal  Float   @default(0.0)
+
+  // Auditing
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  version   Int      @default(1)
+
+  @@map("invoice_items")
+}
+
+// 31. CURRENCIES
+model Currency {
+  id        String    @id @default(uuid()) @db.Uuid
+  code      String    @unique
+  name      String
+  symbol    String
+
+  // Auditing
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  // Relations
+  payments  Payment[]
+
+  @@map("currencies")
+}
+
+// 32. PAYMENTS
+model Payment {
+  id            String    @id @default(uuid()) @db.Uuid
+  invoiceId     String    @db.Uuid
+  invoice       Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount        Float
+  currencyId    String    @db.Uuid
+  currency      Currency  @relation(fields: [currencyId], references: [id], onDelete: Restrict)
+  method        String
+  status        String    @default("pending")
+  transactionId String?
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@index([status])
+  @@map("payments")
+}
+
+// 33. NOTIFICATIONS
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String    @default("info")
+  readAt    DateTime?
+
+  // Auditing
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  @@map("notifications")
+}
+
+// 34. EMAIL TEMPLATES
+model EmailTemplate {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique
+  subject   String
+  bodyHtml  String
+  bodyText  String?
+
+  // Auditing
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  @@map("email_templates")
+}
+
+// 35. AUDIT LOGS
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  module    String
+  timestamp DateTime @default(now())
+  ipAddress String?
+  browser   String?
+  details   Json?
+
+  // Auditing (Minimum baseline for system audit records)
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  version   Int      @default(1)
+
+  @@index([timestamp])
+  @@map("audit_logs")
+}
+
+// 36. FILES
+model File {
+  id         String    @id @default(uuid()) @db.Uuid
+  name       String
+  path       String
+  mimeType   String
+  size       Int
+  entityType String
+  entityId   String    @db.Uuid
+
+  // Auditing
+  createdBy  String?
+  updatedBy  String?
+  deletedBy  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  version    Int       @default(1)
+
+  @@map("files")
+}
+
+// 37. COMMENTS
+model Comment {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entityType String
+  entityId   String    @db.Uuid
+  content    String
+
+  // Auditing
+  createdBy  String?
+  updatedBy  String?
+  deletedBy  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  version    Int       @default(1)
+
+  @@map("comments")
+}
+
+// 38. TAGS
+model Tag {
+  id        String        @id @default(uuid()) @db.Uuid
+  name      String        @unique
+  color     String?
+
+  // Auditing
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  deletedAt DateTime?
+  version   Int           @default(1)
+
+  // Relations
+  relations TagRelation[]
+
+  @@map("tags")
+}
+
+// 39. TAG RELATIONS
+model TagRelation {
+  id         String    @id @default(uuid()) @db.Uuid
+  tagId      String    @db.Uuid
+  tag        Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  entityType String
+  entityId   String    @db.Uuid
+
+  // Auditing
+  createdBy  String?
+  updatedBy  String?
+  deletedBy  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  version    Int       @default(1)
+
+  @@map("tag_relations")
+}
+
+// 40. SETTINGS
+model Setting {
+  id        String    @id @default(uuid()) @db.Uuid
+  key       String    @unique
+  value     String
+  category  String    @default("general")
+
+  // Auditing
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  @@map("settings")
+}

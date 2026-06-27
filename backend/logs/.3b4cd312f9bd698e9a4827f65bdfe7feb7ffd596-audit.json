@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\.3b4cd312f9bd698e9a4827f65bdfe7feb7ffd596-audit.json",
+    "files": [
+        {
+            "date": 1782565208817,
+            "name": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\error-2026-06-27.log",
+            "hash": "f79748e1da6b631e0cee2cdb2180055714322912605f6c1ccd6779f938f0729f"
+        }
+    ],
+    "hashType": "sha256"
+}
