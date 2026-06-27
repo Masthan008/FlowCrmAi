@@ -47,6 +47,16 @@ interface ContactState {
   businessMetrics: ContactBusinessMetric | null;
   health: ContactHealth | null;
   engagementScore: ContactEngagement | null;
+  lifecycle: any | null;
+  stageHistory: any[];
+  preferences: any | null;
+  segmentsList: any[];
+  tagsList: any[];
+  workflowsList: any[];
+  followups: any[];
+  score: any | null;
+  risk: any | null;
+  recommendations: any[];
 
   // UI State
   loading: boolean;
@@ -103,6 +113,20 @@ interface ContactState {
   fetchBusinessMetrics: (id: string) => Promise<void>;
   fetchHealth: (id: string) => Promise<void>;
   fetchEngagementScore: (id: string) => Promise<void>;
+  fetchLifecycle: (id: string) => Promise<void>;
+  updateLifecycle: (id: string, stage: string, reason?: string) => Promise<void>;
+  fetchPreferences: (id: string) => Promise<void>;
+  updatePreferences: (id: string, data: any) => Promise<void>;
+  fetchSegments: (id: string) => Promise<void>;
+  fetchScore: (id: string) => Promise<void>;
+  fetchRisk: (id: string) => Promise<void>;
+  fetchRecommendations: (id: string) => Promise<void>;
+  fetchFollowups: (id: string) => Promise<void>;
+  createFollowup: (id: string, data: any) => Promise<void>;
+  assignOwner: (id: string, ownerId: string, reason?: string) => Promise<void>;
+  createTag: (data: any) => Promise<void>;
+  fetchSegmentsList: () => Promise<void>;
+  createWorkflow: (data: any) => Promise<void>;
 }
 
 export const useContactStore = create<ContactState>((set, get) => ({
@@ -127,6 +151,16 @@ export const useContactStore = create<ContactState>((set, get) => ({
   businessMetrics: null,
   health: null,
   engagementScore: null,
+  lifecycle: null,
+  stageHistory: [],
+  preferences: null,
+  segmentsList: [],
+  tagsList: [],
+  workflowsList: [],
+  followups: [],
+  score: null,
+  risk: null,
+  recommendations: [],
   loading: false,
   error: null,
   filters: {},
@@ -554,6 +588,146 @@ export const useContactStore = create<ContactState>((set, get) => ({
       set({ engagementScore: res.data.data || null });
     } catch (err) {
       console.error('Failed to fetch engagement score', err);
+    }
+  },
+
+  fetchLifecycle: async (id) => {
+    try {
+      const res = await api.get(`/contacts/${id}/lifecycle`);
+      set({
+        lifecycle: res.data.data?.lifecycle || null,
+        stageHistory: res.data.data?.stageHistory || []
+      });
+    } catch (err) {
+      console.error('Failed to fetch lifecycle info', err);
+    }
+  },
+
+  updateLifecycle: async (id, stage, reason) => {
+    try {
+      const res = await api.patch(`/contacts/${id}/lifecycle`, { stage, reason });
+      set({ lifecycle: res.data.data });
+      get().fetchLifecycle(id);
+      get().fetchTimeline(id);
+    } catch (err) {
+      console.error('Failed to update lifecycle stage', err);
+      throw err;
+    }
+  },
+
+  fetchPreferences: async (id) => {
+    try {
+      const res = await api.get(`/contacts/${id}/preferences`);
+      set({ preferences: res.data.data || null });
+    } catch (err) {
+      console.error('Failed to fetch preferences', err);
+    }
+  },
+
+  updatePreferences: async (id, data) => {
+    try {
+      const res = await api.put(`/contacts/${id}/preferences`, data);
+      set({ preferences: res.data.data });
+    } catch (err) {
+      console.error('Failed to update preferences', err);
+      throw err;
+    }
+  },
+
+  fetchSegments: async (id) => {
+    try {
+      const res = await api.get(`/contacts/${id}/segments`);
+      // Stores matched segments for active contact profile
+      set({ segmentsList: res.data.data || [] });
+    } catch (err) {
+      console.error('Failed to fetch segments for contact', err);
+    }
+  },
+
+  fetchScore: async (id) => {
+    try {
+      const res = await api.get(`/contacts/${id}/score`);
+      set({ score: res.data.data || null });
+    } catch (err) {
+      console.error('Failed to fetch score metrics', err);
+    }
+  },
+
+  fetchRisk: async (id) => {
+    try {
+      const res = await api.get(`/contacts/${id}/risk`);
+      set({ risk: res.data.data || null });
+    } catch (err) {
+      console.error('Failed to fetch risk status', err);
+    }
+  },
+
+  fetchRecommendations: async (id) => {
+    try {
+      const res = await api.get(`/contacts/${id}/recommendations`);
+      set({ recommendations: res.data.data || [] });
+    } catch (err) {
+      console.error('Failed to fetch suggestions', err);
+    }
+  },
+
+  fetchFollowups: async (id) => {
+    try {
+      const res = await api.get(`/contacts/${id}/followups`);
+      set({ followups: res.data.data || [] });
+    } catch (err) {
+      console.error('Failed to fetch follow-ups calendar', err);
+    }
+  },
+
+  createFollowup: async (id, data) => {
+    try {
+      const res = await api.post(`/contacts/${id}/followups`, data);
+      set({ followups: [...get().followups, res.data.data] });
+      get().fetchTimeline(id);
+    } catch (err) {
+      console.error('Failed to schedule followup task', err);
+      throw err;
+    }
+  },
+
+  assignOwner: async (id, ownerId, reason) => {
+    try {
+      await api.patch(`/contacts/${id}/assign`, { ownerId, reason });
+      get().fetchContact(id);
+      get().fetchTimeline(id);
+    } catch (err) {
+      console.error('Failed to assign owner to contact', err);
+      throw err;
+    }
+  },
+
+  createTag: async (data) => {
+    try {
+      const res = await api.post('/contacts/contact-tags', data);
+      set({ tagsList: [...get().tagsList, res.data.data] });
+    } catch (err) {
+      console.error('Failed to register global tag', err);
+      throw err;
+    }
+  },
+
+  fetchSegmentsList: async () => {
+    try {
+      const res = await api.get('/contacts/contact-segments');
+      set({ segmentsList: res.data.data || [] });
+    } catch (err) {
+      console.error('Failed to list dynamic segments templates', err);
+    }
+  },
+
+  createWorkflow: async (data) => {
+    try {
+      const res = await api.post('/contacts/contact-workflows', data);
+      set({ workflowsList: [...get().workflowsList, res.data.data] });
+    } catch (err) {
+      console.error('Failed to register automation workflow', err);
+      throw err;
     }
   },
 }));

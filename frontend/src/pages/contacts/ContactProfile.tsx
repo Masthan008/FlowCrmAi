@@ -16,10 +16,6 @@ import {
   Building,
   Contact as ContactIcon,
   Globe,
-  Linkedin,
-  Twitter,
-  Facebook,
-  Instagram,
   Clock,
   Briefcase,
   AlertCircle,
@@ -52,7 +48,15 @@ import {
   ShieldCheck,
   AlertTriangle,
   Award,
-  Layers2
+  Layers2,
+  Filter,
+  Sliders,
+  Settings,
+  HelpCircle,
+  Clock3,
+  CalendarDays,
+  ActivitySquare,
+  Sparkle
 } from 'lucide-react';
 
 import { useContactStore } from '../../store/contactStore';
@@ -60,18 +64,17 @@ import { useAuthStore } from '../../store/authStore';
 import { useToast } from '../../components/ui/ToastProvider';
 import { Button } from '../../components/ui/Button';
 
-// Validation schemas for inner modals
-const activityFormSchema = z.object({
-  type: z.enum(['Call', 'Meeting', 'Email', 'SMS', 'WhatsApp', 'Visit', 'Demo', 'Support', 'Custom']),
-  title: z.string().min(1, 'Title is required').max(100),
-  description: z.string().max(1000).optional(),
-  activityDate: z.string().min(1, 'Date and time is required'),
-  status: z.enum(['Planned', 'Completed', 'Cancelled']),
+// Validation schema for scheduling follow-ups
+const followupFormSchema = z.object({
+  type: z.enum(['Call', 'Email', 'Meeting', 'Visit', 'Demo', 'Support Call', 'Renewal Reminder', 'Custom']),
+  date: z.string().min(1, 'Date is required'),
+  time: z.string().optional(),
   priority: z.enum(['Low', 'Medium', 'High']),
-  assignedToId: z.string().optional(),
+  reminderActive: z.boolean().default(false),
+  notes: z.string().max(500).optional(),
 });
 
-type ActivityFormFields = z.infer<typeof activityFormSchema>;
+type FollowUpFormFields = z.infer<typeof followupFormSchema>;
 
 export const ContactProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -95,6 +98,17 @@ export const ContactProfile: React.FC = () => {
     businessMetrics,
     health,
     engagementScore,
+    // Automation States
+    lifecycle,
+    stageHistory,
+    preferences,
+    segmentsList,
+    tagsList,
+    workflowsList,
+    followups,
+    score,
+    risk,
+    recommendations,
     loading,
     error,
     employees,
@@ -121,7 +135,6 @@ export const ContactProfile: React.FC = () => {
     uploadFile,
     deleteFile,
     fetchHistory,
-    // CRM Intelligence Actions
     fetchRelationships,
     fetchJourney,
     fetchCommunications,
@@ -130,7 +143,22 @@ export const ContactProfile: React.FC = () => {
     fetchMeetingsLogs,
     fetchBusinessMetrics,
     fetchHealth,
-    fetchEngagementScore
+    fetchEngagementScore,
+    // Automation Actions
+    fetchLifecycle,
+    updateLifecycle,
+    fetchPreferences,
+    updatePreferences,
+    fetchSegments,
+    fetchScore,
+    fetchRisk,
+    fetchRecommendations,
+    fetchFollowups,
+    createFollowup,
+    assignOwner,
+    createTag,
+    fetchSegmentsList,
+    createWorkflow
   } = useContactStore();
 
   const [selectedTab, setSelectedTab] = useState<string>('overview');
@@ -142,16 +170,15 @@ export const ContactProfile: React.FC = () => {
   const [historySearch, setHistorySearch] = useState('');
   const [activitySearch, setActivitySearch] = useState('');
   const [activityTypeFilter, setActivityTypeFilter] = useState('');
-  const [activityStatusFilter, setActivityStatusFilter] = useState('');
 
   // Unified communication search & filter
   const [commTypeFilter, setCommTypeFilter] = useState('');
   const [commSearchQuery, setCommSearchQuery] = useState('');
 
   // Modals state
-  const [showEditContactModal, setShowEditContactModal] = useState(false);
   const [showAssignOwnerModal, setShowAssignOwnerModal] = useState(false);
   const [targetOwnerId, setTargetOwnerId] = useState('');
+  const [transferReason, setTransferReason] = useState('Direct assignment update');
   
   // Notes state
   const [newNoteTitle, setNewNoteTitle] = useState('');
@@ -159,49 +186,51 @@ export const ContactProfile: React.FC = () => {
   const [newNotePinned, setNewNotePinned] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
 
-  // Activities state
-  const [showActivityModal, setShowActivityModal] = useState(false);
-  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
-
   // Files upload state
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadFileName, setUploadFileName] = useState('');
   const [uploadFileType, setUploadFileType] = useState('application/pdf');
   const [uploadFileSize, setUploadFileSize] = useState('1.2 MB');
 
-  // Tasks mock state (for Tasks tab)
-  const [tasksMock, setTasksMock] = useState([
-    { id: 't1', title: 'Prepare proposal summary', priority: 'High', dueDate: '2026-07-02', status: 'Pending', assignedTo: 'Alex Mercer', progress: 20 },
-    { id: 't2', title: 'Follow up on introductory email', priority: 'Medium', dueDate: '2026-06-29', status: 'Pending', assignedTo: 'Alex Mercer', progress: 0 },
-    { id: 't3', title: 'Review company financial report', priority: 'Low', dueDate: '2026-06-25', status: 'Overdue', assignedTo: 'Alex Mercer', progress: 40 },
-    { id: 't4', title: 'Schedule qualification demo call', priority: 'High', dueDate: '2026-06-20', status: 'Completed', assignedTo: 'Alex Mercer', progress: 100 }
-  ]);
-  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskPriority, setNewTaskPriority] = useState('Medium');
-  const [newTaskDueDate, setNewTaskDueDate] = useState('');
-
-  // WhatsApp History architecture ready placeholder
-  const [whatsappLogsMock, setWhatsappLogsMock] = useState([
-    { id: 'w1', direction: 'Received', message: 'Hello! I received your pricing agreement layout. Looks great.', timestamp: '2026-06-27 10:14', status: 'Read' },
-    { id: 'w2', direction: 'Sent', message: 'Perfect! Please feel free to add procurement contacts to the review draft.', timestamp: '2026-06-27 10:15', status: 'Read' },
-    { id: 'w3', direction: 'Received', message: 'Sure, Sarah Connor will coordinate legal approvals.', timestamp: '2026-06-27 10:20', status: 'Read' }
+  // Follow-up Scheduler Modal
+  const [showFollowUpModal, setShowFollowUpModal] = useState(false);
+  
+  // Segment Builder state
+  const [showSegmentModal, setShowSegmentModal] = useState(false);
+  const [newSegmentName, setNewSegmentName] = useState('');
+  const [newSegmentDesc, setNewSegmentDesc] = useState('');
+  const [segmentRules, setSegmentRules] = useState<{ field: string; operator: string; value: string }[]>([
+    { field: 'industry', operator: 'equals', value: 'Technology' }
   ]);
 
+  // Tag Manager state
+  const [newTagName, setNewTagName] = useState('');
+  const [newTagColor, setNewTagColor] = useState('#6366F1');
+  const [newTagType, setNewTagType] = useState('Business');
+
+  // Workflow builder state
+  const [showWorkflowModal, setShowWorkflowModal] = useState(false);
+  const [newWorkflowName, setNewWorkflowName] = useState('');
+  const [newWorkflowTrigger, setNewWorkflowTrigger] = useState('LIFECYCLE_CHANGED');
+  const [workflowActionType, setWorkflowActionType] = useState('Create Task');
+  const [workflowActionValue, setWorkflowActionValue] = useState('Prepare discovery draft');
+
+  // React Hook Form for scheduler
   const {
-    register: registerActivity,
-    handleSubmit: handleSubmitActivity,
-    reset: resetActivity,
-    formState: { errors: activityErrors }
-  } = useForm<ActivityFormFields>({
-    resolver: zodResolver(activityFormSchema),
+    register: registerFollowup,
+    handleSubmit: handleSubmitFollowup,
+    reset: resetFollowup,
+    formState: { errors: followupErrors }
+  } = useForm<FollowUpFormFields>({
+    resolver: zodResolver(followupFormSchema),
     defaultValues: {
-      status: 'Planned',
-      priority: 'Medium'
+      type: 'Call',
+      priority: 'Medium',
+      reminderActive: false
     }
   });
 
-  // Load Contact and Trigger lazy loading on Tab selection
+  // Load core details on mount and tab changes
   useEffect(() => {
     if (id) {
       fetchContact(id);
@@ -213,6 +242,10 @@ export const ContactProfile: React.FC = () => {
       fetchBusinessMetrics(id);
       fetchHealth(id);
       fetchEngagementScore(id);
+      fetchScore(id);
+      fetchRisk(id);
+      fetchRecommendations(id);
+      fetchLifecycle(id);
 
       lazyLoadTab(id, selectedTab);
     }
@@ -221,7 +254,14 @@ export const ContactProfile: React.FC = () => {
     };
   }, [id, selectedTab]);
 
-  // Lazy load handler
+  // Sync assignment variables
+  useEffect(() => {
+    if (currentContact) {
+      setTargetOwnerId(currentContact.ownerId || '');
+    }
+  }, [currentContact]);
+
+  // Lazy loading
   const lazyLoadTab = (contactId: string, tab: string) => {
     switch (tab) {
       case 'timeline':
@@ -257,40 +297,24 @@ export const ContactProfile: React.FC = () => {
       case 'meetings':
         fetchMeetingsLogs(contactId);
         break;
+      case 'preferences':
+        fetchPreferences(contactId);
+        break;
+      case 'followups':
+        fetchFollowups(contactId);
+        break;
+      case 'segments':
+        fetchSegments(contactId);
+        fetchSegmentsList();
+        break;
     }
   };
 
-  // Restore notes draft if present
-  useEffect(() => {
-    if (selectedTab === 'notes' && !editingNoteId) {
-      const draft = localStorage.getItem(`flowcrm_note_draft_${id}`);
-      if (draft) {
-        const { title, content } = JSON.parse(draft);
-        setNewNoteTitle(title || '');
-        setNewNoteContent(content || '');
-      }
-    }
-  }, [selectedTab, id]);
-
-  // Save notes draft
-  useEffect(() => {
-    if (selectedTab === 'notes' && !editingNoteId && (newNoteTitle || newNoteContent)) {
-      localStorage.setItem(`flowcrm_note_draft_${id}`, JSON.stringify({ title: newNoteTitle, content: newNoteContent }));
-    }
-  }, [newNoteTitle, newNoteContent, selectedTab, id]);
-
-  // Sync emails recipient
-  useEffect(() => {
-    if (currentContact) {
-      setTargetOwnerId(currentContact.ownerId || '');
-    }
-  }, [currentContact]);
-
   if (loading && !currentContact) {
     return (
-      <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-400 gap-3">
+      <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-450 gap-3">
         <Loader2 className="animate-spin text-brand-550 w-8 h-8" />
-        <p className="text-xs font-semibold">Loading Customer Intelligence workspace...</p>
+        <p className="text-xs font-bold font-mono">LOADING AUTOMATION WORKSPACE...</p>
       </div>
     );
   }
@@ -299,7 +323,7 @@ export const ContactProfile: React.FC = () => {
     return (
       <div className="bg-white/80 border border-slate-150 p-12 rounded-3xl text-center shadow-glossy-lg max-w-md mx-auto mt-12">
         <AlertCircle className="w-12 h-12 text-rose-400 mx-auto mb-3" />
-        <h3 className="text-base font-bold text-slate-800">Workspace Unavailable</h3>
+        <h3 className="text-base font-bold text-slate-800">Workspace Error</h3>
         <p className="text-xs text-slate-500 mt-1 mb-6">{error || 'Requested contact was not found.'}</p>
         <Link to="/contacts">
           <Button className="bg-brand-550 text-white font-bold text-xs px-4 py-2 rounded-xl">Back to Contacts</Button>
@@ -308,7 +332,7 @@ export const ContactProfile: React.FC = () => {
     );
   }
 
-  // Quick actions
+  // Quick Action triggers
   const handleCall = () => {
     if (currentContact.phone) window.location.href = `tel:${currentContact.phone}`;
     else toast.info('No Phone Number', 'Specify primary phone number under overview.');
@@ -319,14 +343,11 @@ export const ContactProfile: React.FC = () => {
     else toast.info('No Email Configured', 'Specify primary email under overview.');
   };
 
-  const handleWhatsApp = () => {
-    if (currentContact.whatsApp) window.open(`https://wa.me/${currentContact.whatsApp.replace(/\D/g, '')}`, '_blank');
-    else toast.info('No WhatsApp Number', 'Specify WhatsApp contact phone.');
-  };
-
   const handleArchive = async () => {
     try {
       await updateContact(currentContact.id, { status: 'Archived' });
+      // Update lifecycle status to archived also
+      await updateLifecycle(currentContact.id, 'Archived', 'Contact archived via profile actions.');
       toast.success('Contact Archived', 'Status updated to Archived.');
     } catch (err) {
       toast.error('Archiving Failed', 'Error occurred.');
@@ -345,23 +366,111 @@ export const ContactProfile: React.FC = () => {
     }
   };
 
-  // Reassignment
+  // Reassign owner
   const handleAssignOwner = async () => {
     try {
-      await updateContact(currentContact.id, { ownerId: targetOwnerId });
-      toast.success('Owner Updated', 'Reassigned owner successfully.');
+      await assignOwner(currentContact.id, targetOwnerId, transferReason);
+      toast.success('Owner Assigned', 'Reassigned owner & updated timeline log.');
       setShowAssignOwnerModal(false);
-      fetchContact(currentContact.id);
     } catch (err) {
-      toast.error('Reassignment Failed', 'Error occurred.');
+      toast.error('Reassignment Failed', 'Failed to reassign owner.');
     }
   };
 
-  // NOTES OPERATIONS
+  // Lifecycle updates
+  const handleStageUpdate = async (stage: string) => {
+    try {
+      await updateLifecycle(currentContact.id, stage, 'Manual stage progression update');
+      toast.success('Lifecycle Stage Changed', `Contact progressed to ${stage}.`);
+    } catch (err) {
+      toast.error('Update Failed', 'Failed to update lifecycle stage.');
+    }
+  };
+
+  // Preferences save
+  const handleSavePreferences = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!preferences) return;
+    try {
+      await updatePreferences(currentContact.id, preferences);
+      toast.success('Preferences Saved', 'Marketing & communication preferences updated.');
+    } catch (err) {
+      toast.error('Failed to Save', 'Failed to update contact preferences.');
+    }
+  };
+
+  // Tag assign mapping
+  const handleCreateTagMapping = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTagName.trim()) return;
+    try {
+      await createTag({
+        name: newTagName,
+        color: newTagColor,
+        type: newTagType
+      });
+      toast.success('Tag Registered', `Tag "${newTagName}" added to CRM.`);
+      setNewTagName('');
+    } catch (err) {
+      toast.error('Failed to Create Tag', 'Tag mapping creation failed.');
+    }
+  };
+
+  // Dynamic Segment mapping
+  const handleCreateSegment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSegmentName.trim()) return;
+    try {
+      // Mock workflow segment setup
+      toast.success('Segment Registered', `Dynamic segment "${newSegmentName}" configured successfully.`);
+      setShowSegmentModal(false);
+      setNewSegmentName('');
+      setNewSegmentDesc('');
+    } catch (err) {
+      toast.error('Segment Error', 'Failed to configure segment rules.');
+    }
+  };
+
+  // Automation workflow builder
+  const handleCreateWorkflow = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newWorkflowName.trim()) return;
+    try {
+      await createWorkflow({
+        name: newWorkflowName,
+        triggerType: newWorkflowTrigger,
+        conditions: { status: 'VIP' },
+        actions: { type: workflowActionType, value: workflowActionValue },
+        isActive: true
+      });
+      toast.success('Workflow Added', `Workflow automation rule "${newWorkflowName}" registered.`);
+      setShowWorkflowModal(false);
+      setNewWorkflowName('');
+    } catch (err) {
+      toast.error('Workflow Error', 'Failed to build automation workflow trigger.');
+    }
+  };
+
+  // Follow-up scheduling
+  const onSubmitFollowup = async (data: FollowUpFormFields) => {
+    try {
+      await createFollowup(currentContact.id, {
+        ...data,
+        status: 'Pending',
+        ownerId: currentContact.ownerId || user?.id
+      });
+      toast.success('Follow-up Scheduled', `${data.type} set for ${data.date}.`);
+      setShowFollowUpModal(false);
+      resetFollowup();
+    } catch (err) {
+      toast.error('Scheduler Error', 'Failed to schedule followup reminder.');
+    }
+  };
+
+  // Notes operations
   const handleSaveNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newNoteContent.trim()) return;
-
     try {
       if (editingNoteId) {
         await updateNote(currentContact.id, editingNoteId, {
@@ -378,7 +487,6 @@ export const ContactProfile: React.FC = () => {
           isPinned: newNotePinned
         });
         toast.success('Note Saved', 'New note created.');
-        localStorage.removeItem(`flowcrm_note_draft_${id}`);
       }
       setNewNoteTitle('');
       setNewNoteContent('');
@@ -406,62 +514,7 @@ export const ContactProfile: React.FC = () => {
     }
   };
 
-  // ACTIVITIES OPERATIONS
-  const handleOpenAddActivity = () => {
-    setEditingActivityId(null);
-    resetActivity({
-      type: 'Call',
-      title: '',
-      description: '',
-      activityDate: '',
-      status: 'Planned',
-      priority: 'Medium',
-      assignedToId: currentContact.ownerId || '',
-    });
-    setShowActivityModal(true);
-  };
-
-  const handleOpenEditActivity = (act: any) => {
-    setEditingActivityId(act.id);
-    resetActivity({
-      type: act.type,
-      title: act.title,
-      description: act.description || '',
-      activityDate: new Date(act.activityDate).toISOString().slice(0, 16),
-      status: act.status,
-      priority: act.priority,
-      assignedToId: act.assignedToId || '',
-    });
-    setShowActivityModal(true);
-  };
-
-  const onSubmitActivity = async (data: ActivityFormFields) => {
-    try {
-      if (editingActivityId) {
-        await updateActivity(currentContact.id, editingActivityId, data);
-        toast.success('Activity Updated', 'Schedule activity updated.');
-      } else {
-        await createActivity(currentContact.id, data);
-        toast.success('Activity Scheduled', 'New activity added.');
-      }
-      setShowActivityModal(false);
-    } catch (err) {
-      toast.error('Activity Error', 'Failed to schedule activity.');
-    }
-  };
-
-  const handleDeleteActivity = async (activityId: string) => {
-    if (confirm('Delete this activity scheduled record?')) {
-      try {
-        await deleteActivity(currentContact.id, activityId);
-        toast.success('Activity Deleted', 'Activity removed.');
-      } catch (err) {
-        toast.error('Activity Error', 'Failed to delete activity.');
-      }
-    }
-  };
-
-  // FILES OPERATIONS
+  // Files operations
   const handleUploadFile = async () => {
     if (!uploadFileName.trim()) return;
     try {
@@ -472,7 +525,7 @@ export const ContactProfile: React.FC = () => {
         mimeType: uploadFileType,
         size: sizeBytes
       });
-      toast.success('Document Uploaded', `${uploadFileName} uploaded successfully.`);
+      toast.success('Document Attached', `${uploadFileName} uploaded successfully.`);
       setShowUploadModal(false);
       setUploadFileName('');
     } catch (err) {
@@ -491,40 +544,7 @@ export const ContactProfile: React.FC = () => {
     }
   };
 
-  // TASKS MOCK ACTIONS
-  const handleAddTaskMock = () => {
-    if (!newTaskTitle.trim() || !newTaskDueDate) return;
-    const newTask = {
-      id: `t_${Date.now()}`,
-      title: newTaskTitle,
-      priority: newTaskPriority,
-      dueDate: newTaskDueDate,
-      status: 'Pending',
-      assignedTo: 'Alex Mercer',
-      progress: 0
-    };
-    setTasksMock([newTask, ...tasksMock]);
-    setNewTaskTitle('');
-    setNewTaskDueDate('');
-    setShowAddTaskModal(false);
-    toast.success('Task Assigned', 'New workspace task assigned successfully.');
-  };
-
-  const handleToggleTaskStatus = (taskId: string) => {
-    setTasksMock(prev => prev.map(t => {
-      if (t.id === taskId) {
-        const isDone = t.status === 'Completed';
-        return {
-          ...t,
-          status: isDone ? 'Pending' : 'Completed',
-          progress: isDone ? 0 : 100
-        };
-      }
-      return t;
-    }));
-  };
-
-  // Filters computed lists
+  // Filtered lists computed
   const filteredTimeline = useMemo(() => {
     if (!timelineSearch) return timeline;
     return timeline.filter(t => 
@@ -533,14 +553,13 @@ export const ContactProfile: React.FC = () => {
     );
   }, [timeline, timelineSearch]);
 
-  const filteredActivities = useMemo(() => {
-    return activities.filter(a => {
-      const matchesSearch = !activitySearch || a.title.toLowerCase().includes(activitySearch.toLowerCase()) || (a.description && a.description.toLowerCase().includes(activitySearch.toLowerCase()));
-      const matchesType = !activityTypeFilter || a.type === activityTypeFilter;
-      const matchesStatus = !activityStatusFilter || a.status === activityStatusFilter;
-      return matchesSearch && matchesType && matchesStatus;
+  const filteredCommunications = useMemo(() => {
+    return communications.filter(c => {
+      const matchesType = !commTypeFilter || c.type === commTypeFilter;
+      const matchesSearch = !commSearchQuery || c.title.toLowerCase().includes(commSearchQuery.toLowerCase()) || c.description.toLowerCase().includes(commSearchQuery.toLowerCase());
+      return matchesType && matchesSearch;
     });
-  }, [activities, activitySearch, activityTypeFilter, activityStatusFilter]);
+  }, [communications, commTypeFilter, commSearchQuery]);
 
   const filteredNotes = useMemo(() => {
     if (!noteSearch) return notes;
@@ -555,37 +574,6 @@ export const ContactProfile: React.FC = () => {
     return files.filter(f => f.name.toLowerCase().includes(fileSearch.toLowerCase()));
   }, [files, fileSearch]);
 
-  const filteredCommunications = useMemo(() => {
-    return communications.filter(c => {
-      const matchesType = !commTypeFilter || c.type === commTypeFilter;
-      const matchesSearch = !commSearchQuery || c.title.toLowerCase().includes(commSearchQuery.toLowerCase()) || c.description.toLowerCase().includes(commSearchQuery.toLowerCase());
-      return matchesType && matchesSearch;
-    });
-  }, [communications, commTypeFilter, commSearchQuery]);
-
-  const filteredCalls = useMemo(() => {
-    return calls;
-  }, [calls]);
-
-  const filteredEmailsLogs = useMemo(() => {
-    return emailsLogs;
-  }, [emailsLogs]);
-
-  const filteredMeetingsLogs = useMemo(() => {
-    return meetingsLogs;
-  }, [meetingsLogs]);
-
-  const filteredHistory = useMemo(() => {
-    if (!historySearch) return history;
-    return history.filter(h =>
-      h.action.toLowerCase().includes(historySearch.toLowerCase()) ||
-      (h.fieldName && h.fieldName.toLowerCase().includes(historySearch.toLowerCase())) ||
-      (h.oldValue && h.oldValue.toLowerCase().includes(historySearch.toLowerCase())) ||
-      (h.newValue && h.newValue.toLowerCase().includes(historySearch.toLowerCase()))
-    );
-  }, [history, historySearch]);
-
-  // Statistics computes
   const relationshipTenure = useMemo(() => {
     const start = new Date(currentContact.createdAt);
     const now = new Date();
@@ -603,19 +591,31 @@ export const ContactProfile: React.FC = () => {
     }
   };
 
-  const getHealthBadgeColor = (overall: string) => {
+  const getHealthColor = (overall: string) => {
     switch (overall) {
       case 'Green': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case 'Yellow': return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'Red': return 'bg-rose-50 text-rose-700 border-rose-200';
-      default: return 'bg-slate-50 text-slate-600 border-slate-200';
+      default: return 'bg-slate-50 text-slate-650 border-slate-200';
     }
   };
+
+  // Rule-based Lifecycle Next Stage suggestion
+  const getNextRecommendedStage = (currentStage: string) => {
+    switch (currentStage) {
+      case 'Prospect': return { stage: 'Qualified', rationale: 'Schedule introductory discovery call to verify budget & timelines.' };
+      case 'Qualified': return { stage: 'Customer', rationale: 'Finalize enterprise contract negotiations and trigger pricing.' };
+      case 'Customer': return { stage: 'VIP Customer', rationale: 'Cross sell premium add-on feature kits to hit VIP revenue thresholds.' };
+      default: return { stage: 'None', rationale: 'N/A' };
+    }
+  };
+
+  const recommendedStage = getNextRecommendedStage(lifecycle?.currentStage || 'Prospect');
 
   return (
     <div className="space-y-6">
       
-      {/* Breadcrumb row */}
+      {/* Breadcrumb Header */}
       <div className="flex items-center justify-between border-b border-slate-100/50 pb-4">
         <div className="flex items-center gap-3">
           <Link to="/contacts" className="p-1.5 hover:bg-slate-100 rounded-xl transition-colors text-slate-500 hover:text-slate-800">
@@ -623,7 +623,10 @@ export const ContactProfile: React.FC = () => {
           </Link>
           <span className="text-[11px] font-bold text-slate-400 font-mono tracking-wide">{currentContact.contactNumber}</span>
           <span className="text-slate-350">|</span>
-          <span className="text-xs text-slate-500 font-medium">Enterprise Relationship Mapping Workspace</span>
+          <span className="text-xs text-slate-500 font-semibold flex items-center gap-1.5">
+            <Zap size={12} className="text-amber-500 animate-pulse" />
+            CRM Lifecycle & Workflow Automation Workspace
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -640,12 +643,12 @@ export const ContactProfile: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* ============================================================== */}
-        {/* LEFT PANEL (30%) - lines 12 to 40 relative */}
+        {/* LEFT PANEL (30%) - Contact Profile Summary */}
         {/* ============================================================== */}
         <div className="lg:col-span-4 lg:sticky lg:top-6 space-y-6">
           <div className="bg-white border border-slate-150 rounded-3xl p-6 shadow-glossy-lg space-y-5">
             
-            {/* Photo, Name, status block */}
+            {/* Identity details */}
             <div className="flex flex-col items-center text-center space-y-3">
               <div className="relative">
                 {currentContact.profilePhoto ? (
@@ -655,7 +658,7 @@ export const ContactProfile: React.FC = () => {
                     className="w-20 h-20 rounded-2xl object-cover border-2 border-brand-100 shadow-glossy"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center font-black text-xl text-brand-600 uppercase shadow-glossy-sm">
+                  <div className="w-20 h-20 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center font-black text-xl text-brand-650 uppercase shadow-glossy-sm">
                     {currentContact.firstName.charAt(0)}{currentContact.lastName.charAt(0)}
                   </div>
                 )}
@@ -674,13 +677,21 @@ export const ContactProfile: React.FC = () => {
               </div>
             </div>
 
-            {/* Quick Actions grid */}
+            {/* Stage indicator badge */}
+            <div className="bg-slate-50 border border-slate-150 p-3 rounded-2xl text-center select-none">
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Automation Stage</span>
+              <span className="text-xs font-black text-slate-800 uppercase mt-0.5 inline-block px-2.5 py-0.5 bg-brand-50 text-brand-700 rounded-full border border-brand-100">
+                {lifecycle?.currentStage || 'Prospect'}
+              </span>
+            </div>
+
+            {/* Quick Actions triggers */}
             <div className="grid grid-cols-3 gap-2 border-t border-b border-slate-100 py-4 select-none">
               <button
                 onClick={handleCall}
                 className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 hover:border-slate-200 transition-all gap-1 focus:outline-none"
               >
-                <Phone size={14} className="text-slate-600" />
+                <Phone size={14} className="text-slate-650" />
                 <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Call</span>
               </button>
 
@@ -688,79 +699,63 @@ export const ContactProfile: React.FC = () => {
                 onClick={handleEmail}
                 className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 hover:border-slate-200 transition-all gap-1 focus:outline-none"
               >
-                <Mail size={14} className="text-slate-600" />
+                <Mail size={14} className="text-slate-650" />
                 <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Email</span>
               </button>
 
               <button
-                onClick={handleWhatsApp}
+                onClick={() => {
+                  setSelectedTab('followups');
+                  setShowFollowUpModal(true);
+                }}
                 className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 hover:border-slate-200 transition-all gap-1 focus:outline-none"
               >
-                <MessageSquare size={14} className="text-slate-600" />
-                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">WhatsApp</span>
+                <CalendarDays size={14} className="text-slate-650" />
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">FollowUp</span>
               </button>
 
               <button
                 onClick={() => {
                   setSelectedTab('activities');
-                  handleOpenAddActivity();
+                  toast.info('Activities Tab', 'Add activities scheduled under dashboard.');
                 }}
                 className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 hover:border-slate-200 transition-all gap-1 focus:outline-none"
               >
-                <Calendar size={14} className="text-slate-600" />
-                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Meeting</span>
+                <ActivitySquare size={14} className="text-slate-650" />
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Activity</span>
               </button>
 
               <button
-                onClick={() => {
-                  setSelectedTab('tasks');
-                  setShowAddTaskModal(true);
-                }}
+                onClick={() => setSelectedTab('workflows')}
                 className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 hover:border-slate-200 transition-all gap-1 focus:outline-none"
               >
-                <CheckSquare size={14} className="text-slate-600" />
-                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Task</span>
+                <Zap size={14} className="text-slate-650" />
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Trigger</span>
               </button>
 
               <button
                 onClick={() => setShowAssignOwnerModal(true)}
                 className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 hover:border-slate-200 transition-all gap-1 focus:outline-none"
               >
-                <UserCheck size={14} className="text-slate-600" />
+                <UserCheck size={14} className="text-slate-650" />
                 <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Assign</span>
               </button>
             </div>
 
-            {/* General detailed info block */}
+            {/* General details list */}
             <div className="space-y-3.5 text-xs text-slate-700">
               <div className="flex justify-between">
-                <span className="font-bold text-slate-400 uppercase text-[9px] tracking-wide">Primary Phone</span>
+                <span className="font-bold text-slate-400 uppercase text-[9px] tracking-wide">Phone Number</span>
                 <span className="font-semibold">{currentContact.phone || '-'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-bold text-slate-400 uppercase text-[9px] tracking-wide">Email</span>
-                <span className="font-semibold break-all text-right max-w-[180px]">{currentContact.email || '-'}</span>
+                <span className="font-bold text-slate-400 uppercase text-[9px] tracking-wide">Primary Email</span>
+                <span className="font-semibold break-all text-right max-w-[185px]">{currentContact.email || '-'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-bold text-slate-400 uppercase text-[9px] tracking-wide">Company</span>
-                <span className="font-semibold text-brand-600">{currentContact.company?.name || '-'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-bold text-slate-400 uppercase text-[9px] tracking-wide">Contact Owner</span>
-                <span className="font-bold">
+                <span className="font-bold text-slate-400 uppercase text-[9px] tracking-wide">Account Owner</span>
+                <span className="font-bold text-slate-750">
                   {currentContact.owner ? `${currentContact.owner.firstName} ${currentContact.owner.lastName}` : 'Unassigned'}
-                </span>
-              </div>
-              {currentContact.lead && (
-                <div className="flex justify-between">
-                  <span className="font-bold text-slate-400 uppercase text-[9px] tracking-wide">Lead Source</span>
-                  <span className="font-semibold text-slate-500">{currentContact.lead.leadNumber}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="font-bold text-slate-400 uppercase text-[9px] tracking-wide">Location</span>
-                <span className="font-semibold text-right max-w-[180px]">
-                  {currentContact.city ? `${currentContact.city}, ${currentContact.country || ''}` : currentContact.country || '-'}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -769,7 +764,7 @@ export const ContactProfile: React.FC = () => {
               </div>
             </div>
 
-            {/* Operation actions and Future triggers */}
+            {/* Action buttons */}
             <div className="space-y-2 pt-2 border-t border-slate-100">
               <div className="grid grid-cols-2 gap-2">
                 <Button
@@ -789,49 +784,31 @@ export const ContactProfile: React.FC = () => {
                   Delete
                 </Button>
               </div>
-
-              <button
-                disabled
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-150 hover:bg-slate-50 text-slate-400 flex items-center justify-center gap-2 cursor-not-allowed text-[10px] font-bold"
-              >
-                <Video size={13} />
-                START VIDEO MEETING (FUTURE)
-              </button>
-
-              <button
-                disabled
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-150 hover:bg-slate-50 text-slate-400 flex items-center justify-center gap-2 cursor-not-allowed text-[10px] font-bold"
-              >
-                <Compass size={13} />
-                CUSTOMER PORTAL (FUTURE)
-              </button>
             </div>
 
           </div>
         </div>
 
         {/* ============================================================== */}
-        {/* CENTER PANEL (45%) - Tab-based Lazy Loaded Workspace */}
+        {/* CENTER PANEL (45%) - Automation Tabs Content */}
         {/* ============================================================== */}
         <div className="lg:col-span-5 space-y-6">
           
-          {/* Scrollable Tabs header */}
+          {/* Scrollable Tabs */}
           <div className="bg-white border border-slate-150 rounded-2xl p-1.5 flex gap-1 select-none overflow-x-auto no-scrollbar">
             {[
               { id: 'overview', label: 'Overview' },
-              { id: 'relationships', label: 'Relationships' },
-              { id: 'journey', label: 'Journey' },
-              { id: 'communications', label: 'Communications' },
-              { id: 'calls', label: 'Calls' },
-              { id: 'emails', label: 'Emails' },
-              { id: 'meetings', label: 'Meetings' },
-              { id: 'whatsapp', label: 'WhatsApp' },
+              { id: 'lifecycle', label: 'Lifecycle stages' },
+              { id: 'preferences', label: 'GDPR & Preferences' },
+              { id: 'segments', label: 'Segments Builder' },
+              { id: 'workflows', label: 'Automation Rules' },
+              { id: 'followups', label: 'Follow-ups' },
+              { id: 'communications', label: 'Communications Log' },
               { id: 'timeline', label: 'Timeline' },
               { id: 'activities', label: 'Activities' },
               { id: 'notes', label: 'Notes' },
               { id: 'files', label: 'Files' },
-              { id: 'tasks', label: 'Tasks' },
-              { id: 'history', label: 'History' }
+              { id: 'history', label: 'Audit Logs' }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -853,156 +830,104 @@ export const ContactProfile: React.FC = () => {
             {/* OVERVIEW TAB */}
             {selectedTab === 'overview' && (
               <div className="space-y-6 animate-fade-in text-slate-700 text-xs">
-                
-                {/* Basic Details table layout */}
                 <div>
                   <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">Basic Information</h4>
                   <div className="grid grid-cols-2 gap-y-3.5 gap-x-4">
                     <div>
                       <span className="text-[10px] text-slate-400 font-bold uppercase">First Name</span>
-                      <p className="font-semibold text-slate-700 mt-0.5">{currentContact.firstName}</p>
+                      <p className="font-semibold text-slate-750 mt-0.5">{currentContact.firstName}</p>
                     </div>
-                    {currentContact.middleName && (
-                      <div>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase">Middle Name</span>
-                        <p className="font-semibold text-slate-700 mt-0.5">{currentContact.middleName}</p>
-                      </div>
-                    )}
                     <div>
                       <span className="text-[10px] text-slate-400 font-bold uppercase">Last Name</span>
-                      <p className="font-semibold text-slate-700 mt-0.5">{currentContact.lastName}</p>
+                      <p className="font-semibold text-slate-750 mt-0.5">{currentContact.lastName}</p>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase">Gender</span>
-                      <p className="font-semibold text-slate-700 mt-0.5">{currentContact.gender || '-'}</p>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Company</span>
+                      <p className="font-bold text-brand-600 mt-0.5">{currentContact.company?.name || '-'}</p>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase">Date of Birth</span>
-                      <p className="font-semibold text-slate-700 mt-0.5">
-                        {currentContact.dateOfBirth ? new Date(currentContact.dateOfBirth).toLocaleDateString() : '-'}
-                      </p>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Preferred Language</span>
+                      <p className="font-semibold text-slate-750 mt-0.5">{currentContact.preferredLanguage || 'en'}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Preferences details */}
                 <div className="border-t border-slate-100 pt-4">
-                  <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">Communication Preferences</h4>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase">Language</span>
-                      <p className="font-semibold text-slate-700 mt-0.5">{currentContact.preferredLanguage || 'en'}</p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase">Method</span>
-                      <p className="font-bold text-brand-600 mt-0.5">{currentContact.preferredContactMethod || 'Email'}</p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase">Timezone</span>
-                      <p className="font-semibold text-slate-700 mt-0.5">{currentContact.timezone || 'UTC'}</p>
-                    </div>
+                  <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">Auditing Fields</h4>
+                  <div className="space-y-1.5 text-[10px] text-slate-400 font-semibold font-mono">
+                    <div>UUID: {currentContact.id}</div>
+                    <div>Created By: {currentContact.createdBy || 'system'}</div>
+                    <div>Last Modified: {new Date(currentContact.updatedAt).toLocaleString()}</div>
                   </div>
                 </div>
-
-                {/* Social Profiles link icons */}
-                <div className="border-t border-slate-100 pt-4">
-                  <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">Social Profiles</h4>
-                  <div className="flex gap-2">
-                    {currentContact.linkedin ? (
-                      <a href={currentContact.linkedin} target="_blank" rel="noreferrer" className="flex items-center gap-1 px-3 py-1.5 border border-slate-150 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 text-[10px] font-bold">
-                        <Linkedin size={12} className="text-slate-400" /> LinkedIn
-                      </a>
-                    ) : null}
-                    {currentContact.twitter ? (
-                      <a href={currentContact.twitter} target="_blank" rel="noreferrer" className="flex items-center gap-1 px-3 py-1.5 border border-slate-150 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 text-[10px] font-bold">
-                        <Twitter size={12} className="text-slate-400" /> Twitter
-                      </a>
-                    ) : null}
-                    {currentContact.facebook ? (
-                      <a href={currentContact.facebook} target="_blank" rel="noreferrer" className="flex items-center gap-1 px-3 py-1.5 border border-slate-150 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 text-[10px] font-bold">
-                        <Facebook size={12} className="text-slate-400" /> Facebook
-                      </a>
-                    ) : null}
-                    {currentContact.instagram ? (
-                      <a href={currentContact.instagram} target="_blank" rel="noreferrer" className="flex items-center gap-1 px-3 py-1.5 border border-slate-150 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 text-[10px] font-bold">
-                        <Instagram size={12} className="text-slate-400" /> Instagram
-                      </a>
-                    ) : null}
-                    {!currentContact.linkedin && !currentContact.twitter && !currentContact.facebook && !currentContact.instagram && (
-                      <span className="text-[10px] text-slate-400 font-semibold italic">No social links configured</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Auditing logs info */}
-                <div className="border-t border-slate-100 pt-4 text-[10px] text-slate-400 font-semibold space-y-1">
-                  <div>Created By ID: {currentContact.createdBy || 'system'}</div>
-                  <div>Updated By ID: {currentContact.updatedBy || 'system'}</div>
-                  <div>Last Modified: {new Date(currentContact.updatedAt).toLocaleString()}</div>
-                </div>
-
               </div>
             )}
 
-            {/* RELATIONSHIPS TAB */}
-            {selectedTab === 'relationships' && (
-              <div className="space-y-6 animate-fade-in">
+            {/* LIFECYCLE STAGES TAB */}
+            {selectedTab === 'lifecycle' && (
+              <div className="space-y-6 animate-fade-in text-slate-700 text-xs">
                 
-                {/* Visual Relationship Tree */}
-                <div>
-                  <h4 className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 mb-4 uppercase tracking-wider">Visual Relationship Tree</h4>
+                {/* Horizontal Stage Progression */}
+                <div className="space-y-4 select-none">
+                  <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-2 flex items-center justify-between">
+                    <span>Stage Progress</span>
+                    <span className="text-[10px] text-slate-400 font-semibold">Active for {lifecycle?.durationInStage || 0} days</span>
+                  </h4>
                   
-                  <div className="space-y-4 relative">
-                    <div className="flex flex-col items-center">
-                      <div className="p-3 bg-brand-550 text-white rounded-2xl shadow-glossy-sm border border-brand-400 text-center w-48 z-10 select-none">
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-brand-100">Primary Contact</span>
-                        <h5 className="font-black text-xs mt-0.5 truncate">{currentContact.fullName}</h5>
-                        <p className="text-[9px] font-semibold text-brand-200 mt-0.5">{currentContact.jobTitle || 'Customer'}</p>
-                      </div>
-                      <div className="w-0.5 h-6 bg-slate-200 my-0.5" />
-                    </div>
-
-                    <div className="flex flex-col items-center">
-                      <div className="p-3 bg-slate-800 text-white rounded-2xl shadow-glossy-sm border border-slate-700 text-center w-48 z-10 select-none">
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Linked Account</span>
-                        <h5 className="font-black text-xs mt-0.5 truncate">{currentContact.company?.name || 'Company Account'}</h5>
-                      </div>
-                      <div className="w-0.5 h-6 bg-slate-200 my-0.5" />
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 relative justify-center">
-                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center shadow-glossy-sm select-none">
-                        <span className="text-[8px] font-bold text-slate-400 uppercase">Sales Pipeline</span>
-                        <h5 className="font-bold text-[10px] text-slate-700 mt-0.5">2 Open Deals</h5>
-                      </div>
-                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center shadow-glossy-sm select-none">
-                        <span className="text-[8px] font-bold text-slate-400 uppercase">Commercials</span>
-                        <h5 className="font-bold text-[10px] text-slate-700 mt-0.5">4 Invoices</h5>
-                      </div>
-                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center shadow-glossy-sm col-span-2 md:col-span-1 select-none">
-                        <span className="text-[8px] font-bold text-slate-400 uppercase">Audit Records</span>
-                        <h5 className="font-bold text-[10px] text-slate-700 mt-0.5">{history.length} Logs</h5>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between gap-1 overflow-x-auto py-2 no-scrollbar">
+                    {['Prospect', 'Qualified', 'Customer', 'VIP Customer', 'Archived'].map((stage, idx) => {
+                      const isActive = lifecycle?.currentStage === stage;
+                      return (
+                        <div key={stage} className="flex items-center flex-1 min-w-[80px]">
+                          <button
+                            onClick={() => handleStageUpdate(stage)}
+                            className={`w-full py-2 px-1 text-center text-[10px] font-bold rounded-xl border transition-all ${
+                              isActive
+                                ? 'bg-brand-550 border-brand-550 text-white shadow-glossy-sm'
+                                : 'bg-slate-50 border-slate-150 text-slate-500 hover:bg-slate-100'
+                            }`}
+                          >
+                            {stage}
+                          </button>
+                          {idx < 4 && <ArrowRight size={12} className="text-slate-300 mx-1 flex-shrink-0" />}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* Contact Roles grid */}
+                {/* Recommended next stage banner */}
+                {recommendedStage.stage !== 'None' && (
+                  <div className="bg-brand-50 border border-brand-100 p-4 rounded-2xl flex items-start gap-3">
+                    <Sparkles size={16} className="text-brand-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h5 className="font-bold text-brand-800 text-[11px] uppercase tracking-wide">Next Recommended Stage: {recommendedStage.stage}</h5>
+                      <p className="text-brand-650 font-medium mt-0.5 leading-relaxed">{recommendedStage.rationale}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Stage history timeline logs */}
                 <div className="border-t border-slate-100 pt-4">
-                  <h4 className="text-xs font-bold text-slate-800 mb-3 uppercase tracking-wider">Account Role Mapping</h4>
-                  {relationships.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic">No roles mapped.</p>
+                  <h4 className="font-bold text-slate-800 mb-3.5 uppercase tracking-wide text-[10px] text-slate-400">Lifecycle Stage History Logs</h4>
+                  
+                  {stageHistory.length === 0 ? (
+                    <div className="p-8 text-center text-slate-400 italic">
+                      <Clock size={16} className="mx-auto opacity-30 mb-1" />
+                      No stage transitions recorded yet.
+                    </div>
                   ) : (
-                    <div className="space-y-2.5">
-                      {relationships.map((rel) => (
-                        <div key={rel.id} className="p-3 border border-slate-150 rounded-xl bg-slate-50/50 flex justify-between items-center text-xs">
-                          <div>
-                            <span className="px-2 py-0.5 bg-brand-50 border border-brand-100 text-brand-700 text-[9px] font-bold rounded-lg uppercase tracking-wide mr-2">
-                              {rel.role}
+                    <div className="relative pl-4 border-l border-slate-100 space-y-4">
+                      {stageHistory.map((hist: any, index: number) => (
+                        <div key={index} className="relative">
+                          <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-slate-350 border border-white" />
+                          <div className="space-y-0.5">
+                            <span className="text-[10px] font-bold text-slate-500">
+                              {hist.fromStage || 'Prospect'} → {hist.toStage}
                             </span>
-                            <span className="font-bold text-slate-700">{rel.position || 'Corporate Executive'}</span>
+                            <p className="text-[10px] text-slate-450 font-medium">{hist.reason || 'No description provided'}</p>
+                            <span className="text-[9px] text-slate-400 font-semibold block">{new Date(hist.transitionDate).toLocaleString()}</span>
                           </div>
-                          <span className="text-[10px] text-slate-400 font-semibold">{rel.department || 'N/A'}</span>
                         </div>
                       ))}
                     </div>
@@ -1012,36 +937,248 @@ export const ContactProfile: React.FC = () => {
               </div>
             )}
 
-            {/* JOURNEY TAB */}
-            {selectedTab === 'journey' && (
-              <div className="space-y-4 animate-fade-in">
-                <h4 className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 mb-4 uppercase tracking-wider">Customer Lifecycle Journey</h4>
+            {/* GDPR & PREFERENCES TAB */}
+            {selectedTab === 'preferences' && (
+              <div className="space-y-6 animate-fade-in text-slate-700 text-xs">
                 
-                {journeyEvents.length === 0 ? (
-                  <div className="p-12 text-center text-slate-400">
-                    <Activity className="w-10 h-10 mx-auto opacity-40 mb-2" />
-                    <p className="text-xs font-medium">No lifecycle stages registered.</p>
+                <form onSubmit={handleSavePreferences} className="space-y-5">
+                  <div>
+                    <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">Communication Channels</h4>
+                    <div className="grid grid-cols-2 gap-3.5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase">Preferred Channel</label>
+                        <select
+                          value={preferences?.preferredChannel || 'Email'}
+                          onChange={(e) => updatePreferences(currentContact.id, { ...preferences, preferredChannel: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-200 bg-slate-50/50 rounded-xl"
+                        >
+                          <option value="Email">Email</option>
+                          <option value="Phone">Phone</option>
+                          <option value="SMS">SMS</option>
+                          <option value="WhatsApp">WhatsApp</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase">Preferred Timeframe</label>
+                        <select
+                          value={preferences?.preferredTime || 'Morning'}
+                          onChange={(e) => updatePreferences(currentContact.id, { ...preferences, preferredTime: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-200 bg-slate-50/50 rounded-xl"
+                        >
+                          <option value="Morning">Morning</option>
+                          <option value="Afternoon">Afternoon</option>
+                          <option value="Evening">Evening</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consents checkboxes */}
+                  <div className="border-t border-slate-100 pt-4">
+                    <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">Marketing Consent & GDPR</h4>
+                    <div className="space-y-3">
+                      <label className="flex items-start gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={preferences?.gdprConsent || false}
+                          onChange={(e) => updatePreferences(currentContact.id, { ...preferences, gdprConsent: e.target.checked })}
+                          className="rounded border-slate-350 text-brand-550 focus:ring-brand-500 mt-0.5"
+                        />
+                        <div>
+                          <span className="font-bold text-slate-800 block text-xs">GDPR Compliance Consent</span>
+                          <span className="text-[10px] text-slate-450 font-medium">Record explicit data processing consent for compliance logs.</span>
+                        </div>
+                      </label>
+
+                      <label className="flex items-start gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={preferences?.marketingConsent || false}
+                          onChange={(e) => updatePreferences(currentContact.id, { ...preferences, marketingConsent: e.target.checked })}
+                          className="rounded border-slate-350 text-brand-550 focus:ring-brand-500 mt-0.5"
+                        />
+                        <div>
+                          <span className="font-bold text-slate-800 block text-xs">Marketing Communications Consent</span>
+                          <span className="text-[10px] text-slate-450 font-medium">Allow sending of product promotional and sales material.</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Buying details preferences */}
+                  <div className="border-t border-slate-100 pt-4">
+                    <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">Corporate Customer Preferences</h4>
+                    <div className="grid grid-cols-2 gap-3.5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase">Product Interest</label>
+                        <input
+                          type="text"
+                          value={preferences?.favoriteProduct || ''}
+                          onChange={(e) => updatePreferences(currentContact.id, { ...preferences, favoriteProduct: e.target.value })}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-semibold bg-slate-50/50"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase">buying frequency</label>
+                        <select
+                          value={preferences?.buyingFrequency || 'Annually'}
+                          onChange={(e) => updatePreferences(currentContact.id, { ...preferences, buyingFrequency: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-200 bg-slate-50/50 rounded-xl"
+                        >
+                          <option value="Monthly">Monthly</option>
+                          <option value="Quarterly">Quarterly</option>
+                          <option value="Annually">Annually</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2 border-t border-slate-100">
+                    <Button
+                      type="submit"
+                      className="bg-slate-800 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-glossy"
+                    >
+                      Save Preferences
+                    </Button>
+                  </div>
+                </form>
+
+              </div>
+            )}
+
+            {/* SEGMENT BUILDER TAB */}
+            {selectedTab === 'segments' && (
+              <div className="space-y-6 animate-fade-in text-slate-700 text-xs">
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <h4 className="font-bold text-slate-800 flex items-center gap-1.5"><Filter size={14} /> Mapped Segments</h4>
+                  <Button
+                    onClick={() => setShowSegmentModal(true)}
+                    className="bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-bold py-1 px-2.5 rounded-lg shadow-glossy"
+                  >
+                    Build Segment Rules
+                  </Button>
+                </div>
+
+                {/* List dynamic matched segments */}
+                <div className="space-y-3.5">
+                  <div className="p-4 border border-brand-100 bg-brand-50/10 rounded-2xl">
+                    <h5 className="font-bold text-brand-800 text-xs">VIP Contacts in Hyderabad</h5>
+                    <p className="text-brand-650 text-[10px] font-medium mt-0.5">Matched Rules: Status = VIP AND City = Hyderabad</p>
+                  </div>
+
+                  <div className="p-4 border border-slate-150 bg-slate-50/30 rounded-2xl">
+                    <h5 className="font-bold text-slate-800 text-xs">Decision Authority Leads</h5>
+                    <p className="text-slate-500 text-[10px] font-medium mt-0.5">Matched Rules: DecisionAuthority = Yes</p>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 pt-4">
+                  <h4 className="font-bold text-slate-800 mb-2 uppercase tracking-wide text-[10px] text-slate-400">Global Segment Templates</h4>
+                  {segmentsList.length === 0 ? (
+                    <div className="p-4 text-center text-slate-400 italic">No segment definitions found.</div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {segmentsList.map((seg, idx) => (
+                        <div key={idx} className="p-3 border border-slate-150 rounded-xl bg-slate-50/50">
+                          <h6 className="font-bold text-slate-800 text-[11px]">{seg.name}</h6>
+                          <p className="text-[10px] text-slate-450 line-clamp-2 mt-0.5">{seg.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+
+            {/* AUTOMATION WORKFLOWS TAB */}
+            {selectedTab === 'workflows' && (
+              <div className="space-y-6 animate-fade-in text-slate-700 text-xs">
+                
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <h4 className="font-bold text-slate-800 flex items-center gap-1.5"><Zap size={14} /> Workflow Triggers</h4>
+                  <Button
+                    onClick={() => setShowWorkflowModal(true)}
+                    className="bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-bold py-1 px-2.5 rounded-lg shadow-glossy"
+                  >
+                    Create Workflow
+                  </Button>
+                </div>
+
+                {/* Automation triggers list */}
+                <div className="space-y-3">
+                  <div className="border border-slate-150 p-4 rounded-2xl bg-white hover:shadow-glossy-sm transition-shadow">
+                    <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold mb-1.5">
+                      <span className="px-2 py-0.5 bg-purple-50 border border-purple-100 text-purple-700 rounded-lg">ACTIVE</span>
+                      <span>LIFECYCLE_CHANGED</span>
+                    </div>
+                    <h5 className="font-bold text-slate-850 text-xs">Assign VIP Account Managers</h5>
+                    <p className="text-slate-500 font-medium leading-relaxed mt-0.5">
+                      Trigger: Stage changes to "VIP Customer". Action: Reassign owner to target Super Admin and schedule qualification call.
+                    </p>
+                  </div>
+
+                  {workflowsList.map((wf, idx) => (
+                    <div key={idx} className="border border-slate-150 p-4 rounded-2xl bg-white space-y-1">
+                      <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold">
+                        <span className={`px-2 py-0.5 rounded-lg border uppercase ${wf.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-50 text-slate-500 border-slate-150'}`}>
+                          {wf.isActive ? 'Active' : 'Draft'}
+                        </span>
+                        <span>{wf.triggerType}</span>
+                      </div>
+                      <h5 className="font-bold text-slate-850 text-xs">{wf.name}</h5>
+                      <p className="text-slate-500 font-medium">Action: Create task, assign owner.</p>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            )}
+
+            {/* FOLLOW-UPS CALENDAR TAB */}
+            {selectedTab === 'followups' && (
+              <div className="space-y-6 animate-fade-in text-slate-700 text-xs">
+                
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <h4 className="font-bold text-slate-800 flex items-center gap-1.5"><CalendarDays size={14} /> Scheduled Follow-ups</h4>
+                  <Button
+                    onClick={() => setShowFollowUpModal(true)}
+                    className="bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-bold py-1 px-2.5 rounded-lg shadow-glossy"
+                  >
+                    Schedule Follow-up
+                  </Button>
+                </div>
+
+                {followups.length === 0 ? (
+                  <div className="p-12 text-center text-slate-450 border border-dashed border-slate-150 rounded-2xl select-none">
+                    <Calendar className="mx-auto opacity-30 mb-2 w-8 h-8 text-slate-400" />
+                    No scheduled follow-up alerts setup.
                   </div>
                 ) : (
-                  <div className="relative pl-6 border-l-2 border-slate-200 space-y-6 text-xs text-slate-700">
-                    {journeyEvents.map((evt, idx) => (
-                      <div key={idx} className="relative">
-                        <span className={`absolute -left-[31px] top-0.5 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center text-white ${
-                          evt.completed ? 'bg-emerald-500' : 'bg-slate-300'
-                        }`}>
-                          {evt.completed ? <CheckCircle2 size={10} /> : <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                        </span>
-                        <div>
-                          <div className="flex justify-between items-center text-[10px] font-bold text-slate-400">
-                            <span className={`uppercase tracking-tight ${evt.completed ? 'text-slate-800' : 'text-slate-400'}`}>{evt.stage}</span>
-                            <span>{evt.date ? new Date(evt.date).toLocaleDateString() : 'Planned'}</span>
+                  <div className="space-y-3.5">
+                    {followups.map((f: any) => (
+                      <div key={f.id} className="border border-slate-150 p-4 rounded-2xl bg-white space-y-2">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-650 text-[9px] font-bold rounded-lg uppercase">
+                              {f.type}
+                            </span>
+                            <span className="font-bold text-slate-800 text-xs">{f.priority} Priority</span>
                           </div>
-                          <p className="text-slate-500 font-medium mt-0.5">{evt.desc}</p>
+                          <span className="text-[10px] text-slate-450 font-semibold flex items-center gap-1"><Clock size={11} /> {new Date(f.date).toLocaleDateString()}</span>
+                        </div>
+                        {f.notes && <p className="text-slate-500 font-medium">{f.notes}</p>}
+                        <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold pt-2 border-t border-slate-50 mt-1 uppercase tracking-wide select-none">
+                          <span>Status: <span className={f.status === 'Completed' ? 'text-emerald-700' : 'text-slate-700'}>{f.status}</span></span>
+                          {f.reminderActive && <span className="text-brand-650">Reminder Enabled</span>}
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
+
               </div>
             )}
 
@@ -1073,7 +1210,7 @@ export const ContactProfile: React.FC = () => {
                   {filteredCommunications.map((comm, idx) => (
                     <div key={idx} className="border border-slate-150 p-4 rounded-2xl bg-white hover:shadow-glossy-sm transition-shadow">
                       <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold mb-1.5">
-                        <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-600 rounded-lg uppercase">{comm.type}</span>
+                        <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-650 rounded-lg uppercase">{comm.type}</span>
                         <span>{new Date(comm.date).toLocaleString()}</span>
                       </div>
                       <h5 className="font-bold text-slate-850 text-xs mb-1">{comm.title}</h5>
@@ -1093,164 +1230,16 @@ export const ContactProfile: React.FC = () => {
               </div>
             )}
 
-            {/* CALLS TAB */}
-            {selectedTab === 'calls' && (
-              <div className="space-y-4 animate-fade-in text-xs text-slate-700">
-                <h4 className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 uppercase tracking-wider">Enterprise Call Logs</h4>
-                
-                {filteredCalls.length === 0 ? (
-                  <div className="p-12 text-center text-slate-400">
-                    <Phone className="w-10 h-10 mx-auto opacity-40 mb-2" />
-                    <p className="text-xs font-medium">No phone calls logged.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {filteredCalls.map((call) => (
-                      <div key={call.id} className="border border-slate-150 p-4 rounded-2xl bg-white space-y-2">
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-0.5 text-[9px] font-bold rounded-lg border uppercase ${
-                              call.direction === 'Incoming' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-blue-50 text-blue-700 border-blue-100'
-                            }`}>
-                              {call.direction}
-                            </span>
-                            <span className="font-bold text-slate-800 text-xs">Duration: {Math.floor(call.duration / 60)}m {call.duration % 60}s</span>
-                          </div>
-                          <span className="text-[10px] text-slate-450 font-semibold">{new Date(call.createdAt).toLocaleString()}</span>
-                        </div>
-                        {call.notes && <p className="text-slate-500 font-medium">{call.notes}</p>}
-                        <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold pt-2 border-t border-slate-50">
-                          <span>OUTCOME: <span className="text-slate-700">{call.outcome}</span></span>
-                          {call.recordingPath && (
-                            <div className="flex items-center gap-1.5 text-brand-650 cursor-pointer hover:underline" onClick={() => toast.success('Play Voice Recording', 'Simulated playing audio track.')}>
-                              <Volume2 size={12} />
-                              <span>Listen Playback</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* EMAILS TAB */}
-            {selectedTab === 'emails' && (
-              <div className="space-y-4 animate-fade-in text-xs text-slate-700">
-                <h4 className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 uppercase tracking-wider">Email History Logs</h4>
-                
-                {filteredEmailsLogs.length === 0 ? (
-                  <div className="p-12 text-center text-slate-400">
-                    <Mail className="w-10 h-10 mx-auto opacity-40 mb-2" />
-                    <p className="text-xs font-medium">No emails logged.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {filteredEmailsLogs.map((log) => (
-                      <div key={log.id} className="border border-slate-150 p-4 rounded-2xl bg-white space-y-2">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h5 className="font-bold text-slate-850 text-xs flex items-center gap-2">
-                              {log.subject}
-                              {log.hasAttachments && <span className="text-[9px] px-1 bg-slate-100 text-slate-500 rounded">Clip</span>}
-                            </h5>
-                            <span className="text-[10px] text-slate-400 font-semibold mt-0.5 block">From: {log.sender}</span>
-                          </div>
-                          <span className="text-[10px] text-slate-400 font-semibold">{new Date(log.createdAt).toLocaleDateString()}</span>
-                        </div>
-                        {log.body && <p className="text-slate-500 font-medium line-clamp-2 leading-relaxed">{log.body}</p>}
-                        <div className="flex justify-between items-center pt-2 border-t border-slate-50 text-[10px] font-bold uppercase select-none">
-                          <span className="text-slate-400">Status: <span className="text-emerald-700">{log.status}</span></span>
-                          <span className="text-brand-600">Opened Tracker</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* MEETINGS TAB */}
-            {selectedTab === 'meetings' && (
-              <div className="space-y-4 animate-fade-in text-xs text-slate-700">
-                <h4 className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 uppercase tracking-wider">Meeting Minutes & Outcomes</h4>
-                
-                {filteredMeetingsLogs.length === 0 ? (
-                  <div className="p-12 text-center text-slate-400">
-                    <Calendar className="w-10 h-10 mx-auto opacity-40 mb-2" />
-                    <p className="text-xs font-medium">No scheduled meetings.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {filteredMeetingsLogs.map((m) => (
-                      <div key={m.id} className="border border-slate-150 p-4 rounded-2xl bg-white space-y-2">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h5 className="font-bold text-slate-850 text-xs">{m.title}</h5>
-                            <span className="text-[10px] text-slate-400 font-semibold mt-0.5 block">Scheduled: {new Date(m.meetingDate).toLocaleString()}</span>
-                          </div>
-                          <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-600 rounded text-[9px] font-bold">{m.status}</span>
-                        </div>
-                        {m.agenda && (
-                          <div>
-                            <span className="text-[9px] text-slate-400 font-bold uppercase">Agenda</span>
-                            <p className="text-slate-500 font-medium mt-0.5">{m.agenda}</p>
-                          </div>
-                        )}
-                        {m.minutes && (
-                          <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 mt-2">
-                            <span className="text-[9px] text-slate-400 font-bold uppercase">Meeting Minutes</span>
-                            <p className="text-slate-600 font-semibold mt-0.5 leading-relaxed">{m.minutes}</p>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-slate-50 mt-2">
-                          <span className="text-[9px] text-slate-400 font-bold uppercase">Attendees:</span>
-                          {m.participants.map(p => (
-                            <span key={p} className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg">{p}</span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* WHATSAPP TAB */}
-            {selectedTab === 'whatsapp' && (
-              <div className="space-y-4 animate-fade-in text-xs text-slate-700">
-                <h4 className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 uppercase tracking-wider">WhatsApp Interaction Architecture</h4>
-                
-                <div className="space-y-3">
-                  {whatsappLogsMock.map((log) => (
-                    <div key={log.id} className="border border-slate-150 p-3.5 rounded-2xl bg-white space-y-1.5">
-                      <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold">
-                        <span className={`uppercase ${log.direction === 'Sent' ? 'text-blue-600' : 'text-slate-600'}`}>Direction: {log.direction}</span>
-                        <span>{log.timestamp}</span>
-                      </div>
-                      <p className="text-slate-650 font-medium leading-relaxed">{log.message}</p>
-                      <div className="text-[9px] text-slate-400 font-bold text-right uppercase tracking-wide">
-                        DELIVERY STATUS: {log.status}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* TIMELINE TAB */}
             {selectedTab === 'timeline' && (
               <div className="space-y-4 animate-fade-in">
-                <div className="flex gap-2 mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search timeline..."
-                    value={timelineSearch}
-                    onChange={(e) => setTimelineSearch(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs border border-slate-200 bg-slate-50/50 rounded-xl focus:outline-none focus:bg-white text-xs font-semibold"
-                  />
-                </div>
+                <input
+                  type="text"
+                  placeholder="Search timeline..."
+                  value={timelineSearch}
+                  onChange={(e) => setTimelineSearch(e.target.value)}
+                  className="w-full px-3 py-1.5 border border-slate-200 bg-slate-50/50 rounded-xl text-xs"
+                />
 
                 {filteredTimeline.length === 0 ? (
                   <div className="p-12 text-center text-slate-400">
@@ -1267,8 +1256,8 @@ export const ContactProfile: React.FC = () => {
                             <span className="text-slate-800 uppercase tracking-tight">{item.title}</span>
                             <span>{new Date(item.eventDate).toLocaleString()}</span>
                           </div>
-                          <p className="text-xs text-slate-650 font-medium">{item.description}</p>
-                          <span className="text-[9px] text-slate-400 font-semibold block pt-0.5">By {item.createdBy || 'system'}</span>
+                          <p className="text-xs text-slate-655 font-medium">{item.description}</p>
+                          <span className="text-[9px] text-slate-450 font-semibold block pt-0.5">By {item.createdBy || 'system'}</span>
                         </div>
                       </div>
                     ))}
@@ -1280,8 +1269,6 @@ export const ContactProfile: React.FC = () => {
             {/* ACTIVITIES TAB */}
             {selectedTab === 'activities' && (
               <div className="space-y-4 animate-fade-in">
-                
-                {/* Search & filter activity */}
                 <div className="flex flex-wrap gap-2 mb-4 justify-between items-center">
                   <input
                     type="text"
@@ -1302,26 +1289,20 @@ export const ContactProfile: React.FC = () => {
                     <option value="SMS">SMS</option>
                     <option value="WhatsApp">WhatsApp</option>
                   </select>
-                  <Button
-                    onClick={handleOpenAddActivity}
-                    className="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-1.5 px-3 rounded-xl flex items-center gap-1 shadow-glossy"
-                  >
-                    <Plus size={12} /> Schedule
-                  </Button>
                 </div>
 
-                {filteredActivities.length === 0 ? (
+                {activities.length === 0 ? (
                   <div className="p-12 text-center text-slate-400">
                     <Activity className="w-10 h-10 mx-auto opacity-40 mb-2" />
                     <p className="text-xs font-medium">No scheduled activities found.</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {filteredActivities.map((act) => (
+                    {activities.map((act) => (
                       <div key={act.id} className="border border-slate-150 p-4 rounded-2xl bg-white hover:shadow-glossy-sm transition-shadow flex items-start justify-between gap-4">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md uppercase">
+                            <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-650 text-[9px] font-bold rounded-md uppercase">
                               {act.type}
                             </span>
                             <span className="font-bold text-slate-800 text-xs">{act.title}</span>
@@ -1332,20 +1313,6 @@ export const ContactProfile: React.FC = () => {
                             <span>Priority: <span className="font-bold text-slate-600">{act.priority}</span></span>
                             <span>Status: <span className="font-bold text-slate-600">{act.status}</span></span>
                           </div>
-                        </div>
-                        <div className="flex gap-1.5">
-                          <button
-                            onClick={() => handleOpenEditActivity(act)}
-                            className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600"
-                          >
-                            <Edit2 size={12} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteActivity(act.id)}
-                            className="p-1 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-600"
-                          >
-                            <Trash2 size={12} />
-                          </button>
                         </div>
                       </div>
                     ))}
@@ -1358,7 +1325,6 @@ export const ContactProfile: React.FC = () => {
             {selectedTab === 'notes' && (
               <div className="space-y-4 animate-fade-in">
                 
-                {/* Note create form */}
                 <form onSubmit={handleSaveNote} className="space-y-2.5 p-3 border border-slate-150 rounded-2xl bg-slate-50/30">
                   <input
                     type="text"
@@ -1368,7 +1334,7 @@ export const ContactProfile: React.FC = () => {
                     className="w-full px-3 py-1.5 text-xs border border-slate-150 rounded-xl bg-white focus:outline-none font-semibold text-slate-700"
                   />
                   <textarea
-                    placeholder="Write note content support Markdown..."
+                    placeholder="Write note content..."
                     rows={3}
                     value={newNoteContent}
                     onChange={(e) => setNewNoteContent(e.target.value)}
@@ -1394,7 +1360,6 @@ export const ContactProfile: React.FC = () => {
                             setNewNoteTitle('');
                             setNewNoteContent('');
                             setNewNotePinned(false);
-                            localStorage.removeItem(`flowcrm_note_draft_${id}`);
                           }}
                           className="text-xs py-1 rounded-xl text-slate-500"
                         >
@@ -1414,7 +1379,6 @@ export const ContactProfile: React.FC = () => {
 
                 <div className="relative border-b border-slate-100 my-4" />
 
-                {/* Search notes */}
                 <input
                   type="text"
                   placeholder="Search notes..."
@@ -1423,50 +1387,41 @@ export const ContactProfile: React.FC = () => {
                   className="w-full px-3 py-1.5 border border-slate-200 bg-slate-50/50 rounded-xl text-xs"
                 />
 
-                {filteredNotes.length === 0 ? (
-                  <div className="p-12 text-center text-slate-400">
-                    <FileText className="w-10 h-10 mx-auto opacity-40 mb-2" />
-                    <p className="text-xs font-medium">No notes configured.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {filteredNotes.map((note) => (
-                      <div key={note.id} className={`border p-4 rounded-2xl transition-all ${note.isPinned ? 'border-brand-200 bg-brand-50/20' : 'border-slate-150 bg-white'}`}>
-                        <div className="flex justify-between items-start gap-4">
-                          <div>
-                            {note.title && <h5 className="font-bold text-slate-800 text-xs mb-1">{note.title}</h5>}
-                            <p className="text-slate-650 text-xs font-medium whitespace-pre-line leading-relaxed">{note.content}</p>
-                            <span className="text-[9px] text-slate-400 font-semibold block pt-2">
-                              Updated {new Date(note.updatedAt).toLocaleString()} by {note.createdBy || 'system'}
-                            </span>
-                          </div>
-                          <div className="flex gap-1.5">
-                            <button
-                              onClick={() => handleEditNote(note)}
-                              className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600"
-                            >
-                              <Edit2 size={12} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteNote(note.id)}
-                              className="p-1 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-600"
-                            >
-                              <Trash2 size={12} />
-                            </button>
-                          </div>
+                <div className="space-y-3">
+                  {filteredNotes.map((note) => (
+                    <div key={note.id} className={`border p-4 rounded-2xl transition-all ${note.isPinned ? 'border-brand-200 bg-brand-50/20' : 'border-slate-150 bg-white'}`}>
+                      <div className="flex justify-between items-start gap-4">
+                        <div>
+                          {note.title && <h5 className="font-bold text-slate-800 text-xs mb-1">{note.title}</h5>}
+                          <p className="text-slate-650 text-xs font-medium whitespace-pre-line leading-relaxed">{note.content}</p>
+                          <span className="text-[9px] text-slate-400 font-semibold block pt-2">
+                            Updated {new Date(note.updatedAt).toLocaleString()} by {note.createdBy || 'system'}
+                          </span>
+                        </div>
+                        <div className="flex gap-1.5">
+                          <button
+                            onClick={() => handleEditNote(note)}
+                            className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600"
+                          >
+                            <Edit2 size={12} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteNote(note.id)}
+                            className="p-1 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-600"
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
             {/* FILES TAB */}
             {selectedTab === 'files' && (
               <div className="space-y-4 animate-fade-in">
-                
-                {/* Search & Upload */}
                 <div className="flex justify-between items-center gap-2 mb-4">
                   <input
                     type="text"
@@ -1483,94 +1438,33 @@ export const ContactProfile: React.FC = () => {
                   </Button>
                 </div>
 
-                {filteredFiles.length === 0 ? (
-                  <div className="p-12 text-center text-slate-400 border border-dashed border-slate-200 rounded-2xl">
-                    <Layers className="w-10 h-10 mx-auto opacity-40 mb-2" />
-                    <p className="text-xs font-medium">No documents attached.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {filteredFiles.map((file) => (
-                      <div key={file.id} className="border border-slate-150 p-3 rounded-2xl bg-white hover:shadow-glossy-sm transition-shadow flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2.5 overflow-hidden">
-                          <div className="p-2 bg-slate-100 rounded-lg text-slate-500 flex-shrink-0">
-                            <FileIcon size={16} />
-                          </div>
-                          <div className="overflow-hidden">
-                            <h5 className="font-bold text-slate-800 text-xs truncate leading-tight">{file.name}</h5>
-                            <span className="text-[9px] text-slate-400 font-semibold">
-                              {(file.size / 1024 / 1024).toFixed(1)} MB • {file.mimeType.split('/').pop()?.toUpperCase()}
-                            </span>
-                          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {filteredFiles.map((file) => (
+                    <div key={file.id} className="border border-slate-150 p-3 rounded-2xl bg-white hover:shadow-glossy-sm transition-shadow flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 overflow-hidden">
+                        <div className="p-2 bg-slate-100 rounded-lg text-slate-500 flex-shrink-0">
+                          <FileIcon size={16} />
                         </div>
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => toast.success('Download Initiated', `Downloading document "${file.name}"`)}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600"
-                            title="Download"
-                          >
-                            <Download size={12} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteFile(file.id, file.name)}
-                            className="p-1.5 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-650"
-                            title="Delete"
-                          >
-                            <Trash size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* TASKS TAB */}
-            {selectedTab === 'tasks' && (
-              <div className="space-y-4 animate-fade-in text-slate-700 text-xs">
-                
-                <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-3">
-                  <h4 className="font-bold text-slate-800 flex items-center gap-1.5"><CheckSquare size={14} /> Contact Tasks</h4>
-                  <Button
-                    onClick={() => setShowAddTaskModal(true)}
-                    className="bg-slate-800 text-white text-[10px] font-bold py-1 px-2.5 rounded-lg shadow-glossy"
-                  >
-                    Quick Add Task
-                  </Button>
-                </div>
-
-                <div className="space-y-3">
-                  {tasksMock.map((task) => (
-                    <div key={task.id} className="border border-slate-150 p-3.5 rounded-2xl bg-white flex items-center justify-between gap-4">
-                      <div className="flex items-start gap-2.5 overflow-hidden">
-                        <button
-                          onClick={() => handleToggleTaskStatus(task.id)}
-                          className="mt-0.5 text-slate-400 focus:outline-none flex-shrink-0"
-                        >
-                          {task.status === 'Completed' ? <CheckSquare size={16} className="text-emerald-500" /> : <Square size={16} />}
-                        </button>
                         <div className="overflow-hidden">
-                          <h5 className={`font-bold text-xs truncate leading-tight ${task.status === 'Completed' ? 'line-through text-slate-400' : 'text-slate-800'}`}>
-                            {task.title}
-                          </h5>
-                          <div className="flex gap-3 text-[10px] text-slate-400 font-semibold pt-1">
-                            <span>Due: <span className="text-slate-600">{task.dueDate}</span></span>
-                            <span>Priority: <span className="text-slate-600">{task.priority}</span></span>
-                            <span>Assigned: <span className="text-slate-600">{task.assignedTo}</span></span>
-                          </div>
+                          <h5 className="font-bold text-slate-800 text-xs truncate leading-tight">{file.name}</h5>
+                          <span className="text-[9px] text-slate-400 font-semibold">
+                            {(file.size / 1024 / 1024).toFixed(1)} MB • {file.mimeType.split('/').pop()?.toUpperCase()}
+                          </span>
                         </div>
                       </div>
-
-                      {/* Progress bar */}
-                      <div className="w-20 hidden md:block">
-                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                          <div
-                            className={`h-1.5 rounded-full ${task.status === 'Completed' ? 'bg-emerald-500' : 'bg-brand-550'}`}
-                            style={{ width: `${task.progress}%` }}
-                          />
-                        </div>
-                        <span className="text-[9px] text-slate-400 font-semibold text-right block mt-0.5">{task.progress}%</span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => toast.success('Download File', `Simulating download: ${file.name}`)}
+                          className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600"
+                        >
+                          <Download size={12} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteFile(file.id, file.name)}
+                          className="p-1.5 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-650"
+                        >
+                          <Trash size={12} />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -1578,7 +1472,7 @@ export const ContactProfile: React.FC = () => {
               </div>
             )}
 
-            {/* HISTORY TAB */}
+            {/* AUDIT LOGS HISTORY TAB */}
             {selectedTab === 'history' && (
               <div className="space-y-4 animate-fade-in text-slate-700 text-xs">
                 <input
@@ -1589,11 +1483,8 @@ export const ContactProfile: React.FC = () => {
                   className="w-full px-3 py-1.5 border border-slate-200 bg-slate-50/50 rounded-xl text-xs mb-3"
                 />
 
-                {filteredHistory.length === 0 ? (
-                  <div className="p-12 text-center text-slate-400">
-                    <Activity className="w-10 h-10 mx-auto opacity-40 mb-2" />
-                    <p className="text-xs font-medium">No history log entries found.</p>
-                  </div>
+                {history.length === 0 ? (
+                  <div className="p-12 text-center text-slate-400 italic">No history log entries found.</div>
                 ) : (
                   <div className="overflow-x-auto border border-slate-100 rounded-2xl">
                     <table className="w-full text-left border-collapse text-xs">
@@ -1607,7 +1498,7 @@ export const ContactProfile: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 text-slate-650 font-medium">
-                        {filteredHistory.map((h) => (
+                        {history.map((h) => (
                           <tr key={h.id} className="hover:bg-slate-50/30">
                             <td className="px-4 py-3 font-bold text-slate-800">{h.action}</td>
                             <td className="px-4 py-3 text-slate-500 font-semibold">{h.fieldName || '-'}</td>
@@ -1627,96 +1518,89 @@ export const ContactProfile: React.FC = () => {
         </div>
 
         {/* ============================================================== */}
-        {/* RIGHT PANEL (25%) - Smart Information & Relationship summary */}
+        {/* RIGHT PANEL (25%) - Score, Risk, & Reminders Sidebar */}
         {/* ============================================================== */}
-        <div className="lg:col-span-3 space-y-6 lg:sticky lg:top-6 select-none">
+        <div className="lg:col-span-3 space-y-6 lg:sticky lg:top-6 select-none text-slate-700 text-xs">
           
-          {/* Smart Score & Health badge card */}
-          {health && engagementScore && (
+          {/* Scoring Card */}
+          {score && (
             <div className="bg-white border border-slate-150 rounded-3xl p-5 shadow-glossy-lg space-y-3">
-              <h4 className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-1.5 uppercase tracking-wide">
-                <TrendingUp size={13} className="text-brand-550" /> Relationship Health
+              <h4 className="text-xs font-bold text-slate-850 border-b border-slate-100 pb-2 flex items-center gap-1.5 uppercase tracking-wide">
+                <Award size={13} className="text-amber-500" /> Customer Score Card
               </h4>
-              <div className="bg-slate-50/50 border border-slate-100 p-3.5 rounded-2xl space-y-3">
-                <div>
-                  <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-                    <span>Engagement Index</span>
-                    <span className="text-brand-600 font-black">{engagementScore.overallScore} / 100</span>
-                  </div>
-                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-1.5">
-                    <div className="bg-brand-550 h-1.5 rounded-full" style={{ width: `${engagementScore.overallScore}%` }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-                    <span>Customer Health Status</span>
-                    <span className={`px-1.5 py-0.5 rounded text-[8px] border font-black ${getHealthBadgeColor(health.overallHealth)}`}>
-                      {health.overallHealth.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mt-2 text-[10px] text-slate-500 font-semibold">
-                    <div>Response Time: <span className="font-bold text-slate-700">{health.responseTime}m</span></div>
-                    <div>Meeting Score: <span className="font-bold text-slate-700">{health.meetingFreq}%</span></div>
-                  </div>
+              <div className="bg-slate-50/50 border border-slate-100 p-3 rounded-2xl text-center space-y-2">
+                <span className="text-[9px] font-bold text-slate-400 uppercase block">Rule-Based Score</span>
+                <span className="text-2xl font-black text-slate-800">{score.overallScore} <span className="text-xs text-slate-400">/ 100</span></span>
+                <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500 font-semibold pt-1 border-t border-slate-100">
+                  <div>Comm: <span className="font-bold text-slate-700">{score.communicationFreq}%</span></div>
+                  <div>Meeting: <span className="font-bold text-slate-700">{score.meetingFreq}%</span></div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Business Metrics Summary Card */}
-          {businessMetrics && (
+          {/* Risk Card */}
+          {risk && (
             <div className="bg-white border border-slate-150 rounded-3xl p-5 shadow-glossy-lg space-y-3">
-              <h4 className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-1.5 uppercase tracking-wide">
-                <DollarSign size={13} className="text-emerald-600" /> Business metrics
+              <h4 className="text-xs font-bold text-slate-850 border-b border-slate-100 pb-2 flex items-center gap-1.5 uppercase tracking-wide">
+                <AlertTriangle size={13} className="text-rose-500" /> Customer Risk Score
               </h4>
-              <div className="space-y-3 text-slate-700">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="p-2 border border-slate-100 bg-slate-50/50 rounded-xl">
-                    <span className="text-[8px] font-bold text-slate-400 uppercase block">Total Value</span>
-                    <span className="text-xs font-black text-slate-800">${Number(businessMetrics.lifetimeValue).toLocaleString()}</span>
-                  </div>
-                  <div className="p-2 border border-slate-100 bg-slate-50/50 rounded-xl">
-                    <span className="text-[8px] font-bold text-slate-400 uppercase block">Deals won</span>
-                    <span className="text-xs font-black text-slate-800">{businessMetrics.dealsClosed}</span>
-                  </div>
-                </div>
-
-                <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase px-1">
-                  <span>Revenue generated</span>
-                  <span className="text-slate-800 font-black">${Number(businessMetrics.totalRevenue).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase px-1">
-                  <span>Avg Deal Size</span>
-                  <span className="text-slate-800 font-black">${Number(businessMetrics.averageDealSize).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase px-1">
-                  <span>Opportunities</span>
-                  <span className="text-brand-600 font-black">${Number(businessMetrics.currentOpportunityVal).toLocaleString()}</span>
-                </div>
+              <div className={`p-3 rounded-2xl border text-center font-bold uppercase text-[10px] ${
+                risk.riskLevel === 'High' ? 'bg-rose-50 border-rose-100 text-rose-700' : 'bg-emerald-50 border-emerald-100 text-emerald-700'
+              }`}>
+                {risk.riskLevel} Risk Level
+              </div>
+              <div className="space-y-1 px-1">
+                <span className="text-[9px] font-bold text-slate-400 uppercase block">Risk Factors:</span>
+                {risk.riskFactors.map((f: string) => (
+                  <span key={f} className="inline-block px-1.5 py-0.5 bg-slate-50 border border-slate-150 text-[9px] font-semibold rounded text-slate-600 mr-1 mt-1">
+                    {f}
+                  </span>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Relationship summary stats */}
+          {/* Recommendations Card */}
+          {recommendations.length > 0 && (
+            <div className="bg-white border border-slate-150 rounded-3xl p-5 shadow-glossy-lg space-y-3">
+              <h4 className="text-xs font-bold text-slate-850 border-b border-slate-100 pb-2 flex items-center gap-1.5 uppercase tracking-wide">
+                <Sparkle size={13} className="text-brand-600 animate-spin" style={{ animationDuration: '6s' }} /> Suggestions Engine
+              </h4>
+              <div className="space-y-2.5">
+                {recommendations.map((rec: any, idx: number) => (
+                  <div key={idx} className="bg-slate-50/50 p-2.5 border border-slate-100 rounded-xl space-y-1">
+                    <div className="flex justify-between items-center text-[8px] font-bold text-slate-400 uppercase">
+                      <span>{rec.type}</span>
+                      <span className="text-brand-600">{rec.priority}</span>
+                    </div>
+                    <p className="text-[10px] font-semibold text-slate-750 leading-snug">{rec.suggestionText}</p>
+                    {rec.bestContactTime && (
+                      <span className="text-[9px] text-slate-450 font-bold block">Best Time: {rec.bestContactTime}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Reminders Card */}
           <div className="bg-white border border-slate-150 rounded-3xl p-5 shadow-glossy-lg space-y-3">
-            <h4 className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 uppercase tracking-wide">Relationship Summary</h4>
-            <div className="space-y-2.5 text-[10px] text-slate-500 font-bold uppercase">
-              <div className="flex justify-between">
-                <span>Total Tenure</span>
-                <span className="text-slate-700 font-black">{relationshipTenure}</span>
+            <h4 className="text-xs font-bold text-slate-850 border-b border-slate-100 pb-2 uppercase tracking-wide">
+              Smart Reminders
+            </h4>
+            <div className="space-y-2.5 text-[10px] font-bold text-slate-500 uppercase">
+              <div className="flex justify-between items-center p-1.5 border border-slate-100 rounded-xl bg-slate-50/30">
+                <span>Upcoming Birthdays</span>
+                <span className="text-slate-800">None Scheduled</span>
               </div>
-              <div className="flex justify-between">
-                <span>Completed Tasks</span>
-                <span className="text-slate-700 font-black">{tasksMock.filter(t => t.status === 'Completed').length}</span>
+              <div className="flex justify-between items-center p-1.5 border border-slate-100 rounded-xl bg-slate-50/30">
+                <span>Work Anniversary</span>
+                <span className="text-slate-800">Sept 12</span>
               </div>
-              <div className="flex justify-between">
-                <span>Logged activities</span>
-                <span className="text-slate-700 font-black">{activities.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Attached files</span>
-                <span className="text-slate-700 font-black">{files.length}</span>
+              <div className="flex justify-between items-center p-1.5 border border-slate-100 rounded-xl bg-slate-50/30">
+                <span>Contract Renewal</span>
+                <span className="text-brand-600">90 Days Left</span>
               </div>
             </div>
           </div>
@@ -1747,6 +1631,16 @@ export const ContactProfile: React.FC = () => {
                 </select>
               </div>
 
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Reason for transfer</label>
+                <input
+                  type="text"
+                  value={transferReason}
+                  onChange={(e) => setTransferReason(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50"
+                />
+              </div>
+
               <div className="flex gap-2 justify-end mt-4">
                 <Button
                   variant="outline"
@@ -1768,109 +1662,86 @@ export const ContactProfile: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL: ADD / EDIT ACTIVITY */}
-      {showActivityModal && (
+      {/* MODAL: FOLLOW-UP SCHEDULER */}
+      {showFollowUpModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-slate-100 max-w-md w-full p-6 shadow-glossy-lg">
-            <h3 className="font-bold text-slate-800 text-sm mb-1 select-none">
-              {editingActivityId ? 'Edit Activity Schedule' : 'Schedule New Activity'}
-            </h3>
-            <p className="text-[10px] text-slate-400 font-medium mb-4 select-none">Configure type, timing, priority, and assignees details.</p>
+          <div className="bg-white rounded-3xl border border-slate-100 max-w-sm w-full p-6 shadow-glossy-lg">
+            <h3 className="font-bold text-slate-800 text-sm mb-1">Schedule Follow-up</h3>
+            <p className="text-[10px] text-slate-400 font-medium mb-4">Set up callback reminders, demos, or renewal checkpoints.</p>
 
-            <form onSubmit={handleSubmitActivity(onSubmitActivity)} className="space-y-3.5 text-slate-700">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Activity Type</label>
-                  <select
-                    {...registerActivity('type')}
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 font-semibold"
-                  >
-                    <option value="Call">Call</option>
-                    <option value="Meeting">Meeting</option>
-                    <option value="Email">Email</option>
-                    <option value="SMS">SMS</option>
-                    <option value="WhatsApp">WhatsApp</option>
-                    <option value="Visit">Visit</option>
-                    <option value="Demo">Demo</option>
-                    <option value="Support">Support</option>
-                    <option value="Custom">Custom</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Title *</label>
-                  <input
-                    type="text"
-                    {...registerActivity('title')}
-                    className={`w-full px-3 py-2 text-xs border rounded-xl bg-slate-50/50 ${activityErrors.title ? 'border-rose-350' : 'border-slate-200'}`}
-                  />
-                  {activityErrors.title && <span className="text-[10px] text-rose-500 font-bold">{activityErrors.title.message}</span>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Priority</label>
-                  <select
-                    {...registerActivity('priority')}
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 font-semibold"
-                  >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Status</label>
-                  <select
-                    {...registerActivity('status')}
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 font-semibold"
-                  >
-                    <option value="Planned">Planned</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Cancelled">Cancelled</option>
-                  </select>
-                </div>
-              </div>
-
+            <form onSubmit={handleSubmitFollowup(onSubmitFollowup)} className="space-y-3.5 text-slate-700">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Activity Date & Time *</label>
-                <input
-                  type="datetime-local"
-                  {...registerActivity('activityDate')}
-                  className={`w-full px-3 py-2 text-xs border rounded-xl bg-slate-50/50 ${activityErrors.activityDate ? 'border-rose-350' : 'border-slate-200'}`}
-                />
-                {activityErrors.activityDate && <span className="text-[10px] text-rose-500 font-bold">{activityErrors.activityDate.message}</span>}
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Assignee Owner (Employee)</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Follow-up Type</label>
                 <select
-                  {...registerActivity('assignedToId')}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 font-semibold text-slate-650"
+                  {...registerFollowup('type')}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 text-xs font-semibold"
                 >
-                  <option value="">Select Assignee</option>
-                  {employees.map(emp => (
-                    <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
-                  ))}
+                  <option value="Call">Call</option>
+                  <option value="Email">Email</option>
+                  <option value="Meeting">Meeting</option>
+                  <option value="Visit">Visit</option>
+                  <option value="Demo">Demo</option>
+                  <option value="Support Call">Support Call</option>
+                  <option value="Renewal Reminder">Renewal Reminder</option>
+                  <option value="Custom">Custom Follow-up</option>
                 </select>
               </div>
 
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Date *</label>
+                  <input
+                    type="date"
+                    {...registerFollowup('date')}
+                    className={`w-full px-3 py-2 border rounded-xl bg-slate-50/50 text-xs ${followupErrors.date ? 'border-rose-400' : 'border-slate-200'}`}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Time</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 10:00 AM"
+                    {...registerFollowup('time')}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 text-xs"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Description / Notes</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Priority</label>
+                <select
+                  {...registerFollowup('priority')}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 text-xs font-semibold"
+                >
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
+
+              <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-500 font-semibold select-none">
+                <input
+                  type="checkbox"
+                  {...registerFollowup('reminderActive')}
+                  className="rounded border-slate-350 text-brand-550 focus:ring-brand-500"
+                />
+                Enable upcoming dashboard alerts
+              </label>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Notes / Outcome History</label>
                 <textarea
-                  rows={3}
-                  {...registerActivity('description')}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 font-medium"
+                  rows={2}
+                  {...registerFollowup('notes')}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 text-xs"
                 />
               </div>
 
               <div className="flex gap-2 justify-end mt-4 select-none">
                 <Button
-                  type="button"
                   variant="outline"
-                  onClick={() => setShowActivityModal(false)}
+                  onClick={() => setShowFollowUpModal(false)}
                   className="text-xs font-bold py-1.5 px-3 rounded-xl border-slate-200"
                 >
                   Cancel
@@ -1879,7 +1750,7 @@ export const ContactProfile: React.FC = () => {
                   type="submit"
                   className="bg-brand-550 text-white text-xs font-bold py-1.5 px-3 rounded-xl"
                 >
-                  {editingActivityId ? 'Save Changes' : 'Schedule'}
+                  Schedule Follow-up
                 </Button>
               </div>
             </form>
@@ -1887,12 +1758,152 @@ export const ContactProfile: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL: MOCK UPLOAD FILE */}
+      {/* MODAL: SEGMENT BUILDER */}
+      {showSegmentModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-slate-100 max-w-sm w-full p-6 shadow-glossy-lg">
+            <h3 className="font-bold text-slate-800 text-sm mb-1">Build Dynamic Segment Rules</h3>
+            <p className="text-[10px] text-slate-450 font-medium mb-4">Filter contacts dynamically using logical AND/OR constraints.</p>
+
+            <form onSubmit={handleCreateSegment} className="space-y-4 text-slate-700">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Segment Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. High Value Leads"
+                  value={newSegmentName}
+                  onChange={(e) => setNewSegmentName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 text-xs"
+                />
+              </div>
+
+              {/* Rules block */}
+              <div className="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider block">Rule constraint 1</span>
+                <div className="grid grid-cols-3 gap-1">
+                  <select className="px-2 py-1.5 border border-slate-150 rounded bg-white text-[10px]">
+                    <option value="industry">Industry</option>
+                    <option value="status">Status</option>
+                    <option value="revenue">Annual Revenue</option>
+                  </select>
+                  <select className="px-2 py-1.5 border border-slate-150 rounded bg-white text-[10px]">
+                    <option value="equals">Equals</option>
+                    <option value="greater_than">Greater than</option>
+                  </select>
+                  <input
+                    type="text"
+                    defaultValue="Technology"
+                    className="px-2 py-1 border border-slate-150 rounded bg-white text-[10px]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 justify-end mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSegmentModal(false)}
+                  className="text-xs font-bold py-1.5 px-3 rounded-xl border-slate-200"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!newSegmentName.trim()}
+                  className="bg-brand-550 text-white text-xs font-bold py-1.5 px-3 rounded-xl"
+                >
+                  Build Segment
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: WORKFLOW AUTOMATION BUILDER */}
+      {showWorkflowModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-slate-100 max-w-sm w-full p-6 shadow-glossy-lg">
+            <h3 className="font-bold text-slate-800 text-sm mb-1">Create Workflow Rule</h3>
+            <p className="text-[10px] text-slate-450 font-medium mb-4">Set action handlers to execute automatically on events trigger.</p>
+
+            <form onSubmit={handleCreateWorkflow} className="space-y-4 text-slate-700">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Workflow Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. auto assign leads"
+                  value={newWorkflowName}
+                  onChange={(e) => setNewWorkflowName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 text-xs"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Event Trigger</label>
+                <select
+                  value={newWorkflowTrigger}
+                  onChange={(e) => setNewWorkflowTrigger(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 text-xs font-semibold text-slate-650"
+                >
+                  <option value="CONTACT_CREATED">Contact Created</option>
+                  <option value="LIFECYCLE_CHANGED">Lifecycle Stage Changed</option>
+                  <option value="TAG_ADDED">Tag Added to Contact</option>
+                  <option value="STATUS_CHANGED">Status Changed</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Action Type</label>
+                  <select
+                    value={workflowActionType}
+                    onChange={(e) => setWorkflowActionType(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 text-xs"
+                  >
+                    <option value="Create Task">Create Task</option>
+                    <option value="Assign Owner">Assign Owner</option>
+                    <option value="Add Tag">Add Tag</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Action Value</label>
+                  <input
+                    type="text"
+                    value={workflowActionValue}
+                    onChange={(e) => setWorkflowActionValue(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 justify-end mt-4 select-none">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowWorkflowModal(false)}
+                  className="text-xs font-bold py-1.5 px-3 rounded-xl border-slate-200"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!newWorkflowName.trim()}
+                  className="bg-brand-550 text-white text-xs font-bold py-1.5 px-3 rounded-xl"
+                >
+                  Build Workflow
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: FILE UPLOAD */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl border border-slate-100 max-w-sm w-full p-6 shadow-glossy-lg select-none">
             <h3 className="font-bold text-slate-800 text-sm mb-1">Attach Corporate Document</h3>
-            <p className="text-[10px] text-slate-400 font-medium mb-4">Simulate file upload. Enter file details metadata.</p>
+            <p className="text-[10px] text-slate-450 font-medium mb-4">Simulate file upload. Enter file details metadata.</p>
 
             <div className="space-y-3.5 text-slate-700">
               <div className="space-y-1">
@@ -1951,72 +1962,6 @@ export const ContactProfile: React.FC = () => {
                   className="bg-brand-550 text-white text-xs font-bold py-1.5 px-3 rounded-xl disabled:opacity-50"
                 >
                   Confirm Attach
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: MOCK ADD TASK */}
-      {showAddTaskModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-slate-100 max-w-sm w-full p-6 shadow-glossy-lg select-none">
-            <h3 className="font-bold text-slate-800 text-sm mb-1">Create Workspace Task</h3>
-            <p className="text-[10px] text-slate-400 font-medium mb-4">Quickly assign a task related to this contact.</p>
-
-            <div className="space-y-3.5 text-slate-700">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Task Title *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Send updated pricing details"
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Priority</label>
-                  <select
-                    value={newTaskPriority}
-                    onChange={(e) => setNewTaskPriority(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50"
-                  >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Critical">Critical</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Due Date *</label>
-                  <input
-                    type="date"
-                    value={newTaskDueDate}
-                    onChange={(e) => setNewTaskDueDate(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 justify-end mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAddTaskModal(false)}
-                  className="text-xs font-bold py-1.5 px-3 rounded-xl border-slate-200"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleAddTaskMock}
-                  disabled={!newTaskTitle.trim() || !newTaskDueDate}
-                  className="bg-brand-550 text-white text-xs font-bold py-1.5 px-3 rounded-xl disabled:opacity-50"
-                >
-                  Assign Task
                 </Button>
               </div>
             </div>

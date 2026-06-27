@@ -327,4 +327,133 @@ export interface JourneyEvent {
   completed: boolean;
 }
 
+export interface ContactLifecycle {
+  id: string;
+  contactId: string;
+  currentStage: string;
+  previousStage: string | null;
+  lastStageChange: string;
+  durationInStage: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContactStageHistory {
+  id: string;
+  contactId: string;
+  fromStage: string | null;
+  toStage: string;
+  transitionDate: string;
+  reason: string | null;
+  changedBy: string | null;
+}
+
+export interface ContactPreference {
+  id: string;
+  contactId: string;
+  preferredChannel: string;
+  preferredTime: string | null;
+  language: string;
+  timezone: string;
+  emailPreference: boolean;
+  smsPreference: boolean;
+  whatsappPreference: boolean;
+  phonePreference: boolean;
+  marketingConsent: boolean;
+  newsletterConsent: boolean;
+  gdprConsent: boolean;
+  favoriteProduct: string | null;
+  favoriteCategory: string | null;
+  buyingFrequency: string | null;
+  businessSize: string | null;
+  customerType: string | null;
+  industry: string | null;
+  budgetRange: string | null;
+  annualRevenue: number | null;
+  decisionAuthority: string | null;
+  relationshipType: string | null;
+}
+
+export interface ContactTag {
+  id: string;
+  name: string;
+  color: string;
+  type: string;
+}
+
+export interface ContactTagMapping {
+  id: string;
+  contactId: string;
+  tagId: string;
+  tag?: ContactTag;
+}
+
+export interface ContactSegmentRule {
+  id: string;
+  segmentId: string;
+  field: string;
+  operator: string;
+  value: string;
+  logicalOperator: string;
+}
+
+export interface ContactSegment {
+  id: string;
+  name: string;
+  description: string | null;
+  rules: ContactSegmentRule[];
+}
+
+export interface ContactWorkflow {
+  id: string;
+  name: string;
+  triggerType: string;
+  conditions: any;
+  actions: any;
+  isActive: boolean;
+}
+
+export interface ContactFollowUp {
+  id: string;
+  contactId: string;
+  type: string;
+  date: string;
+  time: string | null;
+  priority: string;
+  reminderActive: boolean;
+  reminderDate: string | null;
+  status: string;
+  outcome: string | null;
+  nextFollowUpDate: string | null;
+  ownerId: string | null;
+  notes?: string;
+}
+
+export interface ContactScore {
+  id: string;
+  contactId: string;
+  communicationFreq: number;
+  meetingFreq: number;
+  businessValue: number;
+  revenueScore: number;
+  responseTimeScore: number;
+  overallScore: number;
+}
+
+export interface ContactRisk {
+  id: string;
+  contactId: string;
+  riskLevel: 'Low' | 'Medium' | 'High';
+  riskFactors: string[];
+}
+
+export interface ContactRecommendation {
+  id: string;
+  contactId: string;
+  type: string;
+  suggestionText: string;
+  priority: string;
+  bestContactTime: string | null;
+}
+
 
