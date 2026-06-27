@@ -69,6 +69,12 @@ async function main() {
     { name: 'communication:view', module: 'contacts', action: 'communication:view', description: 'View unified communication logs' },
     { name: 'health:view', module: 'contacts', action: 'health:view', description: 'View relationship customer health metric' },
     { name: 'journey:view', module: 'contacts', action: 'journey:view', description: 'View relationship customer lifecycle journey map' },
+    { name: 'contacts:workflow:manage', module: 'contacts', action: 'workflow:manage', description: 'Manage automation workflows' },
+    { name: 'contacts:segment:manage', module: 'contacts', action: 'segment:manage', description: 'Manage dynamic contact segments' },
+    { name: 'contacts:score:view', module: 'contacts', action: 'score:view', description: 'View rule-based contact scores' },
+    { name: 'contacts:risk:view', module: 'contacts', action: 'risk:view', description: 'View customer risk analysis' },
+    { name: 'contacts:lifecycle:manage', module: 'contacts', action: 'lifecycle:manage', description: 'Manage customer lifecycle transitions' },
+    { name: 'contacts:preferences:edit', module: 'contacts', action: 'preferences:edit', description: 'Edit communication preferences' },
 
     // Companies
     { name: 'companies:view', module: 'companies', action: 'view', description: 'View client companies' },

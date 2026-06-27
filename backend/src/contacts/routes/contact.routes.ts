@@ -247,4 +247,92 @@ router.get(
   contactIntelligenceController.getEngagement
 );
 
+// Lifecycle
+router.get(
+  '/:id/lifecycle',
+  requirePermission('contacts:view'),
+  contactIntelligenceController.getLifecycle
+);
+router.patch(
+  '/:id/lifecycle',
+  requirePermission('contacts:lifecycle:manage'),
+  logActivity('contacts', 'CONTACT_LIFECYCLE_UPDATED'),
+  contactIntelligenceController.updateLifecycle
+);
+
+// Preferences
+router.get(
+  '/:id/preferences',
+  requirePermission('contacts:view'),
+  contactIntelligenceController.getPreferences
+);
+router.put(
+  '/:id/preferences',
+  requirePermission('contacts:preferences:edit'),
+  logActivity('contacts', 'CONTACT_PREFERENCES_UPDATED'),
+  contactIntelligenceController.updatePreferences
+);
+
+// Segmentation & Scoring
+router.get(
+  '/:id/segments',
+  requirePermission('contacts:view'),
+  contactIntelligenceController.getSegments
+);
+router.get(
+  '/:id/score',
+  requirePermission('contacts:score:view'),
+  contactIntelligenceController.getScore
+);
+router.get(
+  '/:id/risk',
+  requirePermission('contacts:risk:view'),
+  contactIntelligenceController.getRisk
+);
+router.get(
+  '/:id/recommendations',
+  requirePermission('contacts:view'),
+  contactIntelligenceController.getRecommendations
+);
+
+// Follow-ups
+router.get(
+  '/:id/followups',
+  requirePermission('contacts:view'),
+  contactIntelligenceController.getFollowups
+);
+router.post(
+  '/:id/followups',
+  requirePermission('contacts:activities:create'),
+  logActivity('contacts', 'CONTACT_FOLLOWUP_CREATED'),
+  contactIntelligenceController.createFollowup
+);
+
+// Ownership Reassignment
+router.patch(
+  '/:id/assign',
+  requirePermission('contacts:assign'),
+  logActivity('contacts', 'CONTACT_OWNER_ASSIGNED'),
+  contactIntelligenceController.assignOwner
+);
+
+// Global Tag & Segment Configurations (Without id)
+router.post(
+  '/contact-tags',
+  requirePermission('contacts:edit'),
+  contactIntelligenceController.createTag
+);
+
+router.get(
+  '/contact-segments',
+  requirePermission('contacts:segment:manage'),
+  contactIntelligenceController.getSegmentsList
+);
+
+router.post(
+  '/contact-workflows',
+  requirePermission('contacts:workflow:manage'),
+  contactIntelligenceController.createWorkflow
+);
+
 export default router;

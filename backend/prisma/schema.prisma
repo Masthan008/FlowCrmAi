@@ -466,6 +466,14 @@ model Contact {
   businessMetric         ContactBusinessMetric?
   healthMetric           ContactHealth?
   engagementMetric       ContactEngagement?
+  lifecycle              ContactLifecycle?
+  stageHistory           ContactStageHistory[]
+  preference             ContactPreference?
+  tagMappings            ContactTagMapping[]
+  followups              ContactFollowUp[]
+  scores                 ContactScore?
+  riskMetric             ContactRisk?
+  recommendations        ContactRecommendation[]
 
   @@index([email])
   @@index([phone])
@@ -2288,6 +2296,210 @@ model ContactEngagement {
   updatedAt             DateTime  @updatedAt
 
   @@map("contact_engagement")
+}
+
+// ==========================================
+// CONTACT LIFECYCLE, WORKFLOW & SEGMENTATION
+// ==========================================
+
+model ContactLifecycle {
+  id                    String    @id @default(uuid()) @db.Uuid
+  contactId             String    @unique @db.Uuid
+  contact               Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  currentStage          String    // Prospect, Qualified, Customer, VIP Customer, Partner, Vendor, Distributor, Inactive, Lost Customer, Archived
+  previousStage         String?
+  lastStageChange       DateTime  @default(now())
+  durationInStage       Int       @default(0) // Duration in days
+
+  // Auditing
+  createdBy             String?
+  updatedBy             String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("contact_lifecycle")
+}
+
+model ContactStageHistory {
+  id              String    @id @default(uuid()) @db.Uuid
+  contactId       String    @db.Uuid
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  fromStage       String?
+  toStage         String
+  transitionDate  DateTime  @default(now())
+  reason          String?
+  changedBy       String?
+
+  @@map("contact_stage_history")
+}
+
+model ContactPreference {
+  id                     String    @id @default(uuid()) @db.Uuid
+  contactId              String    @unique @db.Uuid
+  contact                Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  preferredChannel       String    @default("Email") // Email, Phone, SMS, WhatsApp
+  preferredTime          String?   // e.g. "Morning", "Afternoon"
+  language               String    @default("en")
+  timezone               String    @default("UTC")
+  emailPreference        Boolean   @default(true)
+  smsPreference          Boolean   @default(true)
+  whatsappPreference     Boolean   @default(true)
+  phonePreference        Boolean   @default(true)
+  marketingConsent       Boolean   @default(false)
+  newsletterConsent      Boolean   @default(false)
+  gdprConsent            Boolean   @default(false)
+  favoriteProduct        String?
+  favoriteCategory       String?
+  buyingFrequency        String?
+  businessSize           String?   // Small, Medium, Enterprise
+  customerType           String?
+  industry               String?
+  budgetRange            String?
+  annualRevenue          Decimal?  @db.Decimal(12, 2)
+  decisionAuthority      String?   // Yes, No, Influencer
+  relationshipType       String?
+
+  // Auditing
+  createdBy              String?
+  updatedBy              String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  @@map("contact_preferences")
+}
+
+model ContactTag {
+  id              String             @id @default(uuid()) @db.Uuid
+  name            String             @unique
+  color           String             @default("#475569")
+  type            String             @default("Custom") // Priority, Department, Business, Custom
+  mappings        ContactTagMapping[]
+
+  @@map("contact_tags")
+}
+
+model ContactTagMapping {
+  id              String     @id @default(uuid()) @db.Uuid
+  contactId       String     @db.Uuid
+  contact         Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  tagId           String     @db.Uuid
+  tag             ContactTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([contactId, tagId])
+  @@map("contact_tag_mapping")
+}
+
+model ContactSegment {
+  id              String               @id @default(uuid()) @db.Uuid
+  name            String               @unique
+  description     String?
+  rules           ContactSegmentRule[]
+
+  // Auditing
+  createdBy       String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@map("contact_segments")
+}
+
+model ContactSegmentRule {
+  id              String         @id @default(uuid()) @db.Uuid
+  segmentId       String         @db.Uuid
+  segment         ContactSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  field           String         // status, revenue, location, etc.
+  operator        String         // equals, greater_than, contains, etc.
+  value           String
+  logicalOperator String         @default("AND") // AND, OR
+
+  @@map("contact_segment_rules")
+}
+
+model ContactWorkflow {
+  id              String    @id @default(uuid()) @db.Uuid
+  name            String    @unique
+  triggerType     String    // CONTACT_CREATED, CONTACT_UPDATED, LIFECYCLE_CHANGED, STATUS_CHANGED, TAG_ADDED
+  conditions      Json      // Conditions JSON mapping
+  actions         Json      // Actions JSON mapping (e.g. create task, update status)
+  isActive        Boolean   @default(true)
+
+  // Auditing
+  createdBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("contact_workflows")
+}
+
+model ContactFollowUp {
+  id              String    @id @default(uuid()) @db.Uuid
+  contactId       String    @db.Uuid
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  type            String    // Call, Email, Meeting, Visit, Demo, Support Call, Renewal Reminder, Custom
+  date            DateTime
+  time            String?
+  priority        String    @default("Medium") // Low, Medium, High
+  reminderActive  Boolean   @default(false)
+  reminderDate    DateTime?
+  status          String    @default("Pending") // Pending, Completed
+  outcome         String?
+  nextFollowUpDate DateTime?
+  ownerId         String?   @db.Uuid
+
+  // Auditing
+  createdBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("contact_followups")
+}
+
+model ContactScore {
+  id                String    @id @default(uuid()) @db.Uuid
+  contactId         String    @unique @db.Uuid
+  contact           Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  communicationFreq Int       @default(0)
+  meetingFreq       Int       @default(0)
+  businessValue     Int       @default(0)
+  revenueScore      Int       @default(0)
+  responseTimeScore Int       @default(0)
+  overallScore      Int       @default(0) // Calculated index 0-100
+
+  // Auditing
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("contact_scores")
+}
+
+model ContactRisk {
+  id              String    @id @default(uuid()) @db.Uuid
+  contactId       String    @unique @db.Uuid
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  riskLevel       String    @default("Low") // Low, Medium, High
+  riskFactors     String[]
+
+  // Auditing
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("contact_risk")
+}
+
+model ContactRecommendation {
+  id              String    @id @default(uuid()) @db.Uuid
+  contactId       String    @db.Uuid
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  type            String    // Follow-up, Product suggestion, Best time, Next meeting, Cross sell, Upsell
+  suggestionText  String
+  priority        String    @default("Medium") // Low, Medium, High
+  bestContactTime String?
+
+  // Auditing
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("contact_recommendations")
 }
 
 
