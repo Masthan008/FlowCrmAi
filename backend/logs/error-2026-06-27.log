@@ -109,3 +109,24 @@
 {"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"f1bda0af-2ee2-40e7-923f-832c9f002d63","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 22:46:35","url":"/api/v1/leads?limit=100"}
 {"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"fe567434-463c-4b49-9260-97bda7ff1f30","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 22:46:35","url":"/api/v1/companies"}
 {"level":"error","message":"Cannot set property query of #<IncomingMessage> which has only a getter","method":"GET","requestId":"7f36c82b-ab6c-421c-9974-d8eb553977f8","stack":"TypeError: Cannot set property query of #<IncomingMessage> which has only a getter\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\validate.ts:17:16\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","statusCode":500,"timestamp":"2026-06-27 22:46:35","url":"/api/v1/leads?limit=100"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:53"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:53"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:53"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:53"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:53"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:53"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:53"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:53"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:53"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:53"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:56"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:56"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:56"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:56"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:56"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:56"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:56"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:56"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:56"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-27 22:54:56"}
+{"level":"error","message":"Security Alert: Session compromised. Please re-authenticate.","method":"POST","requestId":"33614cf9-cdd8-43d9-99f6-8fb45efce897","stack":"Error: Security Alert: Session compromised. Please re-authenticate.\n    at AuthService.refresh (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\services\\auth.service.ts:229:19)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at refresh (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\controllers\\auth.controller.ts:97:22)","statusCode":401,"timestamp":"2026-06-27 22:54:57","url":"/api/v1/auth/refresh"}

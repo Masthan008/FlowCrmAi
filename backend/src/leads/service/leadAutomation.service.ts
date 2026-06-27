@@ -152,8 +152,17 @@ export const leadAutomationService = {
     await prisma.$transaction(async (tx) => {
       // Step 2: Resolve Company mapping
       if (!config.skipCompany && !companyId && lead.companyName) {
+        const lastCmp = await tx.company.findFirst({ orderBy: { createdAt: 'desc' }, select: { companyNumber: true } });
+        let nextNum = 1;
+        if (lastCmp?.companyNumber) {
+          const parts = lastCmp.companyNumber.split('-');
+          const num = parseInt(parts[1], 10);
+          if (!isNaN(num)) nextNum = num + 1;
+        }
+        const companyNumber = `CMP-${String(nextNum).padStart(5, '0')}`;
         const newCompany = await tx.company.create({
           data: {
+            companyNumber,
             name: lead.companyName,
             industry: lead.industry || null,
             website: lead.website || null,
