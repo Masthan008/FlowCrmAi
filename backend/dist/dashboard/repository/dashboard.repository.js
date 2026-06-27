@@ -61,7 +61,11 @@ class DashboardRepository {
             }),
             // Call activity logs in period
             db_1.prisma.activity.count({
-                where: { type: 'call', createdAt: { gte: startDate, lte: endDate }, deletedAt: null }
+                where: {
+                    type: { name: { in: ['call', 'Call'] } },
+                    createdAt: { gte: startDate, lte: endDate },
+                    deletedAt: null
+                }
             }),
             // Created tasks in period
             db_1.prisma.task.count({
@@ -204,7 +208,7 @@ class DashboardRepository {
                     }
                 },
                 activities: {
-                    where: { type: 'call' }
+                    where: { type: { name: { in: ['call', 'Call'] } } }
                 },
                 meetings: true
             }

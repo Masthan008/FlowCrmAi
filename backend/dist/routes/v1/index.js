@@ -9,6 +9,7 @@ const config_1 = require("../../config");
 const placeholder_1 = require("./placeholder");
 const auth_1 = __importDefault(require("./auth"));
 const dashboard_routes_1 = __importDefault(require("../../dashboard/routes/dashboard.routes"));
+const lead_routes_1 = __importDefault(require("../../leads/routes/lead.routes"));
 const router = (0, express_1.Router)();
 // Health check endpoint
 router.get('/health', async (req, res) => {
@@ -32,6 +33,7 @@ router.get('/health', async (req, res) => {
 // Custom routes
 router.use('/auth', auth_1.default);
 router.use('/dashboard', dashboard_routes_1.default);
+router.use('/leads', lead_routes_1.default);
 // Generate placeholder routers for all 20 remaining CRM infrastructure modules
 const placeholderModules = [
     'users',
@@ -40,7 +42,6 @@ const placeholderModules = [
     'customers',
     'contacts',
     'companies',
-    'leads',
     'deals',
     'activities',
     'tasks',

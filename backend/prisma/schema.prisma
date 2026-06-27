@@ -390,6 +390,7 @@ model LeadSource {
   id          String    @id @default(uuid()) @db.Uuid
   name        String    @unique
   description String?
+  isActive    Boolean   @default(true)
 
   // Auditing
   createdBy   String?
@@ -411,6 +412,9 @@ model LeadStatus {
   id          String    @id @default(uuid()) @db.Uuid
   name        String    @unique
   description String?
+  color       String    @default("#6B7280")
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
 
   // Auditing
   createdBy   String?
@@ -429,32 +433,63 @@ model LeadStatus {
 
 // 17. LEADS
 model Lead {
-  id           String      @id @default(uuid()) @db.Uuid
-  customerId   String?     @db.Uuid
-  customer     Customer?   @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  name         String
-  email        String?
-  phone        String?
-  sourceId     String?     @db.Uuid
-  source       LeadSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
-  statusId     String?     @db.Uuid
-  status       LeadStatus? @relation(fields: [statusId], references: [id], onDelete: SetNull)
-  assignedToId String?     @db.Uuid
-  assignedTo   Employee?   @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
-  value        Float       @default(0.0)
+  id                 String      @id @default(uuid()) @db.Uuid
+  leadNumber         String      @unique
+  customerId         String?     @db.Uuid
+  customer           Customer?   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Personal Information
+  firstName          String
+  lastName           String
+  fullName           String
+  email              String?
+  phone              String?
+  alternatePhone     String?
+  jobTitle           String?
+
+  // Company Information
+  companyName        String?
+  industry           String?
+  website            String?
+
+  // Address
+  address            String?
+  city               String?
+  state              String?
+  country            String?
+  postalCode         String?
+
+  // Lead Classification
+  sourceId           String?     @db.Uuid
+  source             LeadSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  statusId           String?     @db.Uuid
+  status             LeadStatus? @relation(fields: [statusId], references: [id], onDelete: SetNull)
+  assignedToId       String?     @db.Uuid
+  assignedTo         Employee?   @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  priority           String      @default("Medium")
+  rating             Int         @default(0)
+  value              Float       @default(0.0)
+  expectedClosingDate DateTime?
+  description        String?
 
   // Auditing
-  createdBy    String?
-  updatedBy    String?
-  deletedBy    String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  deletedAt    DateTime?
-  version      Int         @default(1)
+  createdBy          String?
+  updatedBy          String?
+  deletedBy          String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  deletedAt          DateTime?
+  version            Int         @default(1)
 
-  @@index([name])
+  @@index([leadNumber])
+  @@index([fullName])
   @@index([email])
   @@index([phone])
+  @@index([companyName])
+  @@index([statusId])
+  @@index([sourceId])
+  @@index([assignedToId])
+  @@index([priority])
   @@index([createdAt])
   @@map("leads")
 }

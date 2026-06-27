@@ -50,7 +50,7 @@ class SocketManager {
             }
             try {
                 const cleanToken = token.replace('Bearer ', '');
-                const decoded = jsonwebtoken_1.default.verify(cleanToken, config_1.config.jwtSecret);
+                const decoded = jsonwebtoken_1.default.verify(cleanToken, config_1.config.jwt.secret);
                 socket.user = decoded; // Store token payload on socket connection
                 next();
             }

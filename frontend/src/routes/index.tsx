@@ -2,6 +2,9 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout';
 import Dashboard from '../pages/Dashboard';
 import Leads from '../pages/Leads';
+import LeadAdd from '../pages/leads/LeadAdd';
+import LeadEdit from '../pages/leads/LeadEdit';
+import LeadView from '../pages/leads/LeadView';
 import Contacts from '../pages/Contacts';
 import Companies from '../pages/Companies';
 import Deals from '../pages/Deals';
@@ -87,6 +90,30 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredPermission="leads:view">
             <Leads />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'leads/new',
+        element: (
+          <ProtectedRoute requiredPermission="leads:create">
+            <LeadAdd />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'leads/:id',
+        element: (
+          <ProtectedRoute requiredPermission="leads:view">
+            <LeadView />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'leads/:id/edit',
+        element: (
+          <ProtectedRoute requiredPermission="leads:edit">
+            <LeadEdit />
           </ProtectedRoute>
         ),
       },

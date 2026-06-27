@@ -1,17 +1,8 @@
-import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import { prisma, pool } from '../src/database/db';
 
 dotenv.config();
-
-// Create connection adapter for standalone seed execution
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/flowcrm_db?schema=public',
-});
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('Seeding Database Roles and Permissions...');
@@ -29,11 +20,13 @@ async function main() {
     { name: 'users:edit', module: 'users', action: 'edit', description: 'Edit existing users' },
     { name: 'users:delete', module: 'users', action: 'delete', description: 'Delete users' },
 
-    // Leads
+    // Leads (extended)
     { name: 'leads:view', module: 'leads', action: 'view', description: 'View sales leads' },
     { name: 'leads:create', module: 'leads', action: 'create', description: 'Create new leads' },
     { name: 'leads:edit', module: 'leads', action: 'edit', description: 'Edit leads' },
     { name: 'leads:delete', module: 'leads', action: 'delete', description: 'Delete leads' },
+    { name: 'leads:export', module: 'leads', action: 'export', description: 'Export leads data' },
+    { name: 'leads:assign', module: 'leads', action: 'assign', description: 'Assign leads to team members' },
 
     // Contacts
     { name: 'contacts:view', module: 'contacts', action: 'view', description: 'View customer contacts' },
@@ -135,7 +128,56 @@ async function main() {
   }
   console.log('Linked permissions to Super Admin & Viewer roles.');
 
-  // 4. Seed default Super Admin user if not exists
+  // 5. Seed Lead Sources
+  const leadSourcesData = [
+    { name: 'Website', description: 'Leads from website forms and landing pages' },
+    { name: 'Referral', description: 'Referred by existing customers or partners' },
+    { name: 'Email Campaign', description: 'Generated from email marketing campaigns' },
+    { name: 'Facebook', description: 'Leads from Facebook ads and pages' },
+    { name: 'Instagram', description: 'Leads from Instagram marketing' },
+    { name: 'LinkedIn', description: 'Leads from LinkedIn outreach and ads' },
+    { name: 'Google Ads', description: 'Leads from Google Ads campaigns' },
+    { name: 'Cold Calling', description: 'Generated through cold calling efforts' },
+    { name: 'Trade Show', description: 'Leads collected at trade shows and events' },
+    { name: 'Partner', description: 'Leads from partner organizations' },
+    { name: 'Existing Customer', description: 'Cross-sell or upsell from existing customers' },
+    { name: 'Manual', description: 'Manually entered leads' },
+    { name: 'Custom', description: 'Custom or other sources' },
+  ];
+
+  for (const src of leadSourcesData) {
+    await prisma.leadSource.upsert({
+      where: { name: src.name },
+      update: {},
+      create: src,
+    });
+  }
+  console.log(`Upserted ${leadSourcesData.length} lead sources.`);
+
+  // 6. Seed Lead Statuses
+  const leadStatusesData = [
+    { name: 'New', description: 'Newly created lead', color: '#3B82F6', order: 1 },
+    { name: 'Open', description: 'Lead is open for engagement', color: '#6366F1', order: 2 },
+    { name: 'Contacted', description: 'Initial contact has been made', color: '#8B5CF6', order: 3 },
+    { name: 'Qualified', description: 'Lead has been qualified', color: '#06B6D4', order: 4 },
+    { name: 'Proposal Sent', description: 'Proposal has been sent', color: '#F59E0B', order: 5 },
+    { name: 'Negotiation', description: 'In active negotiation', color: '#F97316', order: 6 },
+    { name: 'Won', description: 'Deal has been won', color: '#10B981', order: 7 },
+    { name: 'Lost', description: 'Deal has been lost', color: '#EF4444', order: 8 },
+    { name: 'Inactive', description: 'Lead is currently inactive', color: '#6B7280', order: 9 },
+    { name: 'Archived', description: 'Lead has been archived', color: '#9CA3AF', order: 10 },
+  ];
+
+  for (const st of leadStatusesData) {
+    await prisma.leadStatus.upsert({
+      where: { name: st.name },
+      update: { color: st.color, order: st.order },
+      create: st,
+    });
+  }
+  console.log(`Upserted ${leadStatusesData.length} lead statuses.`);
+
+  // 7. Seed default Super Admin user if not exists
   const defaultAdminEmail = 'admin@flowcrm.ai';
   const existingUser = await prisma.user.findUnique({
     where: { email: defaultAdminEmail },
