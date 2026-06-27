@@ -87,8 +87,8 @@ export const Register: React.FC = () => {
       <div className="bg-white/80 backdrop-blur-xl border border-slate-100/80 shadow-glossy-lg rounded-3xl p-8 max-w-lg w-full relative z-10 transition-all">
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-8 select-none">
-          <div className="w-12 h-12 rounded-2xl bg-brand-550 flex items-center justify-center text-white font-black text-xl shadow-glossy shadow-brand-200 mb-4">
-            F
+          <div className="w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center shadow-glossy shadow-brand-200 mb-4">
+            <img src="/favicon.png" alt="FlowCRM AI" className="w-full h-full object-cover" />
           </div>
           <h2 className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-2">
             Create Your <span className="text-brand-550">FlowCRM AI</span> Account

@@ -252,7 +252,12 @@ model Company {
   employees       Employee[]
   customers       Customer[]
   tasks           Task[]
-  contacts        Contact[]  @relation("CompanyContacts")
+  contacts        Contact[]       @relation("CompanyContacts")
+  companyNotes    CompanyNote[]
+  companyActivities CompanyActivity[]
+  companyFiles    CompanyFile[]
+  companyTimelines CompanyTimeline[]
+  companyHistories CompanyHistory[]
 
   // Auditing
   createdBy   String?
@@ -346,6 +351,7 @@ model Employee {
   leadNotifications LeadNotification[]
   contacts          Contact[]          @relation("ContactOwner")
   contactActivities ContactActivity[]
+  companyActivities CompanyActivity[]
 
   @@map("employees")
 }
@@ -2550,6 +2556,123 @@ model ContactRecommendation {
   updatedAt       DateTime  @updatedAt
 
   @@map("contact_recommendations")
+}
+
+// 83. COMPANY NOTES
+model CompanyNote {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  content     String    @db.Text
+  isPinned    Boolean   @default(false)
+  title       String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("company_notes")
+}
+
+// 84. COMPANY ACTIVITIES
+model CompanyActivity {
+  id            String    @id @default(uuid()) @db.Uuid
+  companyId     String    @db.Uuid
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type          String    // Call, Meeting, Email, Visit, Demo, Presentation, Negotiation, Follow-up, Support, Custom
+  title         String
+  description   String?   @db.Text
+  activityDate  DateTime
+  status        String    @default("Planned") // Planned, Completed, Cancelled
+  priority      String    @default("Medium")  // Low, Medium, High
+  isCompleted   Boolean   @default(false)
+  assignedToId  String?   @db.Uuid
+  assignedTo    Employee? @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("company_activities")
+}
+
+// 85. COMPANY FILES
+model CompanyFile {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name        String
+  path        String
+  mimeType    String
+  size        Int
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("company_files")
+}
+
+// 86. COMPANY TIMELINE
+model CompanyTimeline {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type        String    // COMPANY_CREATED, COMPANY_UPDATED, OWNER_CHANGED, STATUS_CHANGED, PRIORITY_CHANGED, CONTACT_ADDED, LEAD_LINKED, DEAL_CREATED, DEAL_CLOSED, MEETING_SCHEDULED, TASK_ASSIGNED, INVOICE_GENERATED, PAYMENT_RECEIVED, DOCUMENT_UPLOADED, ACTIVITY_LOGGED, NOTE_ADDED
+  title       String
+  description String?   @db.Text
+  icon        String?
+  color       String?
+  eventDate   DateTime  @default(now())
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("company_timeline")
+}
+
+// 87. COMPANY HISTORY
+model CompanyHistory {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  action      String    // Viewed, Edited, Created, Deleted, Restored, Status Changed, Priority Changed, Owner Changed, Address Changed, GST Updated
+  fieldName   String?
+  oldValue    String?   @db.Text
+  newValue    String?   @db.Text
+  userId      String?   @db.Uuid
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("company_history")
 }
 
 

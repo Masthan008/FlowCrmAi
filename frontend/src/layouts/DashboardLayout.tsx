@@ -129,8 +129,8 @@ export const DashboardLayout: React.FC = () => {
     <div className="flex flex-col h-full bg-white/70 backdrop-blur-xl border-r border-slate-100/60 p-4">
       {/* Sidebar Header */}
       <div className="flex items-center gap-3 px-2 py-4 border-b border-slate-100/60 mb-6">
-        <div className="w-8 h-8 rounded-xl bg-brand-550 flex items-center justify-center text-white font-bold shadow-glossy shadow-brand-200">
-          F
+        <div className="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shadow-glossy shadow-brand-200">
+          <img src="/favicon.png" alt="FlowCRM AI" className="w-full h-full object-cover" />
         </div>
         {!settings.sidebarCollapsed && (
           <span className="font-bold text-slate-800 text-lg tracking-tight select-none">

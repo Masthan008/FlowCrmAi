@@ -148,3 +148,69 @@ export const COMPANY_TYPES = [
 ] as const;
 
 export const COMPANY_PRIORITIES = ['Low', 'Medium', 'High', 'Critical'] as const;
+
+// Company 360 Workspace Types
+export interface CompanyNote {
+  id: string;
+  companyId: string;
+  content: string;
+  isPinned: boolean;
+  title?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+}
+
+export interface CompanyActivity {
+  id: string;
+  companyId: string;
+  type: string;
+  title: string;
+  description?: string;
+  activityDate: string;
+  status: string;
+  priority: string;
+  isCompleted: boolean;
+  assignedToId?: string;
+  assignedTo?: { id: string; firstName: string; lastName: string; email: string };
+  createdBy?: string;
+  createdAt: string;
+}
+
+export interface CompanyFile {
+  id: string;
+  companyId: string;
+  name: string;
+  path: string;
+  mimeType: string;
+  size: number;
+  createdBy?: string;
+  createdAt: string;
+}
+
+export interface CompanyTimelineEvent {
+  id: string;
+  companyId: string;
+  type: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  eventDate: string;
+  createdBy?: string;
+  createdAt: string;
+}
+
+export interface CompanyHistoryEntry {
+  id: string;
+  companyId: string;
+  action: string;
+  fieldName?: string;
+  oldValue?: string;
+  newValue?: string;
+  userId?: string;
+  createdBy?: string;
+  createdAt: string;
+}

@@ -1286,3 +1286,57 @@
 {"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 1.938 ms","timestamp":"2026-06-27 22:55:14"}
 {"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 392.950 ms","timestamp":"2026-06-27 22:55:14"}
 {"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.526 ms","timestamp":"2026-06-27 22:55:14"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 22:58:37"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-27 22:58:37"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-27 22:58:37"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-27 22:58:37"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-27 22:58:37"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-27 22:58:38"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 9524.660 ms","timestamp":"2026-06-27 23:01:59"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 9496.856 ms","timestamp":"2026-06-27 23:01:59"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 9552.199 ms","timestamp":"2026-06-27 23:01:59"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 9563.972 ms","timestamp":"2026-06-27 23:01:59"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 9922.052 ms","timestamp":"2026-06-27 23:01:59"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 168.755 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 9663.563 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 242.229 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 194.703 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 305.019 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 2.609 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 133.264 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 173.268 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 162.328 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 253.423 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 186.382 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 351.928 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1.554 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 1.128 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 1.129 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.333 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 1.530 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.317 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 1.521 ms","timestamp":"2026-06-27 23:02:00"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 1.876 ms","timestamp":"2026-06-27 23:02:06"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 1.274 ms","timestamp":"2026-06-27 23:02:06"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 1.657 ms","timestamp":"2026-06-27 23:02:06"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=12m 200 991 - 1.023 ms","timestamp":"2026-06-27 23:02:06"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 0.853 ms","timestamp":"2026-06-27 23:02:06"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1.273 ms","timestamp":"2026-06-27 23:02:06"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 1287.853 ms","timestamp":"2026-06-27 23:02:07"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 1435.912 ms","timestamp":"2026-06-27 23:02:07"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1.533 ms","timestamp":"2026-06-27 23:02:07"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 1.485 ms","timestamp":"2026-06-27 23:02:07"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 1.354 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.490 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.934 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.717 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 1.516 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 610.789 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 974.835 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 0.997 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 1.391 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 0.808 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.187 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.672 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.267 ms","timestamp":"2026-06-27 23:02:08"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 0.953 ms","timestamp":"2026-06-27 23:02:08"}
