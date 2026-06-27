@@ -257,7 +257,14 @@ model Company {
   companyActivities CompanyActivity[]
   companyFiles    CompanyFile[]
   companyTimelines CompanyTimeline[]
-  companyHistories CompanyHistory[]
+  companyHistories  CompanyHistory[]
+  departments       CompanyDepartment[]
+  hierarchyEntries  CompanyHierarchy[]
+  hierarchyParents  CompanyHierarchy[] @relation("HierarchyParentCompany")
+  businessNetwork   CompanyBusinessNetwork[]
+  bizNetworkRelated CompanyBusinessNetwork[] @relation("BizNetworkRelatedCompanies")
+  revenues          CompanyRevenue[]
+  journey           CompanyCustomerJourney[]
 
   // Auditing
   createdBy   String?
@@ -286,12 +293,49 @@ model Company {
 
 // 9. BRANCHES
 model Branch {
+  id            String     @id @default(uuid()) @db.Uuid
+  companyId     String     @db.Uuid
+  company       Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name          String
+  branchCode    String?
+  branchType    String?    // Head Office, Regional Office, Branch Office, Franchise, Business Unit
+  managerId     String?    @db.Uuid
+  phone         String?
+  email         String?
+  address       String?
+  gst           String?
+  country       String?
+  state         String?
+  city          String?
+  employeeCount Int        @default(0)
+  revenue       Float      @default(0.0)
+  status        String     @default("Active")
+  openingDate   DateTime?
+  timezone      String?
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+  version       Int        @default(1)
+
+  @@map("branches")
+}
+
+model CompanyDepartment {
   id          String     @id @default(uuid()) @db.Uuid
   companyId   String     @db.Uuid
   company     Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  name        String
-  phone       String?
-  address     String?
+  name        String     // Sales, Marketing, Finance, HR, Support, IT, Operations, Legal, or Custom
+  type        String     @default("Custom") // Sales, Marketing, Finance, HR, Support, IT, Operations, Legal, Custom
+  managerId   String?    @db.Uuid
+  description String?    @db.Text
+  revenue     Float      @default(0.0)
+  status      String     @default("Active")
+  employeeCount Int      @default(0)
 
   // Auditing
   createdBy   String?
@@ -302,7 +346,112 @@ model Branch {
   deletedAt   DateTime?
   version     Int        @default(1)
 
-  @@map("branches")
+  @@index([companyId])
+  @@index([type])
+  @@map("company_departments")
+}
+
+model CompanyHierarchy {
+  id              String     @id @default(uuid()) @db.Uuid
+  companyId       String     @db.Uuid
+  company         Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  parentCompanyId String?    @db.Uuid
+  parentCompany   Company?   @relation("HierarchyParentCompany", fields: [parentCompanyId], references: [id], onDelete: SetNull)
+  relationshipType String    // Subsidiary, Branch Office, Regional Office, Head Office, Franchise, Business Unit, Joint Venture, Partner Organization
+  level           Int        @default(0)
+  description     String?    @db.Text
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedBy       String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+  version         Int        @default(1)
+
+  @@index([companyId])
+  @@index([parentCompanyId])
+  @@index([relationshipType])
+  @@map("company_hierarchy")
+}
+
+model CompanyBusinessNetwork {
+  id                String     @id @default(uuid()) @db.Uuid
+  companyId         String     @db.Uuid
+  company           Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  relatedCompanyId  String?    @db.Uuid
+  relatedCompany  Company?   @relation("BizNetworkRelatedCompanies", fields: [relatedCompanyId], references: [id], onDelete: SetNull)
+  name              String
+  relationshipType  String     // Partner, Supplier, Distributor, Reseller, Affiliate, Strategic Alliance, Linked Company
+  description       String?    @db.Text
+  status            String     @default("Active")
+  website           String?
+
+  // Auditing
+  createdBy         String?
+  updatedBy         String?
+  deletedBy         String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  deletedAt         DateTime?
+  version           Int        @default(1)
+
+  @@index([companyId])
+  @@index([relationshipType])
+  @@map("company_business_network")
+}
+
+model CompanyRevenue {
+  id          String     @id @default(uuid()) @db.Uuid
+  companyId   String     @db.Uuid
+  company     Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  period      String     // Monthly, Quarterly, Annual
+  year        Int
+  month       Int?
+  quarter     Int?
+  amount      Float      @default(0.0)
+  type        String     @default("Revenue") // Revenue, Expense, Profit
+  description String?    @db.Text
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  version     Int        @default(1)
+
+  @@index([companyId, period, year])
+  @@index([companyId, type])
+  @@map("company_revenue")
+}
+
+model CompanyCustomerJourney {
+  id          String     @id @default(uuid()) @db.Uuid
+  companyId   String     @db.Uuid
+  company     Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type        String     // Lead Created, Company Registered, First Contact, First Meeting, First Deal, Quote Generated, Invoice Generated, Payment Received, Renewal, Expansion, Support Case, Relationship Milestone
+  title       String
+  description String?    @db.Text
+  eventDate   DateTime   @default(now())
+  icon        String?
+  color       String?
+  metadata    String?    @db.Text // JSON for extra data
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  version     Int        @default(1)
+
+  @@index([companyId])
+  @@index([type])
+  @@map("company_customer_journey")
 }
 
 // 10. EMPLOYEES

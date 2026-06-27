@@ -55,9 +55,11 @@ flowcrm-ai-enterprise/
 │   │   ├── tasks/                 # Task domain
 │   │   └── dashboard/             # Dashboard domain
 │   ├── prisma/
-│   │   ├── schema.prisma          # Database schema (66 models)
+│   │   ├── schema.prisma          # Database schema (71 models)
 │   │   └── seed.ts                # Database seeder
-│   └── uploads/                   # File storage
+│   │   └── uploads/               # File storage
+│   │
+│   └── companies/                # Company domain (routes, controller, service, repository, validators)
 │
 └── frontend/
     └── src/
@@ -84,10 +86,12 @@ flowcrm-ai-enterprise/
 - **Leads Management** -- Full CRUD, soft delete, sources/statuses master data, search/filter/sort, pagination, bulk operations (update, archive, restore), duplicate merge, CSV import/export, saved views, assignment (manual/round-robin/load-based), lead scoring, health/SLA tracking, workflow automation, approval flows, 360 workspace (notes, activities, files, timeline, history)
 - **Contacts Management** -- Full CRUD, soft delete, rich profile with multi-channel communication, relationship mapping, customer journey tracking, engagement scoring, business/health metrics, communication logs
 - **Tasks Management** -- Full CRUD, Kanban board, priorities, subtasks, checklists, comments, file attachments, time tracking, watchers, dependencies, recurrence, approval workflow, calendar view, productivity analytics
+- **Company Management** -- Full CRUD, soft delete, company hierarchy (unlimited parent/child/subsidiary levels), organization tree, branch management (Head Office, Regional Office, Franchise, Business Unit), department management (Sales, Marketing, Finance, HR, Support, IT, Operations, Legal, Custom), primary contacts directory, business network (Partners, Suppliers, Distributors, Resellers, Affiliates, Strategic Alliances), revenue dashboard (annual/monthly/quarterly revenue, pipeline value, outstanding/paid amounts, deal/invoice/payment metrics), customer journey timeline (Lead Created to Payment Received and beyond), 360° workspace (timeline, activities, notes, files, meetings, tasks, communications, audit history)
+- **Company 360° Workspace** -- Timeline events, activity CRUD with type/priority/status, notes with pinning, file upload/download, meetings, tasks, communications, full audit history with field-level change tracking
 
 ### Placeholder / Coming Soon
 
-Users, Roles, Permissions, Customers, Companies, Deals, Activities, Calendar, Meetings, Products, Quotes, Invoices, Payments, Notifications, Reports, Analytics, Settings
+Users, Roles, Permissions, Customers, Deals, Activities, Calendar, Meetings, Products, Quotes, Invoices, Payments, Notifications, Reports, Analytics, Settings
 
 ## Architecture
 
@@ -128,6 +132,16 @@ Standardized JSON response format across all endpoints:
 - `GET|POST|PUT|DELETE /leads/*` (30+ endpoints)
 - `GET|POST|PUT|DELETE /contacts/*` (25+ endpoints)
 - `GET|POST|PUT|DELETE /tasks/*` (30+ endpoints)
+- `GET|POST|PUT|DELETE /companies/*` (50+ endpoints including hierarchy, branches, departments, 360 workspace, revenue, business network, customer journey)
+- `GET /companies/:id/hierarchy`, `/hierarchy/tree` -- Organization hierarchy
+- `GET|POST|PUT|DELETE /companies/:id/branches/*` -- Branch management
+- `GET|POST|PUT|DELETE /companies/:id/departments/*` -- Department management
+- `GET /companies/:id/contacts` -- Contact directory
+- `GET /companies/:id/leads`, `/deals`, `/quotes`, `/invoices`, `/payments` -- Related business data
+- `GET|POST|DELETE /companies/:id/revenue/*` -- Revenue tracking & dashboard
+- `GET|POST|PUT|DELETE /companies/:id/business-network/*` -- Business network management
+- `GET|POST|DELETE /companies/:id/customer-journey/*` -- Customer journey milestones
+- `GET /companies/:id/timeline`, `/activities`, `/notes`, `/files`, `/history` -- 360° workspace
 
 ## Prerequisites
 
@@ -210,7 +224,7 @@ npm run dev
 ## Database
 
 - **ORM:** Prisma 7.x with `@prisma/adapter-pg`
-- **Models:** 66 database models with full auditing
+- **Models:** 71 database models with full auditing
 - **Soft deletes:** Every table includes `deletedAt`, `deletedBy`, and `version` fields
 - **UUIDs:** All primary keys use UUID v4
 - **Timestamps:** Automatic `createdAt`, `updatedAt` on all models

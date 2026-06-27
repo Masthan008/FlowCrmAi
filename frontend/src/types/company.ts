@@ -214,3 +214,116 @@ export interface CompanyHistoryEntry {
   createdBy?: string;
   createdAt: string;
 }
+
+// Company Phase 6 - Enterprise Relationship Management
+export interface CompanyBranch {
+  id: string;
+  companyId: string;
+  name: string;
+  branchCode?: string;
+  branchType?: string;
+  managerId?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  gst?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  employeeCount: number;
+  revenue: number;
+  status: string;
+  openingDate?: string;
+  timezone?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CompanyDepartment {
+  id: string;
+  companyId: string;
+  name: string;
+  type: string;
+  managerId?: string;
+  description?: string;
+  revenue: number;
+  status: string;
+  employeeCount: number;
+  createdAt: string;
+}
+
+export interface CompanyHierarchyEntry {
+  id: string;
+  companyId: string;
+  parentCompanyId?: string;
+  parentCompany?: { id: string; name: string; companyNumber: string; status: string };
+  relationshipType: string;
+  level: number;
+  description?: string;
+  children?: CompanyHierarchyEntry[];
+  createdAt: string;
+}
+
+export interface CompanyBusinessNetworkEntry {
+  id: string;
+  companyId: string;
+  relatedCompanyId?: string;
+  name: string;
+  relationshipType: string;
+  description?: string;
+  status: string;
+  website?: string;
+  createdAt: string;
+}
+
+export interface CompanyRevenueEntry {
+  id: string;
+  companyId: string;
+  period: string;
+  year: number;
+  month?: number;
+  quarter?: number;
+  amount: number;
+  type: string;
+  description?: string;
+  createdAt: string;
+}
+
+export interface CompanyRevenueSummary {
+  totalRevenue: number;
+  annualRevenue: number;
+  monthlyRevenue: number;
+  quarterlyRevenue: number;
+  currentYear: number;
+  currentMonth: number;
+  annualCount: number;
+  monthlyCount: number;
+}
+
+export interface CompanyCustomerJourneyEntry {
+  id: string;
+  companyId: string;
+  type: string;
+  title: string;
+  description?: string;
+  eventDate: string;
+  icon?: string;
+  color?: string;
+  metadata?: string;
+  createdAt: string;
+}
+
+export interface CompanyRevenueDashboard {
+  totalSales: number;
+  averageDealValue: number;
+  outstandingAmount: number;
+  paidAmount: number;
+  pipelineValue: number;
+  dealCount: number;
+  invoiceCount: number;
+  paymentCount: number;
+}
+
+export interface CompanyBusinessNetworkGrouped {
+  [key: string]: CompanyBusinessNetworkEntry[];
+}
