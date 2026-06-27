@@ -118,6 +118,10 @@ model User {
   loginHistories LoginHistory[]
   passwordResets PasswordReset[]
   refreshTokens  RefreshToken[]
+  taskTimelines  TaskTimeline[]
+  savedViews     SavedView[]
+  importLogs     LeadImportLog[]
+  exportLogs     LeadExportLog[]
 
   @@index([email])
   @@index([phone])
@@ -279,6 +283,16 @@ model Employee {
   delegatedTasks Task[]     @relation("TaskAssignedBy")
   meetings    Meeting[]
   leadActivities LeadActivity[]
+  subtasks      TaskSubtask[]
+  timeLogs      TaskTimeLog[]
+  watchedTasks  TaskWatcher[]
+  approvals     TaskApproval[]
+  taskNotifications TaskNotification[]
+  previousLeads     Lead[]             @relation("LeadPreviousOwner")
+  leadAssignments   LeadAssignment[]
+  leadFollowups     LeadFollowup[]
+  leadApprovals     LeadApproval[]
+  leadNotifications LeadNotification[]
 
   @@map("employees")
 }
@@ -495,6 +509,25 @@ model Lead {
   timeline           LeadTimeline[]
   history            LeadHistory[]
   tasks              Task[]
+  isFavorite         Boolean           @default(false)
+  archivedAt         DateTime?
+  archivedBy         String?
+  tagMappings        LeadTagMapping[]
+  mergeHistories     LeadMergeHistory[] @relation("PrimaryMerge")
+  duplicates1        LeadDuplicate[]    @relation("LeadDup1")
+  duplicates2        LeadDuplicate[]    @relation("LeadDup2")
+  previousOwnerId    String?            @db.Uuid
+  previousOwner      Employee?          @relation("LeadPreviousOwner", fields: [previousOwnerId], references: [id], onDelete: SetNull)
+  assignedDate       DateTime?
+  assignmentReason   String?
+  assignments        LeadAssignment[]
+  followups          LeadFollowup[]
+  conversions        LeadConversionHistory[]
+  workflows          LeadWorkflow[]
+  score              LeadScore?
+  health             LeadHealth?
+  sla                LeadSla?
+  approvals          LeadApproval[]
 
   @@index([leadNumber])
   @@index([fullName])
@@ -665,6 +698,17 @@ model Task {
   assignedBy         Employee?        @relation("TaskAssignedBy", fields: [assignedById], references: [id], onDelete: SetNull)
   comments           TaskComment[]
   attachments        TaskAttachment[]
+  subtasks           TaskSubtask[]
+  checklists         TaskChecklist[]
+  timeLogs           TaskTimeLog[]
+  labelMappings      TaskLabelMapping[]
+  watchers           TaskWatcher[]
+  dependencies       TaskDependency[] @relation("TaskDepends")
+  dependentOn        TaskDependency[] @relation("TaskDependsOn")
+  recurrence         TaskRecurrence?
+  approval           TaskApproval?
+  notifications      TaskNotification[]
+  timelines          TaskTimeline[]
 
   // Fields
   department         String?
@@ -1318,5 +1362,558 @@ model TaskAttachment {
   version     Int       @default(1)
 
   @@map("task_attachments")
+}
+
+// 51. TASK SUBTASKS
+model TaskSubtask {
+  id                 String       @id @default(uuid()) @db.Uuid
+  taskId             String       @db.Uuid
+  task               Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  title              String
+  description        String?      @db.Text
+  assignedToId       String?      @db.Uuid
+  assignedTo         Employee?    @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  priority           String       @default("Medium") // Low, Medium, High, Critical
+  status             String       @default("Pending") // Pending, In Progress, Waiting, Completed, Cancelled
+  dueDate            DateTime?
+  progressPercentage Int          @default(0)
+
+  // Auditing
+  createdBy          String?
+  updatedBy          String?
+  deletedBy          String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  deletedAt          DateTime?
+  version            Int          @default(1)
+
+  @@map("task_subtasks")
+}
+
+// 52. TASK CHECKLISTS
+model TaskChecklist {
+  id                 String       @id @default(uuid()) @db.Uuid
+  taskId             String       @db.Uuid
+  task               Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  title              String
+  isCompleted        Boolean      @default(false)
+  order              Int          @default(0)
+
+  // Auditing
+  createdBy          String?
+  updatedBy          String?
+  deletedBy          String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  deletedAt          DateTime?
+  version            Int          @default(1)
+
+  @@map("task_checklists")
+}
+
+// 53. TASK TIME LOGS
+model TaskTimeLog {
+  id            String    @id @default(uuid()) @db.Uuid
+  taskId        String    @db.Uuid
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  employeeId    String    @db.Uuid
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  startTime     DateTime?
+  endTime       DateTime?
+  duration      Int       @default(0) // duration in seconds
+  isTimer       Boolean   @default(false)
+  isBillable    Boolean   @default(true)
+  notes         String?   @db.Text
+  action        String?   // e.g. "Started Timer", "Stopped Timer", "Manual Entry"
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("task_time_logs")
+}
+
+// 54. TASK LABELS
+model TaskLabel {
+  id            String             @id @default(uuid()) @db.Uuid
+  name          String             @unique
+  color         String?
+  mappings      TaskLabelMapping[]
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  deletedAt     DateTime?
+  version       Int                @default(1)
+
+  @@map("task_labels")
+}
+
+// 55. TASK LABEL MAPPING
+model TaskLabelMapping {
+  taskId        String     @db.Uuid
+  task          Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  labelId       String     @db.Uuid
+  label         TaskLabel  @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+  @@map("task_label_mapping")
+}
+
+// 56. TASK WATCHERS
+model TaskWatcher {
+  taskId        String     @db.Uuid
+  task          Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  employeeId    String     @db.Uuid
+  employee      Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, employeeId])
+  @@map("task_watchers")
+}
+
+// 57. TASK DEPENDENCIES
+model TaskDependency {
+  taskId          String    @db.Uuid
+  task            Task      @relation("TaskDepends", fields: [taskId], references: [id], onDelete: Cascade)
+  dependentTaskId String    @db.Uuid
+  dependentTask   Task      @relation("TaskDependsOn", fields: [dependentTaskId], references: [id], onDelete: Cascade)
+  type            String    // blocked_by, blocks, waiting_for
+
+  @@id([taskId, dependentTaskId, type])
+  @@map("task_dependencies")
+}
+
+// 58. TASK RECURRENCE
+model TaskRecurrence {
+  id            String    @id @default(uuid()) @db.Uuid
+  taskId        String    @unique @db.Uuid
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  frequency     String    // Daily, Weekly, Monthly, Yearly, Custom
+  interval      Int       @default(1)
+  daysOfWeek    Int[]     @default([]) // e.g. [1, 3, 5]
+  dayOfMonth    Int?
+  monthOfYear   Int?
+  endDate       DateTime?
+  nextRunDate   DateTime?
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("task_recurrence")
+}
+
+// 59. TASK APPROVALS
+model TaskApproval {
+  id            String    @id @default(uuid()) @db.Uuid
+  taskId        String    @unique @db.Uuid
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  approverId    String    @db.Uuid
+  approver      Employee  @relation(fields: [approverId], references: [id], onDelete: Restrict)
+  status        String    @default("Pending Approval") // Pending Approval, Approved, Rejected, Returned
+  approvalDate  DateTime?
+  comments      String?   @db.Text
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("task_approvals")
+}
+
+// 60. TASK NOTIFICATIONS
+model TaskNotification {
+  id            String    @id @default(uuid()) @db.Uuid
+  taskId        String    @db.Uuid
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  employeeId    String    @db.Uuid
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  title         String
+  message       String
+  type          String    @default("info")
+  readAt        DateTime?
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("task_notifications")
+}
+
+// 61. TASK TIMELINE
+model TaskTimeline {
+  id            String    @id @default(uuid()) @db.Uuid
+  taskId        String    @db.Uuid
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  action        String    // Created, Assigned, Edited, Comment Added, Attachment Uploaded, Checklist Updated, Status Changed, Completed, Approved, Deleted
+  notes         String?   @db.Text
+  userId        String?   @db.Uuid
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("task_timeline")
+}
+
+// 62. LEAD TAGS
+model LeadTag {
+  id            String             @id @default(uuid()) @db.Uuid
+  name          String             @unique
+  color         String             @default("#3B82F6")
+  mappings      LeadTagMapping[]
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  deletedAt     DateTime?
+  version       Int                @default(1)
+
+  @@map("lead_tags")
+}
+
+// 63. LEAD TAG MAPPING
+model LeadTagMapping {
+  leadId        String     @db.Uuid
+  lead          Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tagId         String     @db.Uuid
+  tag           LeadTag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([leadId, tagId])
+  @@map("lead_tag_mapping")
+}
+
+// 64. SAVED VIEWS
+model SavedView {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String
+  entityType    String    @default("lead") // lead, task, etc.
+  filters       Json
+  columns       String[]
+  isDefault     Boolean   @default(false)
+  isPinned      Boolean   @default(false)
+  userId        String    @db.Uuid
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("saved_views")
+}
+
+// 65. LEAD IMPORT LOGS
+model LeadImportLog {
+  id            String    @id @default(uuid()) @db.Uuid
+  fileName      String
+  totalRows     Int       @default(0)
+  successCount  Int       @default(0)
+  failedCount   Int       @default(0)
+  errorDetails  String?   @db.Text
+  importedById  String    @db.Uuid
+  importedBy    User      @relation(fields: [importedById], references: [id], onDelete: Cascade)
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("lead_import_logs")
+}
+
+// 66. LEAD EXPORT LOGS
+model LeadExportLog {
+  id            String    @id @default(uuid()) @db.Uuid
+  exportType    String    // CSV, Excel, PDF
+  rowsExported  Int       @default(0)
+  userId        String    @db.Uuid
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("lead_export_logs")
+}
+
+// 67. LEAD MERGE HISTORY
+model LeadMergeHistory {
+  id            String    @id @default(uuid()) @db.Uuid
+  primaryLeadId String    @db.Uuid
+  primaryLead   Lead      @relation("PrimaryMerge", fields: [primaryLeadId], references: [id], onDelete: Cascade)
+  mergedLeadIds String[]
+  mergedDetails Json
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("lead_merge_history")
+}
+
+// 68. LEAD DUPLICATES
+model LeadDuplicate {
+  id            String    @id @default(uuid()) @db.Uuid
+  leadId1       String    @db.Uuid
+  lead1         Lead      @relation("LeadDup1", fields: [leadId1], references: [id], onDelete: Cascade)
+  leadId2       String    @db.Uuid
+  lead2         Lead      @relation("LeadDup2", fields: [leadId2], references: [id], onDelete: Cascade)
+  reason        String    // Same Email, Same Phone, Same Company, Similar Name
+  status        String    @default("Pending") // Pending, Ignored, Merged, Review Later
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("lead_duplicates")
+}
+
+// 69. LEAD ASSIGNMENTS
+model LeadAssignment {
+  id              String    @id @default(uuid()) @db.Uuid
+  leadId          String    @db.Uuid
+  lead            Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  assignedToId    String    @db.Uuid
+  assignedTo      Employee  @relation(fields: [assignedToId], references: [id], onDelete: Cascade)
+  assignedDate    DateTime  @default(now())
+  reason          String?
+  assignmentType  String    @default("Manual") // Manual, Round Robin, Load Based, Territory, Department
+  previousOwnerId String?   @db.Uuid
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("lead_assignments")
+}
+
+// 70. LEAD FOLLOWUPS
+model LeadFollowup {
+  id              String    @id @default(uuid()) @db.Uuid
+  leadId          String    @db.Uuid
+  lead            Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type            String    // Phone Call, Email, Meeting, Demo, Visit, Custom
+  followupDate    DateTime
+  assignedToId    String    @db.Uuid
+  assignedTo      Employee  @relation(fields: [assignedToId], references: [id], onDelete: Cascade)
+  status          String    @default("Planned") // Planned, Completed, Cancelled
+  notes           String?   @db.Text
+  reminderMinutes Int       @default(15)
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("lead_followups")
+}
+
+// 71. LEAD CONVERSION HISTORY
+model LeadConversionHistory {
+  id              String    @id @default(uuid()) @db.Uuid
+  leadId          String    @db.Uuid
+  lead            Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  convertedAt     DateTime  @default(now())
+  customerId      String?   @db.Uuid
+  companyId       String?   @db.Uuid
+  contactId       String?   @db.Uuid
+  dealId          String?   @db.Uuid
+  notes           String?   @db.Text
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("lead_conversion_history")
+}
+
+// 72. LEAD WORKFLOWS
+model LeadWorkflow {
+  id              String    @id @default(uuid()) @db.Uuid
+  leadId          String    @db.Uuid
+  lead            Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  name            String
+  trigger         String    // Lead Created, Lead Updated, Lead Assigned, Status Changed, Priority Changed, Lead Converted
+  conditions      Json      // Condition metrics details e.g. statusId, priority, value
+  actions         Json      // Actions targets details e.g. create task, change status, assign user
+  isActive        Boolean   @default(true)
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("lead_workflows")
+}
+
+// 73. LEAD SCORES
+model LeadScore {
+  id              String    @id @default(uuid()) @db.Uuid
+  leadId          String    @unique @db.Uuid
+  lead            Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  score           Int       @default(0) // 0-100
+  factors         Json?     // Positive & negative contributing indicators details
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("lead_scores")
+}
+
+// 74. LEAD HEALTH
+model LeadHealth {
+  id              String    @id @default(uuid()) @db.Uuid
+  leadId          String    @unique @db.Uuid
+  lead            Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadScore       Int       @default(0)
+  activityScore   Int       @default(0)
+  engagementScore Int       @default(0)
+  communicationScore Int    @default(0)
+  followupStatus  String    @default("Good") // Good, Warning, Critical
+  overallHealth   String    @default("Healthy") // Healthy, Needs Attention, At Risk
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("lead_health")
+}
+
+// 75. LEAD SLA
+model LeadSla {
+  id              String    @id @default(uuid()) @db.Uuid
+  leadId          String    @unique @db.Uuid
+  lead            Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  firstResponseTime Int?    // minutes
+  lastResponseTime  Int?    // minutes
+  followupTime      Int?    // minutes
+  resolutionTime    Int?    // minutes
+  escalationTime    Int?    // minutes
+  status            String    @default("Green") // Green, Yellow, Red
+  hasBreached       Boolean   @default(false)
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("lead_sla")
+}
+
+// 76. LEAD APPROVALS
+model LeadApproval {
+  id              String    @id @default(uuid()) @db.Uuid
+  leadId          String    @db.Uuid
+  lead            Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type            String    // Value Approval, Transfer Approval, Conversion Approval
+  status          String    @default("Pending") // Pending, Approved, Rejected, Returned
+  requestedById   String?   @db.Uuid
+  approverId      String    @db.Uuid
+  approver        Employee  @relation(fields: [approverId], references: [id], onDelete: Cascade)
+  comments        String?   @db.Text
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("lead_approvals")
+}
+
+// 77. LEAD NOTIFICATIONS
+model LeadNotification {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @db.Uuid
+  user            Employee  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  message         String
+  type            String    @default("info") // info, warning, breach, SLA
+  readAt          DateTime?
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("lead_notifications")
 }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
 import { Card } from '../components/ui/Card';
@@ -23,35 +23,33 @@ import {
   Pencil,
   Trash2,
   Star,
-  ChevronUp,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Filter,
   SlidersHorizontal,
   Loader2,
   AlertCircle,
+  FileDown,
+  FileUp,
+  GitMerge,
+  Archive,
+  RefreshCw,
+  Columns,
+  CheckCircle2,
+  Trash,
+  Tag,
+  Briefcase,
+  UserCheck,
+  Calendar,
+  Sparkles,
 } from 'lucide-react';
 
-// Priority badge colors
 const priorityColors: Record<string, string> = {
-  Critical: 'bg-red-50 text-red-700 border-red-200',
+  Critical: 'bg-red-50 text-red-700 border-red-200 shadow-sm',
   High: 'bg-orange-50 text-orange-700 border-orange-200',
   Medium: 'bg-blue-50 text-blue-700 border-blue-200',
-  Low: 'bg-slate-50 text-slate-600 border-slate-200',
+  Low: 'bg-slate-50 text-slate-650 border-slate-200',
 };
-
-// Quick filter definitions
-const quickFilters = [
-  { label: 'All Leads', key: 'all', icon: Users2 },
-  { label: 'New', key: 'new', icon: Plus },
-  { label: 'Qualified', key: 'qualified', icon: Target },
-  { label: 'Won', key: 'won', icon: Trophy },
-  { label: 'Lost', key: 'lost', icon: XCircle },
-  { label: 'High Priority', key: 'high-priority', icon: TrendingUp },
-];
 
 const Leads: React.FC = () => {
   const navigate = useNavigate();
@@ -60,24 +58,55 @@ const Leads: React.FC = () => {
     leads,
     statistics,
     statuses,
+    sources,
+    employees,
+    savedViews,
     loading,
     error,
     filters,
     pagination,
+    selectedIds,
     fetchLeads,
     fetchStatistics,
     fetchStatuses,
+    fetchSources,
+    fetchEmployees,
+    fetchViews,
+    saveCustomView,
+    deleteCustomView,
     setFilters,
     setPage,
     setSort,
     deleteLead,
-    clearError,
+    toggleSelection,
+    clearSelection,
+    bulkUpdateLeads,
+    archiveLeadsAction,
+    restoreLeadsAction,
+    mergeLeadsAction,
+    importLeadsAction,
+    exportLeadsAction,
+    searchLeadsAction,
+    filterLeadsAction,
   } = useLeadStore();
 
+  // Search and Advanced Filter States
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeQuickFilter, setActiveQuickFilter] = useState('all');
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [leadToDelete, setLeadToDelete] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'All' | 'Favorites' | 'Archived'>('All');
+  
+  // Custom Saved Views
+  const [selectedViewId, setSelectedViewId] = useState<string | null>(null);
+  const [saveViewModalOpen, setSaveViewModalOpen] = useState(false);
+  const [newViewName, setNewViewName] = useState('');
+
+  // AND/OR Filter Builder State
+  const [filterBuilderOpen, setFilterBuilderOpen] = useState(false);
+  const [filterCondition, setFilterCondition] = useState<'AND' | 'OR'>('AND');
+  const [filterRules, setFilterRules] = useState<Array<{ field: string; operator: string; value: any }>>([
+    { field: 'priority', operator: 'equals', value: 'High' }
+  ]);
+
+  // Column Visibility & Ordering
   const [colVisibility, setColVisibility] = useState<Record<string, boolean>>({
     leadNumber: true,
     fullName: true,
@@ -86,171 +115,359 @@ const Leads: React.FC = () => {
     phone: true,
     status: true,
     priority: true,
-    assignedTo: true,
-    source: true,
     value: true,
-    expectedClosingDate: false,
     createdAt: true,
-    actions: true,
+    tags: true,
   });
   const [showColMenu, setShowColMenu] = useState(false);
+
+  // Bulk operation modals
+  const [bulkActionOpen, setBulkActionOpen] = useState(false);
+  const [bulkField, setBulkField] = useState<'status' | 'priority' | 'owner' | 'rating' | 'tags' | ''>('');
+  const [bulkVal, setBulkVal] = useState('');
+  const [bulkTagsText, setBulkTagsText] = useState('');
+
+  // CSV Import wizard state
+  const [importOpen, setImportOpen] = useState(false);
+  const [importFileText, setImportFileText] = useState('');
+  const [importFileName, setImportFileName] = useState('');
+  const [importHeaders, setImportHeaders] = useState<string[]>([]);
+  const [importRows, setImportRows] = useState<any[]>([]);
+  const [fieldMapping, setFieldMapping] = useState<Record<string, string>>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    companyName: '',
+    industry: '',
+    value: '',
+    tags: '',
+  });
+  const [importStep, setImportStep] = useState(1);
+  const [importResult, setImportResult] = useState<any>(null);
+
+  // Export Leads options
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportType, setExportType] = useState<'csv' | 'xlsx' | 'pdf'>('csv');
+  const [exportScope, setExportScope] = useState<'selected' | 'filtered' | 'page' | 'all'>('all');
+
+  // Duplicate check and Merge modal
+  const [duplicateBannerOpen, setDuplicateBannerOpen] = useState(true);
+  const [mergeOpen, setMergeOpen] = useState(false);
+  const [mergePrimaryId, setMergePrimaryId] = useState('');
+  const [mergeSecondaryId, setMergeSecondaryId] = useState('');
+  const [mergedFields, setMergedFields] = useState<any>({});
+
+  // Single Delete Confirmation
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [leadToDelete, setLeadToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLeads();
     fetchStatistics();
     fetchStatuses();
+    fetchSources();
+    fetchEmployees();
+    fetchViews();
   }, []);
 
-  // Search debounce
+  // Search input debouncer trigger
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setFilters({ search: searchQuery || undefined });
-    }, 400);
-    return () => clearTimeout(timeout);
+    if (searchQuery.trim()) {
+      const delay = setTimeout(() => {
+        searchLeadsAction(searchQuery.trim());
+      }, 300);
+      return () => clearTimeout(delay);
+    } else {
+      fetchLeads();
+    }
   }, [searchQuery]);
 
-  const handleQuickFilter = (key: string) => {
-    setActiveQuickFilter(key);
-    if (key === 'all') {
-      setFilters({ status: undefined, priority: undefined });
-    } else if (key === 'high-priority') {
-      setFilters({ status: undefined, priority: 'High' });
+  // Tab trigger scoping
+  useEffect(() => {
+    if (activeTab === 'Archived') {
+      // Custom filter parameter for soft archived leads
+      setFilters({ status: 'archived' as any });
+      fetchLeads();
     } else {
-      const matchedStatus = statuses.find(
-        (s) => s.name.toLowerCase() === key.toLowerCase()
-      );
-      if (matchedStatus) {
-        setFilters({ status: matchedStatus.id, priority: undefined });
-      }
+      setFilters({ status: undefined });
+      fetchLeads();
+    }
+  }, [activeTab]);
+
+  // Load selected Saved View filters
+  const handleSelectView = (view: any) => {
+    setSelectedViewId(view.id);
+    if (view.filters) {
+      filterLeadsAction(view.filters);
+    }
+    if (view.columns && view.columns.length > 0) {
+      const newColVis = { ...colVisibility };
+      Object.keys(newColVis).forEach(k => {
+        newColVis[k] = view.columns.includes(k);
+      });
+      setColVisibility(newColVis);
     }
   };
 
-  const handleSort = (column: string) => {
-    const currentSort = filters.sortBy;
-    const currentDir = filters.sortDir || 'desc';
-    if (currentSort === column) {
-      setSort(column, currentDir === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSort(column, 'desc');
+  // Add rule in custom AND/OR filter builder
+  const handleAddRule = () => {
+    setFilterRules([...filterRules, { field: 'priority', operator: 'equals', value: '' }]);
+  };
+
+  const handleRemoveRule = (idx: number) => {
+    setFilterRules(filterRules.filter((_, i) => i !== idx));
+  };
+
+  const handleApplyFilters = () => {
+    const filtersObj = {
+      condition: filterCondition,
+      rules: filterRules.filter(r => r.value !== ''),
+    };
+    filterLeadsAction(filtersObj);
+    setFilterBuilderOpen(false);
+  };
+
+  const handleSaveView = async () => {
+    if (!newViewName.trim()) return;
+    const columnsArr = Object.keys(colVisibility).filter(k => colVisibility[k]);
+    const filtersObj = {
+      condition: filterCondition,
+      rules: filterRules.filter(r => r.value !== ''),
+    };
+    await saveCustomView({
+      name: newViewName.trim(),
+      filters: filtersObj,
+      columns: columnsArr,
+    });
+    setNewViewName('');
+    setSaveViewModalOpen(false);
+  };
+
+  // Bulk modify updates
+  const handleBulkUpdateSubmit = async () => {
+    const payload: any = { ids: selectedIds };
+    if (bulkField === 'status') payload.statusId = bulkVal;
+    if (bulkField === 'priority') payload.priority = bulkVal;
+    if (bulkField === 'rating') payload.rating = parseInt(bulkVal) || 0;
+    if (bulkField === 'owner') payload.assignedToId = bulkVal;
+    if (bulkField === 'tags') {
+      payload.tags = bulkTagsText.split(',').map(t => t.trim()).filter(Boolean);
     }
+
+    await bulkUpdateLeads(payload);
+    clearSelection();
+    setBulkActionOpen(false);
+    setBulkField('');
+    setBulkVal('');
+    setBulkTagsText('');
+  };
+
+  const handleBulkArchive = async () => {
+    if (window.confirm(`Archive ${selectedIds.length} leads?`)) {
+      await archiveLeadsAction(selectedIds);
+      clearSelection();
+    }
+  };
+
+  const handleBulkRestore = async () => {
+    await restoreLeadsAction(selectedIds);
+    clearSelection();
+  };
+
+  // Export leads dataset helper
+  const handleExportSubmit = async () => {
+    const params: Record<string, any> = { type: exportType };
+    if (exportScope === 'selected') {
+      params.selectedIds = selectedIds.join(',');
+    } else if (exportScope === 'filtered') {
+      params.filters = JSON.stringify({ condition: filterCondition, rules: filterRules });
+    } else if (exportScope === 'page') {
+      params.pageLeads = leads.map(l => l.id).join(',');
+    }
+
+    const data = await exportLeadsAction(params);
+    
+    // Simulate browser download file
+    const headers = ['Lead No', 'Name', 'Company', 'Email', 'Phone', 'Priority', 'Status', 'Value'];
+    const rows = data.map((l: any) => [
+      l.leadNumber,
+      `"${l.fullName}"`,
+      `"${l.companyName || ''}"`,
+      l.email || '',
+      l.phone || '',
+      l.priority,
+      l.status?.name || '',
+      l.value || 0,
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `FlowCRM_Leads_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setExportOpen(false);
+  };
+
+  // CSV uploader step parses helper
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const text = evt.target?.result as string;
+      setImportFileText(text);
+
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length > 0) {
+        const headersArr = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
+        setImportHeaders(headersArr);
+
+        const rowsArr = lines.slice(1).map(line => {
+          const cols = line.split(',').map(c => c.trim().replace(/['"]/g, ''));
+          const rowObj: any = {};
+          headersArr.forEach((h, idx) => {
+            rowObj[h] = cols[idx] || '';
+          });
+          return rowObj;
+        });
+
+        setImportRows(rowsArr);
+        
+        // Auto match mapping preview fields
+        const initialMapping = { ...fieldMapping };
+        Object.keys(initialMapping).forEach(k => {
+          const match = headersArr.find(h => h.toLowerCase() === k.toLowerCase());
+          if (match) initialMapping[k] = match;
+        });
+        setFieldMapping(initialMapping);
+        setImportStep(2);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleImportSubmit = async () => {
+    try {
+      const res = await importLeadsAction({
+        fileName: importFileName,
+        rows: importRows,
+        mapping: fieldMapping,
+      });
+      setImportResult(res);
+      setImportStep(3);
+    } catch (err: any) {
+      setImportResult({ error: err.message || 'Import transaction rolled back.' });
+      setImportStep(3);
+    }
+  };
+
+  // Lead merging parameters
+  const handleMergeSubmit = async () => {
+    if (!mergePrimaryId || !mergeSecondaryId) return;
+    await mergeLeadsAction({
+      primaryId: mergePrimaryId,
+      secondaryIds: [mergeSecondaryId],
+      fieldValues: mergedFields,
+    });
+    setMergeOpen(false);
+    setMergePrimaryId('');
+    setMergeSecondaryId('');
+    setMergedFields({});
+  };
+
+  const startMerge = (lead1Id: string, lead2Id: string) => {
+    setMergePrimaryId(lead1Id);
+    setMergeSecondaryId(lead2Id);
+    const lead1 = leads.find(l => l.id === lead1Id);
+    const lead2 = leads.find(l => l.id === lead2Id);
+    if (lead1 && lead2) {
+      setMergedFields({
+        firstName: lead1.firstName,
+        lastName: lead1.lastName,
+        email: lead1.email || lead2.email,
+        phone: lead1.phone || lead2.phone,
+        companyName: lead1.companyName || lead2.companyName,
+        value: Math.max(lead1.value || 0, lead2.value || 0),
+        industry: lead1.industry || lead2.industry,
+      });
+    }
+    setMergeOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
     if (leadToDelete) {
       await deleteLead(leadToDelete);
-      setDeleteModalOpen(false);
+      setDeleteOpen(false);
       setLeadToDelete(null);
+      fetchLeads();
     }
   };
 
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Star
-            key={i}
-            size={13}
-            className={i <= rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}
-          />
-        ))}
-      </div>
-    );
-  };
+  // Find duplicates warnings triggers
+  const duplicateAlerts = useMemo(() => {
+    const alerts: Array<{ lead1: any; lead2: any; reason: string }> = [];
+    const emails = new Map();
+    const phones = new Map();
 
-  const SortIcon = ({ column }: { column: string }) => {
-    if (filters.sortBy !== column)
-      return <div className="w-3.5 h-3.5" />;
-    return filters.sortDir === 'asc' ? (
-      <ChevronUp size={14} className="text-brand-600" />
-    ) : (
-      <ChevronDown size={14} className="text-brand-600" />
-    );
-  };
-
-  const breadcrumbs = [{ label: 'Leads' }];
-
-  const columns = [
-    { key: 'leadNumber', label: 'Lead #', sortable: true },
-    { key: 'fullName', label: 'Name', sortable: true },
-    { key: 'companyName', label: 'Company', sortable: true },
-    { key: 'email', label: 'Email', sortable: true },
-    { key: 'phone', label: 'Phone', sortable: false },
-    { key: 'status', label: 'Status', sortable: false },
-    { key: 'priority', label: 'Priority', sortable: true },
-    { key: 'assignedTo', label: 'Owner', sortable: false },
-    { key: 'source', label: 'Source', sortable: false },
-    { key: 'value', label: 'Value', sortable: true },
-    { key: 'expectedClosingDate', label: 'Expected Close', sortable: true },
-    { key: 'createdAt', label: 'Created', sortable: true },
-    { key: 'actions', label: 'Actions', sortable: false },
-  ];
-
-  const visibleColumns = columns.filter((c) => colVisibility[c.key]);
-
-  // Statistics cards
-  const statsCards = [
-    {
-      label: 'Total Leads',
-      value: statistics?.totalLeads ?? 0,
-      icon: Users2,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
-    },
-    {
-      label: 'Qualified',
-      value: statistics?.qualifiedLeads ?? 0,
-      icon: Target,
-      color: 'text-cyan-600',
-      bg: 'bg-cyan-50',
-    },
-    {
-      label: 'Won',
-      value: statistics?.wonLeads ?? 0,
-      icon: Trophy,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
-    },
-    {
-      label: 'Lost',
-      value: statistics?.lostLeads ?? 0,
-      icon: XCircle,
-      color: 'text-red-600',
-      bg: 'bg-red-50',
-    },
-    {
-      label: 'Conversion',
-      value: `${statistics?.conversionRate ?? 0}%`,
-      icon: TrendingUp,
-      color: 'text-violet-600',
-      bg: 'bg-violet-50',
-    },
-    {
-      label: 'Avg. Value',
-      value: `$${(statistics?.averageValue ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
-      icon: DollarSign,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50',
-    },
-  ];
+    leads.forEach(l => {
+      if (l.email) {
+        if (emails.has(l.email)) {
+          alerts.push({ lead1: emails.get(l.email), lead2: l, reason: 'Duplicate Email' });
+        } else {
+          emails.set(l.email, l);
+        }
+      }
+      if (l.phone) {
+        if (phones.has(l.phone)) {
+          alerts.push({ lead1: phones.get(l.phone), lead2: l, reason: 'Duplicate Phone' });
+        } else {
+          phones.set(l.phone, l);
+        }
+      }
+    });
+    return alerts;
+  }, [leads]);
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb & Header */}
-      <div className="flex flex-col gap-2">
-        <Breadcrumb items={breadcrumbs} />
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-800">
-              Lead Management
-            </h1>
-            <p className="text-sm text-slate-400 mt-0.5">
-              Track and manage your sales pipeline prospects
-            </p>
-          </div>
+      {/* Header breadcrumb & actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <Breadcrumb items={[{ label: 'Sales Leads Workspace' }]} />
+          <h1 className="text-2xl font-black tracking-tight text-slate-800">Advanced Lead Workspace</h1>
+          <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">
+            Enterprise multi filtering, saved layouts, CSV import wizards, and deduplication
+          </p>
+        </div>
+
+        <div className="flex gap-2">
           <Button
-            variant="primary"
+            variant="glass"
+            size="sm"
+            onClick={() => setImportOpen(true)}
+            className="rounded-xl font-bold border-slate-200 text-xs flex items-center gap-1.5"
+          >
+            <FileUp size={14} />
+            CSV Mapper Import
+          </Button>
+          <Button
+            variant="glass"
+            size="sm"
+            onClick={() => setExportOpen(true)}
+            className="rounded-xl font-bold border-slate-200 text-xs flex items-center gap-1.5"
+          >
+            <FileDown size={14} />
+            Export Data
+          </Button>
+          <Button
             onClick={() => navigate('/leads/new')}
-            className="flex items-center gap-2 shadow-md"
+            className="rounded-xl flex items-center gap-1.5 shadow-md bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs"
           >
             <Plus size={16} />
             Add Lead
@@ -258,385 +475,873 @@ const Leads: React.FC = () => {
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {statsCards.map((card) => (
-          <Card key={card.label} className="p-4 hover:shadow-glossy-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className={`p-2.5 rounded-xl ${card.bg}`}>
-                <card.icon size={18} className={card.color} />
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">
-                  {card.label}
-                </p>
-                <p className="text-lg font-bold text-slate-800 mt-0.5">
-                  {card.value}
-                </p>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Quick Filters */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Filter size={15} className="text-slate-400 mr-1" />
-        {quickFilters.map((qf) => (
-          <button
-            key={qf.key}
-            onClick={() => handleQuickFilter(qf.key)}
-            className={`
-              flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border
-              ${
-                activeQuickFilter === qf.key
-                  ? 'bg-brand-550 text-white border-brand-550 shadow-sm'
-                  : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
-              }
-            `}
-          >
-            <qf.icon size={13} />
-            {qf.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Error Banner */}
-      {error && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-          <AlertCircle size={18} />
-          <span>{error}</span>
-          <button onClick={clearError} className="ml-auto text-red-500 hover:text-red-700">
-            <XCircle size={16} />
-          </button>
-        </div>
+      {/* DUPLICATE DETECTION NOTICE BANNER */}
+      {duplicateAlerts.length > 0 && duplicateBannerOpen && (
+        <Card className="p-3.5 bg-amber-50/60 border border-amber-200/80 rounded-2xl flex items-center justify-between gap-3 text-xs font-bold text-amber-800 shadow-sm animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={16} className="text-amber-600 shrink-0" />
+            <span>
+              Warning: Detected {duplicateAlerts.length} duplicate conflicts in workspace. Take merging actions to unify history logs.
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => startMerge(duplicateAlerts[0].lead1.id, duplicateAlerts[0].lead2.id)}
+              className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg shadow-sm text-[10px]"
+            >
+              Resolve Merge
+            </button>
+            <button onClick={() => setDuplicateBannerOpen(false)}>
+              <XCircle size={16} className="text-amber-400 hover:text-amber-600" />
+            </button>
+          </div>
+        </Card>
       )}
 
-      {/* Search & Column Visibility Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full sm:max-w-xs">
-          <Input
-            icon={<Search size={16} />}
-            placeholder="Search leads by name, email, company..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="py-2 pl-9 rounded-xl border-slate-200/80 bg-white"
-          />
-        </div>
-        <div className="relative ml-auto">
+      {/* STATISTICS PERIOD BAR */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Sales Leads', val: statistics?.totalLeads || 0, icon: Users2, color: 'text-blue-500' },
+          { label: 'Qualified Opportunities', val: statistics?.qualifiedLeads || 0, icon: Target, color: 'text-amber-500' },
+          { label: 'Won Conversions', val: statistics?.wonLeads || 0, icon: Trophy, color: 'text-emerald-500' },
+          { label: 'Pipeline Forecast Value', val: `$${(statistics?.totalValue || 0).toLocaleString()}`, icon: DollarSign, color: 'text-indigo-500' },
+        ].map((c, i) => {
+          const Icon = c.icon;
+          return (
+            <Card key={i} className="p-4 bg-white border border-slate-200/60 shadow-sm rounded-2xl flex items-center gap-4">
+              <div className={`p-3 rounded-xl bg-slate-50 border border-slate-100 ${c.color}`}>
+                <Icon size={20} />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{c.label}</span>
+                <span className="text-xl font-black text-slate-800 block mt-0.5">{c.val}</span>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* FILTER BUILDER, VIEWS TABS & SEARCH ROW */}
+      <div className="space-y-4">
+        {/* Saved Views tab selector row */}
+        <div className="flex flex-wrap gap-2 items-center pb-2 border-b border-slate-100">
+          <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mr-2">List Layouts:</span>
+          <button
+            onClick={() => {
+              setSelectedViewId(null);
+              fetchLeads();
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+              !selectedViewId ? 'bg-blue-50/50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            All Leads Default
+          </button>
+          
+          {savedViews.map((view) => (
+            <div key={view.id} className="flex items-center gap-0.5 group">
+              <button
+                onClick={() => handleSelectView(view)}
+                className={`px-3 py-1.5 rounded-l-lg text-xs font-bold transition-all border border-r-0 ${
+                  selectedViewId === view.id
+                    ? 'bg-blue-50/50 border-blue-200 text-blue-700'
+                    : 'bg-white border-slate-200 text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                {view.name}
+              </button>
+              <button
+                onClick={() => deleteCustomView(view.id)}
+                className="px-2 py-1.5 border border-l-0 border-slate-200 rounded-r-lg bg-white hover:bg-red-50 text-slate-350 hover:text-red-600 transition-colors"
+              >
+                <Trash size={12} />
+              </button>
+            </div>
+          ))}
+
           <Button
             variant="glass"
             size="sm"
-            onClick={() => setShowColMenu(!showColMenu)}
-            className="flex items-center gap-2 border-slate-200/80 hover:bg-slate-50"
+            onClick={() => setSaveViewModalOpen(true)}
+            className="rounded-lg text-[10px] font-bold py-1 px-2.5 h-max border-dashed border-slate-300 hover:border-blue-400 text-slate-500"
           >
-            <SlidersHorizontal size={14} />
-            Columns
+            + Save View Layout
           </Button>
-          {showColMenu && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setShowColMenu(false)} />
-              <div className="absolute right-0 mt-2 w-52 rounded-xl bg-white border border-slate-100 shadow-glossy-md p-2 z-20">
-                <p className="text-xs font-semibold text-slate-400 px-2 py-1.5 uppercase tracking-wide">
-                  Toggle Columns
-                </p>
-                <div className="h-px bg-slate-100 my-1" />
-                <div className="max-h-56 overflow-y-auto space-y-0.5">
-                  {columns
-                    .filter((c) => c.key !== 'actions')
-                    .map((col) => (
-                      <label
-                        key={col.key}
-                        className="flex items-center gap-2 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-50 rounded-lg cursor-pointer transition-all"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={colVisibility[col.key]}
-                          onChange={(e) =>
-                            setColVisibility((prev) => ({
-                              ...prev,
-                              [col.key]: e.target.checked,
-                            }))
-                          }
-                          className="rounded border-slate-300 text-brand-550 focus:ring-brand-100"
-                        />
-                        {col.label}
-                      </label>
-                    ))}
-                </div>
-              </div>
-            </>
-          )}
         </div>
-      </div>
 
-      {/* Table */}
-      {loading && leads.length === 0 ? (
-        <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-14 w-full rounded-xl" />
-          ))}
-        </div>
-      ) : leads.length === 0 ? (
-        <EmptyState
-          title="No Leads Found"
-          description={
-            searchQuery || activeQuickFilter !== 'all'
-              ? 'No leads match your current filters. Try adjusting your search or filters.'
-              : 'Start building your pipeline by adding your first lead.'
-          }
-          icon={<Users2 className="w-12 h-12 text-slate-300" />}
-          actionLabel={!searchQuery && activeQuickFilter === 'all' ? 'Create Lead' : undefined}
-          onAction={
-            !searchQuery && activeQuickFilter === 'all'
-              ? () => navigate('/leads/new')
-              : undefined
-          }
-        />
-      ) : (
-        <>
-          <div className="rounded-2xl border border-slate-200/60 overflow-hidden bg-white/70 backdrop-blur-md shadow-glossy-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200/80 bg-slate-50/70">
-                    {visibleColumns.map((col) => (
-                      <th
-                        key={col.key}
-                        className={`py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider select-none ${
-                          col.sortable ? 'cursor-pointer hover:text-slate-700' : ''
-                        } sticky top-0 bg-slate-50/70 backdrop-blur-sm`}
-                        onClick={() => col.sortable && handleSort(col.key)}
-                      >
-                        <div className="flex items-center gap-1.5">
-                          {col.label}
-                          {col.sortable && <SortIcon column={col.key} />}
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100/60">
-                  {leads.map((lead) => (
-                    <tr
-                      key={lead.id}
-                      className="hover:bg-slate-50/50 transition-colors cursor-pointer"
-                      onClick={() => navigate(`/leads/${lead.id}`)}
-                    >
-                      {colVisibility.leadNumber && (
-                        <td className="py-3.5 px-4 text-sm font-mono text-slate-500">
-                          {lead.leadNumber}
-                        </td>
-                      )}
-                      {colVisibility.fullName && (
-                        <td className="py-3.5 px-4">
-                          <div>
-                            <p className="text-sm font-semibold text-slate-800">
-                              {lead.fullName}
-                            </p>
-                            {lead.jobTitle && (
-                              <p className="text-xs text-slate-400">{lead.jobTitle}</p>
-                            )}
-                          </div>
-                        </td>
-                      )}
-                      {colVisibility.companyName && (
-                        <td className="py-3.5 px-4 text-sm text-slate-600">
-                          {lead.companyName || '—'}
-                        </td>
-                      )}
-                      {colVisibility.email && (
-                        <td className="py-3.5 px-4 text-sm text-slate-600">
-                          {lead.email || '—'}
-                        </td>
-                      )}
-                      {colVisibility.phone && (
-                        <td className="py-3.5 px-4 text-sm text-slate-600">
-                          {lead.phone || '—'}
-                        </td>
-                      )}
-                      {colVisibility.status && (
-                        <td className="py-3.5 px-4">
-                          {lead.status ? (
-                            <span
-                              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border"
-                              style={{
-                                backgroundColor: `${lead.status.color}15`,
-                                color: lead.status.color,
-                                borderColor: `${lead.status.color}30`,
-                              }}
-                            >
-                              {lead.status.name}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-slate-400">—</span>
-                          )}
-                        </td>
-                      )}
-                      {colVisibility.priority && (
-                        <td className="py-3.5 px-4">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${
-                              priorityColors[lead.priority] || priorityColors.Medium
-                            }`}
-                          >
-                            {lead.priority}
-                          </span>
-                        </td>
-                      )}
-                      {colVisibility.assignedTo && (
-                        <td className="py-3.5 px-4 text-sm text-slate-600">
-                          {lead.assignedTo
-                            ? `${lead.assignedTo.firstName} ${lead.assignedTo.lastName}`
-                            : '—'}
-                        </td>
-                      )}
-                      {colVisibility.source && (
-                        <td className="py-3.5 px-4 text-sm text-slate-600">
-                          {lead.source?.name || '—'}
-                        </td>
-                      )}
-                      {colVisibility.value && (
-                        <td className="py-3.5 px-4 text-sm font-semibold text-slate-700">
-                          ${lead.value.toLocaleString()}
-                        </td>
-                      )}
-                      {colVisibility.expectedClosingDate && (
-                        <td className="py-3.5 px-4 text-sm text-slate-500">
-                          {lead.expectedClosingDate
-                            ? new Date(lead.expectedClosingDate).toLocaleDateString()
-                            : '—'}
-                        </td>
-                      )}
-                      {colVisibility.createdAt && (
-                        <td className="py-3.5 px-4 text-sm text-slate-500">
-                          {new Date(lead.createdAt).toLocaleDateString()}
-                        </td>
-                      )}
-                      {colVisibility.actions && (
-                        <td className="py-3.5 px-4">
-                          <div
-                            className="flex items-center gap-1"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              onClick={() => navigate(`/leads/${lead.id}`)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
-                              title="View"
-                            >
-                              <Eye size={15} />
-                            </button>
-                            <button
-                              onClick={() => navigate(`/leads/${lead.id}/edit`)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
-                              title="Edit"
-                            >
-                              <Pencil size={15} />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setLeadToDelete(lead.id);
-                                setDeleteModalOpen(true);
-                              }}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
-                              title="Delete"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </td>
-                      )}
-                    </tr>
+        {/* Global Instant Search Bar & Column configurations */}
+        <div className="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+          <div className="flex-1 max-w-md relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Instant query (name, email, industry, tags, state, city...)"
+              className="pl-9 pr-4 rounded-xl border-slate-200/80 focus:border-blue-400 bg-white/70"
+            />
+          </div>
+
+          <div className="flex gap-2 justify-end items-center">
+            <Button
+              variant="glass"
+              size="sm"
+              onClick={() => setFilterBuilderOpen(true)}
+              className="rounded-xl flex items-center gap-1.5 font-bold text-xs"
+            >
+              <Filter size={14} />
+              AND/OR Filter Builder
+            </Button>
+
+            <div className="relative">
+              <Button
+                variant="glass"
+                size="sm"
+                onClick={() => setShowColMenu(!showColMenu)}
+                className="rounded-xl flex items-center gap-1.5 font-bold text-xs"
+              >
+                <Columns size={14} />
+                Columns Layout
+              </Button>
+
+              {showColMenu && (
+                <Card className="absolute right-0 mt-2 p-3 bg-white border border-slate-200 rounded-xl shadow-xl z-35 min-w-[160px] space-y-2 text-xs font-semibold text-slate-700">
+                  {Object.keys(colVisibility).map((col) => (
+                    <label key={col} className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={colVisibility[col]}
+                        onChange={() => setColVisibility(prev => ({ ...prev, [col]: !prev[col] }))}
+                        className="rounded text-blue-600 focus:ring-0"
+                      />
+                      <span className="capitalize">{col.replace(/([A-Z])/g, ' $1')}</span>
+                    </label>
                   ))}
-                </tbody>
-              </table>
+                </Card>
+              )}
             </div>
-          </div>
 
-          {/* Pagination */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1 text-slate-500">
-            <div className="text-xs font-medium">
-              Showing {(pagination.page - 1) * pagination.limit + 1}–
-              {Math.min(pagination.page * pagination.limit, pagination.totalItems)} of{' '}
-              {pagination.totalItems} leads
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Button
-                variant="glass"
-                size="sm"
-                onClick={() => setPage(1)}
-                disabled={pagination.page <= 1}
-                className="p-1.5 rounded-lg border-slate-200/80 hover:bg-slate-50"
-              >
-                <ChevronsLeft size={16} />
-              </Button>
-              <Button
-                variant="glass"
-                size="sm"
-                onClick={() => setPage(pagination.page - 1)}
-                disabled={pagination.page <= 1}
-                className="p-1.5 rounded-lg border-slate-200/80 hover:bg-slate-50"
-              >
-                <ChevronLeft size={16} />
-              </Button>
-              <span className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white rounded-lg border border-slate-200/80">
-                {pagination.page} / {pagination.totalPages || 1}
-              </span>
-              <Button
-                variant="glass"
-                size="sm"
-                onClick={() => setPage(pagination.page + 1)}
-                disabled={pagination.page >= pagination.totalPages}
-                className="p-1.5 rounded-lg border-slate-200/80 hover:bg-slate-50"
-              >
-                <ChevronRight size={16} />
-              </Button>
-              <Button
-                variant="glass"
-                size="sm"
-                onClick={() => setPage(pagination.totalPages)}
-                disabled={pagination.page >= pagination.totalPages}
-                className="p-1.5 rounded-lg border-slate-200/80 hover:bg-slate-50"
-              >
-                <ChevronsRight size={16} />
-              </Button>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={deleteModalOpen}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setLeadToDelete(null);
-        }}
-        title="Delete Lead"
-        size="sm"
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-slate-600">
-            Are you sure you want to delete this lead? This action can be undone later if needed.
-          </p>
-          <div className="flex items-center justify-end gap-3">
             <Button
               variant="glass"
               size="sm"
               onClick={() => {
-                setDeleteModalOpen(false);
-                setLeadToDelete(null);
+                setSearchQuery('');
+                setFilterRules([]);
+                fetchLeads();
               }}
+              className="rounded-xl text-red-500 border-red-100 hover:bg-red-50 text-xs"
             >
+              Reset Filters
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* MASS BULK ACTIONS FLOATING TOOLBAR */}
+      {selectedIds.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200/60 p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs font-bold text-blue-800 shadow-md">
+          <span>Selected {selectedIds.length} lead records:</span>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={() => {
+                setBulkField('status');
+                setBulkActionOpen(true);
+              }}
+              className="bg-white hover:bg-slate-50 text-blue-800 border border-blue-200 font-bold rounded-xl text-xs py-1 px-3"
+            >
+              Change Status
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                setBulkField('owner');
+                setBulkActionOpen(true);
+              }}
+              className="bg-white hover:bg-slate-50 text-blue-800 border border-blue-200 font-bold rounded-xl text-xs py-1 px-3"
+            >
+              Assign User
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                setBulkField('tags');
+                setBulkActionOpen(true);
+              }}
+              className="bg-white hover:bg-slate-50 text-blue-800 border border-blue-200 font-bold rounded-xl text-xs py-1 px-3"
+            >
+              Apply Tags
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleBulkArchive}
+              className="bg-white hover:bg-slate-50 text-blue-800 border border-blue-200 font-bold rounded-xl text-xs py-1 px-3 flex items-center gap-1"
+            >
+              <Archive size={12} />
+              Archive
+            </Button>
+            <Button
+              variant="glass"
+              size="sm"
+              onClick={clearSelection}
+              className="rounded-xl border-blue-200 text-xs py-1 px-3"
+            >
+              Clear Checked
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* CORE LEADS DATA TABLE */}
+      <Card className="overflow-hidden border border-slate-200/50 bg-white/70 backdrop-blur-md rounded-2xl shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50/60 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                <th className="py-3 px-4 w-10">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.length === leads.length && leads.length > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        leads.forEach(l => {
+                          if (!selectedIds.includes(l.id)) toggleSelection(l.id);
+                        });
+                      } else {
+                        clearSelection();
+                      }
+                    }}
+                    className="rounded border-slate-350 text-blue-600 focus:ring-0"
+                  />
+                </th>
+                {colVisibility.leadNumber && <th className="py-3 px-4">Lead ID</th>}
+                {colVisibility.fullName && <th className="py-3 px-4">Full Name</th>}
+                {colVisibility.companyName && <th className="py-3 px-4">Company</th>}
+                {colVisibility.email && <th className="py-3 px-4">Email Address</th>}
+                {colVisibility.phone && <th className="py-3 px-4">Phone No</th>}
+                {colVisibility.status && <th className="py-3 px-4">CRM Status</th>}
+                {colVisibility.priority && <th className="py-3 px-4">Priority</th>}
+                {colVisibility.value && <th className="py-3 px-4">Expected Value</th>}
+                {colVisibility.tags && <th className="py-3 px-4">Tags</th>}
+                {colVisibility.createdAt && <th className="py-3 px-4">Date Created</th>}
+                <th className="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-xs">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td className="p-4" colSpan={11}>
+                      <Skeleton className="h-6 w-full rounded-lg" />
+                    </td>
+                  </tr>
+                ))
+              ) : leads.length > 0 ? (
+                leads.map((lead) => {
+                  const isChecked = selectedIds.includes(lead.id);
+                  return (
+                    <tr
+                      key={lead.id}
+                      onClick={() => navigate(`/leads/${lead.id}`)}
+                      className={`hover:bg-white/80 transition-colors group cursor-pointer ${isChecked ? 'bg-blue-50/20' : ''}`}
+                    >
+                      <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleSelection(lead.id)}
+                          className="rounded border-slate-300 text-blue-600 focus:ring-0"
+                        />
+                      </td>
+                      {colVisibility.leadNumber && (
+                        <td className="py-3.5 px-4 font-bold text-slate-500 font-mono tracking-tight">
+                          {lead.leadNumber}
+                        </td>
+                      )}
+                      {colVisibility.fullName && (
+                        <td className="py-3.5 px-4 font-black text-slate-800 min-w-[140px]">
+                          {lead.fullName}
+                        </td>
+                      )}
+                      {colVisibility.companyName && (
+                        <td className="py-3.5 px-4 text-slate-650 font-semibold truncate max-w-[150px]">
+                          {lead.companyName || <span className="text-slate-300">—</span>}
+                        </td>
+                      )}
+                      {colVisibility.email && (
+                        <td className="py-3.5 px-4 text-slate-500 font-medium">
+                          {lead.email || <span className="text-slate-300">—</span>}
+                        </td>
+                      )}
+                      {colVisibility.phone && (
+                        <td className="py-3.5 px-4 text-slate-450 font-semibold font-mono">
+                          {lead.phone || <span className="text-slate-300">—</span>}
+                        </td>
+                      )}
+                      {colVisibility.status && (
+                        <td className="py-3.5 px-4">
+                          <Badge
+                            variant="glass"
+                            className="font-bold text-[10px] border px-2 py-0.5 rounded-lg"
+                            style={{
+                              backgroundColor: `${lead.status?.color}10`,
+                              borderColor: `${lead.status?.color}40`,
+                              color: lead.status?.color,
+                            }}
+                          >
+                            {lead.status?.name || 'Unassigned'}
+                          </Badge>
+                        </td>
+                      )}
+                      {colVisibility.priority && (
+                        <td className="py-3.5 px-4">
+                          <Badge
+                            variant="glass"
+                            className={`px-2 py-0.5 border text-[10px] font-bold rounded-lg ${priorityColors[lead.priority] || priorityColors.Medium}`}
+                          >
+                            {lead.priority}
+                          </Badge>
+                        </td>
+                      )}
+                      {colVisibility.value && (
+                        <td className="py-3.5 px-4 font-bold text-slate-700">
+                          ${(lead.value || 0).toLocaleString()}
+                        </td>
+                      )}
+                      {colVisibility.tags && (
+                        <td className="py-3.5 px-4">
+                          <div className="flex gap-1 flex-wrap max-w-[180px]">
+                            {lead.tagMappings && lead.tagMappings.length > 0 ? (
+                              lead.tagMappings.map((map: any) => (
+                                <span
+                                  key={map.tag.id}
+                                  className="text-[9px] font-bold px-1.5 py-0.2 rounded border shadow-sm"
+                                  style={{
+                                    backgroundColor: `${map.tag.color}15`,
+                                    borderColor: `${map.tag.color}35`,
+                                    color: map.tag.color,
+                                  }}
+                                >
+                                  {map.tag.name}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-slate-300">—</span>
+                            )}
+                          </div>
+                        </td>
+                      )}
+                      {colVisibility.createdAt && (
+                        <td className="py-3.5 px-4 text-slate-400 font-semibold font-mono">
+                          {new Date(lead.createdAt).toLocaleDateString()}
+                        </td>
+                      )}
+                      <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-end gap-1">
+                          <button
+                            onClick={() => navigate(`/leads/${lead.id}`)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors"
+                            title="360 Profile"
+                          >
+                            <Eye size={13} />
+                          </button>
+                          <button
+                            onClick={() => navigate(`/leads/${lead.id}/edit`)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors"
+                            title="Edit"
+                          >
+                            <Pencil size={13} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setLeadToDelete(lead.id);
+                              setDeleteOpen(true);
+                            }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={11} className="py-12 text-center text-slate-400 font-bold">
+                    <p className="text-sm">No sales leads matched criteria.</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {pagination.totalPages > 1 && (
+          <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center text-xs font-semibold text-slate-500">
+            <span>
+              Showing page {pagination.page} of {pagination.totalPages}
+            </span>
+            <div className="flex gap-1.5">
+              <Button
+                variant="glass"
+                size="sm"
+                disabled={pagination.page <= 1}
+                onClick={() => setPage(pagination.page - 1)}
+              >
+                Prev
+              </Button>
+              <Button
+                variant="glass"
+                size="sm"
+                disabled={pagination.page >= pagination.totalPages}
+                onClick={() => setPage(pagination.page + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* FILTER BUILDER DIALOG */}
+      <Modal
+        isOpen={filterBuilderOpen}
+        onClose={() => setFilterBuilderOpen(false)}
+        title="Custom AND/OR Filter Builder"
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-slate-650">Match conditions:</span>
+            <div className="flex border border-slate-200 rounded-xl overflow-hidden text-xs">
+              <button
+                onClick={() => setFilterCondition('AND')}
+                className={`px-3 py-1.5 font-bold ${filterCondition === 'AND' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}
+              >
+                AND (All rules)
+              </button>
+              <button
+                onClick={() => setFilterCondition('OR')}
+                className={`px-3 py-1.5 font-bold ${filterCondition === 'OR' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}
+              >
+                OR (Any rule)
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            {filterRules.map((rule, idx) => (
+              <div key={idx} className="flex gap-2 items-center">
+                <select
+                  value={rule.field}
+                  onChange={(e) => {
+                    const next = [...filterRules];
+                    next[idx].field = e.target.value;
+                    setFilterRules(next);
+                  }}
+                  className="flex-1 text-xs border border-slate-200 rounded-xl p-2 bg-white font-semibold focus:outline-none"
+                >
+                  <option value="priority">Priority</option>
+                  <option value="industry">Industry</option>
+                  <option value="value">Deal Value</option>
+                  <option value="city">City</option>
+                  <option value="state">State</option>
+                  <option value="country">Country</option>
+                </select>
+
+                <select
+                  value={rule.operator}
+                  onChange={(e) => {
+                    const next = [...filterRules];
+                    next[idx].operator = e.target.value;
+                    setFilterRules(next);
+                  }}
+                  className="w-28 text-xs border border-slate-200 rounded-xl p-2 bg-white font-semibold focus:outline-none"
+                >
+                  <option value="equals">Equals</option>
+                  <option value="contains">Contains</option>
+                  <option value="gte">Greater Than</option>
+                  <option value="lte">Less Than</option>
+                </select>
+
+                <Input
+                  value={rule.value}
+                  onChange={(e) => {
+                    const next = [...filterRules];
+                    next[idx].value = e.target.value;
+                    setFilterRules(next);
+                  }}
+                  placeholder="Value..."
+                  className="flex-1 rounded-xl text-xs bg-white border-slate-200"
+                />
+
+                <button
+                  onClick={() => handleRemoveRule(idx)}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <XCircle size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <Button
+            variant="glass"
+            size="sm"
+            onClick={handleAddRule}
+            className="w-full text-xs font-bold border-dashed border-slate-300 text-slate-500 py-2 rounded-xl"
+          >
+            + Add Query Rule
+          </Button>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+            <Button variant="glass" size="sm" onClick={() => setFilterBuilderOpen(false)}>
               Cancel
             </Button>
             <Button
-              variant="primary"
-              size="sm"
-              onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700"
+              onClick={handleApplyFilters}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs py-2 px-4"
             >
-              {loading ? <Loader2 size={14} className="animate-spin" /> : 'Delete'}
+              Apply Filter
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* SAVE CUSTOM VIEW MODAL */}
+      <Modal
+        isOpen={saveViewModalOpen}
+        onClose={() => setSaveViewModalOpen(false)}
+        title="Save Current Filter Layout View"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <Input
+            value={newViewName}
+            onChange={(e) => setNewViewName(e.target.value)}
+            placeholder="e.g. Qualified High Value Leads"
+            required
+            className="rounded-xl border-slate-200 bg-white"
+          />
+          <div className="flex justify-end gap-3">
+            <Button variant="glass" size="sm" onClick={() => setSaveViewModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveView}
+              disabled={!newViewName.trim()}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs"
+            >
+              Create View
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* BULK OPERATIONS EDIT PANEL */}
+      <Modal
+        isOpen={bulkActionOpen}
+        onClose={() => setBulkActionOpen(false)}
+        title={`Bulk Update leads ${bulkField}`}
+        size="sm"
+      >
+        <div className="space-y-4">
+          {bulkField === 'status' && (
+            <select
+              value={bulkVal}
+              onChange={(e) => setBulkVal(e.target.value)}
+              className="w-full text-sm font-semibold border border-slate-200 focus:border-blue-400 bg-white rounded-xl p-2.5 focus:outline-none"
+            >
+              <option value="">Select Status</option>
+              {statuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          )}
+
+          {bulkField === 'owner' && (
+            <select
+              value={bulkVal}
+              onChange={(e) => setBulkVal(e.target.value)}
+              className="w-full text-sm font-semibold border border-slate-200 focus:border-blue-400 bg-white rounded-xl p-2.5 focus:outline-none"
+            >
+              <option value="">Select Owner</option>
+              {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
+            </select>
+          )}
+
+          {bulkField === 'tags' && (
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Apply tag names</label>
+              <Input
+                value={bulkTagsText}
+                onChange={(e) => setBulkTagsText(e.target.value)}
+                placeholder="Enterprise, VIP, Hot Lead"
+                className="rounded-xl border-slate-200 bg-white"
+              />
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3">
+            <Button variant="glass" size="sm" onClick={() => setBulkActionOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleBulkUpdateSubmit}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs"
+            >
+              Save bulk updates
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* EXPORT OPTIONS MODAL */}
+      <Modal
+        isOpen={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export CRM Dataset"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Export Format</label>
+            <div className="grid grid-cols-3 gap-2">
+              {['csv', 'xlsx', 'pdf'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => setExportType(type as any)}
+                  className={`p-2.5 rounded-xl border text-xs font-bold uppercase transition-all ${
+                    exportType === type ? 'border-blue-500 bg-blue-50/20 text-blue-600' : 'border-slate-200 text-slate-500 bg-white'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Scope Selection</label>
+            <select
+              value={exportScope}
+              onChange={(e) => setExportScope(e.target.value as any)}
+              className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2.5 focus:outline-none"
+            >
+              <option value="all">All Records ({statistics?.totalLeads})</option>
+              <option value="selected" disabled={selectedIds.length === 0}>
+                Selected Rows ({selectedIds.length})
+              </option>
+              <option value="filtered">Filtered Results</option>
+              <option value="page">Current Page Leads</option>
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="glass" size="sm" onClick={() => setExportOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExportSubmit}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs"
+            >
+              Download Export
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* CSV IMPORT WIZARD MODAL */}
+      <Modal
+        isOpen={importOpen}
+        onClose={() => {
+          setImportOpen(false);
+          setImportStep(1);
+          setImportResult(null);
+        }}
+        title="Field Mapping Lead Import Wizard"
+        size="md"
+      >
+        <div className="space-y-4">
+          {importStep === 1 && (
+            <div className="space-y-4 py-3 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50 p-6">
+              <FileUp className="mx-auto text-slate-400" size={32} />
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-slate-700 block">Upload CSV Lead Data</span>
+                <span className="text-[10px] text-slate-400 block">Accepts general columns and maps them</span>
+              </div>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleCSVUpload}
+                className="hidden"
+                id="csv-upload-input"
+              />
+              <Button
+                onClick={() => document.getElementById('csv-upload-input')?.click()}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs py-2 px-5"
+              >
+                Browse CSV File
+              </Button>
+            </div>
+          )}
+
+          {importStep === 2 && (
+            <div className="space-y-4">
+              <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider block">
+                Map CRM Fields to CSV Column Headers
+              </span>
+              <div className="grid grid-cols-2 gap-3 max-h-60 overflow-y-auto pr-1">
+                {Object.keys(fieldMapping).map((schemaKey) => (
+                  <div key={schemaKey} className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-550 capitalize">{schemaKey.replace(/([A-Z])/g, ' $1')}</label>
+                    <select
+                      value={fieldMapping[schemaKey]}
+                      onChange={(e) =>
+                        setFieldMapping((prev) => ({ ...prev, [schemaKey]: e.target.value }))
+                      }
+                      className="w-full text-xs font-semibold border border-slate-200 focus:border-blue-400 bg-white rounded-xl p-2 focus:outline-none"
+                    >
+                      <option value="">Ignore column</option>
+                      {importHeaders.map((header) => (
+                        <option key={header} value={header}>
+                          {header}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                <Button variant="glass" size="sm" onClick={() => setImportStep(1)}>
+                  Back
+                </Button>
+                <Button
+                  onClick={handleImportSubmit}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs"
+                >
+                  Import & Validate
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {importStep === 3 && (
+            <div className="space-y-4">
+              {importResult?.error ? (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-2xl text-red-750 text-xs font-bold space-y-1">
+                  <span>Import failed and was completely rolled back:</span>
+                  <span className="block font-mono text-[10px] font-semibold">{importResult.error}</span>
+                </div>
+              ) : (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-bold space-y-1.5">
+                  <span className="block text-sm">✓ Import operation finished successfully!</span>
+                  <div className="grid grid-cols-2 gap-2 text-[10px] font-bold mt-1 text-emerald-650">
+                    <div>Leads Imported: {importResult?.successCount || 0}</div>
+                    <div>Duplicate warnings linked: {importResult?.duplicateCount || 0}</div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => {
+                    setImportOpen(false);
+                    setImportStep(1);
+                    setImportResult(null);
+                    fetchLeads();
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs"
+                >
+                  Finish
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* MERGE DUPLICATES SIDE-BY-SIDE VIEW MODAL */}
+      <Modal
+        isOpen={mergeOpen}
+        onClose={() => setMergeOpen(false)}
+        title="Merge Duplicate Lead Records"
+        size="md"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Consolidating records will transfer all attachments, timelines, notes, and activity records to the primary lead record. Secondary leads will be soft-deleted.
+          </p>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">First Name</label>
+              <Input
+                value={mergedFields.firstName || ''}
+                onChange={(e) => setMergedFields({ ...mergedFields, firstName: e.target.value })}
+                className="rounded-xl border-slate-200 text-xs bg-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Last Name</label>
+              <Input
+                value={mergedFields.lastName || ''}
+                onChange={(e) => setMergedFields({ ...mergedFields, lastName: e.target.value })}
+                className="rounded-xl border-slate-200 text-xs bg-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Email Address</label>
+              <Input
+                value={mergedFields.email || ''}
+                onChange={(e) => setMergedFields({ ...mergedFields, email: e.target.value })}
+                className="rounded-xl border-slate-200 text-xs bg-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Phone Number</label>
+              <Input
+                value={mergedFields.phone || ''}
+                onChange={(e) => setMergedFields({ ...mergedFields, phone: e.target.value })}
+                className="rounded-xl border-slate-200 text-xs bg-white"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+            <Button variant="glass" size="sm" onClick={() => setMergeOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleMergeSubmit}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs py-2 px-5"
+            >
+              Confirm Merge Operations
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Single delete lead modal */}
+      <Modal
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        title="Confirm Lead Deletion"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Are you sure you want to delete this lead? All associated activity logs and notes will be permanently archived.
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button variant="glass" size="sm" onClick={() => setDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteConfirm}
+              className="bg-red-650 hover:bg-red-750 text-white font-bold rounded-xl text-xs"
+            >
+              Delete
             </Button>
           </div>
         </div>
@@ -646,3 +1351,4 @@ const Leads: React.FC = () => {
 };
 
 export default Leads;
+export { Leads };

@@ -81,6 +81,56 @@ export class TaskRepository {
         attachments: {
           orderBy: { createdAt: 'desc' },
         },
+        subtasks: {
+          where: { deletedAt: null },
+          include: {
+            assignedTo: { select: { id: true, firstName: true, lastName: true } },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+        checklists: {
+          where: { deletedAt: null },
+          orderBy: { order: 'asc' },
+        },
+        timeLogs: {
+          where: { deletedAt: null },
+          include: {
+            employee: { select: { id: true, firstName: true, lastName: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+        labelMappings: {
+          include: {
+            label: true,
+          },
+        },
+        watchers: {
+          include: {
+            employee: { select: { id: true, firstName: true, lastName: true, email: true } },
+          },
+        },
+        dependencies: {
+          include: {
+            dependentTask: { select: { id: true, taskNumber: true, title: true, status: true } },
+          },
+        },
+        dependentOn: {
+          include: {
+            task: { select: { id: true, taskNumber: true, title: true, status: true } },
+          },
+        },
+        recurrence: true,
+        approval: {
+          include: {
+            approver: { select: { id: true, firstName: true, lastName: true } },
+          },
+        },
+        timelines: {
+          include: {
+            user: { select: { id: true, fullName: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
   }
@@ -194,6 +244,201 @@ export class TaskRepository {
       where: { id: attachmentId },
     });
   }
+
+  /**
+   * Subtask actions
+   */
+  async createSubtask(data: Prisma.TaskSubtaskUncheckedCreateInput) {
+    return prisma.taskSubtask.create({
+      data,
+      include: {
+        assignedTo: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+  }
+
+  async updateSubtask(id: string, data: Prisma.TaskSubtaskUncheckedUpdateInput) {
+    return prisma.taskSubtask.update({
+      where: { id },
+      data,
+      include: {
+        assignedTo: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+  }
+
+  async deleteSubtask(id: string) {
+    return prisma.taskSubtask.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  /**
+   * Checklist actions
+   */
+  async createChecklistItem(data: Prisma.TaskChecklistUncheckedCreateInput) {
+    return prisma.taskChecklist.create({
+      data,
+    });
+  }
+
+  async updateChecklistItem(id: string, data: Prisma.TaskChecklistUncheckedUpdateInput) {
+    return prisma.taskChecklist.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async deleteChecklistItem(id: string) {
+    return prisma.taskChecklist.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  /**
+   * Time Log actions
+   */
+  async createTimeLog(data: any) {
+    return prisma.taskTimeLog.create({
+      data,
+      include: {
+        employee: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+  }
+
+  async updateTimeLog(id: string, data: any) {
+    return prisma.taskTimeLog.update({
+      where: { id },
+      data,
+      include: {
+        employee: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+  }
+
+  async deleteTimeLog(id: string) {
+    return prisma.taskTimeLog.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  /**
+   * Watchers actions
+   */
+  async addWatcher(taskId: string, employeeId: string) {
+    return prisma.taskWatcher.upsert({
+      where: {
+        taskId_employeeId: { taskId, employeeId },
+      },
+      create: { taskId, employeeId },
+      update: {},
+    });
+  }
+
+  async removeWatcher(taskId: string, employeeId: string) {
+    return prisma.taskWatcher.delete({
+      where: {
+        taskId_employeeId: { taskId, employeeId },
+      },
+    });
+  }
+
+  /**
+   * Dependency actions
+   */
+  async addDependency(taskId: string, dependentTaskId: string, type: string) {
+    return prisma.taskDependency.upsert({
+      where: {
+        taskId_dependentTaskId_type: { taskId, dependentTaskId, type },
+      },
+      create: { taskId, dependentTaskId, type },
+      update: {},
+    });
+  }
+
+  async removeDependency(taskId: string, dependentTaskId: string, type: string) {
+    return prisma.taskDependency.delete({
+      where: {
+        taskId_dependentTaskId_type: { taskId, dependentTaskId, type },
+      },
+    });
+  }
+
+  /**
+   * Recurrence actions
+   */
+  async upsertRecurrence(taskId: string, data: any) {
+    return prisma.taskRecurrence.upsert({
+      where: { taskId },
+      create: {
+        ...data,
+        taskId,
+        frequency: data.frequency || 'Daily',
+      } as any,
+      update: data,
+    });
+  }
+
+  /**
+   * Approvals actions
+   */
+  async upsertApproval(taskId: string, approverId: string) {
+    return prisma.taskApproval.upsert({
+      where: { taskId },
+      create: {
+        taskId,
+        approverId,
+        status: 'Pending Approval',
+      },
+      update: {
+        approverId,
+        status: 'Pending Approval',
+        approvalDate: null,
+        comments: null,
+      },
+    });
+  }
+
+  async updateApproval(id: string, data: any) {
+    return prisma.taskApproval.update({
+      where: { id },
+      data,
+    });
+  }
+
+  /**
+   * Timeline actions
+   */
+  async createTimelineLog(taskId: string, action: string, notes?: string, userId?: string) {
+    return prisma.taskTimeline.create({
+      data: {
+        taskId,
+        action,
+        notes,
+        userId,
+      },
+    });
+  }
+
+  /**
+   * Notification actions
+   */
+  async createNotification(taskId: string, employeeId: string, title: string, message: string, type: string = 'info') {
+    return prisma.taskNotification.create({
+      data: {
+        taskId,
+        employeeId,
+        title,
+        message,
+        type,
+      },
+    });
+  }
 }
 
 export const taskRepository = new TaskRepository();
+

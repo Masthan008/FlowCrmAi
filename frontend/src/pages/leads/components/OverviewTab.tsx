@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
-import { Star, Mail, Phone, Globe, MapPin, Briefcase, Building2, Calendar, Clock, User, Tag, Linkedin, Twitter, Facebook } from 'lucide-react';
+import { Star, Mail, Phone, Globe, MapPin, Briefcase, Building2, Calendar, Clock, User, Tag } from 'lucide-react';
 import type { Lead } from '../../../types/lead';
 
 interface OverviewTabProps {
@@ -109,7 +109,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ profile }) => {
                   }`}
                   onClick={(e) => !socials.linkedin && e.preventDefault()}
                 >
-                  <Linkedin size={14} />
+                  <Globe size={14} />
                   LinkedIn
                 </a>
                 <a
@@ -123,7 +123,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ profile }) => {
                   }`}
                   onClick={(e) => !socials.twitter && e.preventDefault()}
                 >
-                  <Twitter size={14} />
+                  <Globe size={14} />
                   Twitter
                 </a>
                 <a
@@ -137,7 +137,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ profile }) => {
                   }`}
                   onClick={(e) => !socials.facebook && e.preventDefault()}
                 >
-                  <Facebook size={14} />
+                  <Globe size={14} />
                   Facebook
                 </a>
               </div>

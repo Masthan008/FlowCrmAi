@@ -122,7 +122,7 @@ export const RightPanelCards: React.FC<RightPanelCardsProps> = ({ notes, activit
             <p className="text-[11px] text-slate-400 italic">No pending tasks found.</p>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* 5. Recent Notes Summary Widget */}
       <Card className="p-4 bg-white/80 border border-slate-200/60 rounded-2xl shadow-sm space-y-3">

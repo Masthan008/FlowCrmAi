@@ -28,6 +28,12 @@ interface TaskState {
   statistics: any | null;
   kanbanData: Record<string, any[]>;
   
+  // Extensions Data
+  calendarTasks: any[];
+  workloadData: any[];
+  productivityAnalytics: any | null;
+  timelineLogs: any[];
+
   // UI State
   loading: boolean;
   taskLoading: boolean;
@@ -57,6 +63,35 @@ interface TaskState {
   // Attachments
   uploadAttachment: (taskId: string, formData: FormData) => Promise<void>;
   deleteAttachment: (taskId: string, attachmentId: string) => Promise<void>;
+
+  // --- EXTENSIONS FOR PROMPT 20 ---
+  fetchCalendar: (start: string, end: string) => Promise<void>;
+  fetchWorkload: () => Promise<void>;
+  fetchProductivity: (timeframe?: string) => Promise<void>;
+  fetchTimeline: (taskId: string) => Promise<void>;
+
+  addSubtask: (taskId: string, data: any) => Promise<void>;
+  updateSubtask: (taskId: string, subtaskId: string, data: any) => Promise<void>;
+  deleteSubtask: (taskId: string, subtaskId: string) => Promise<void>;
+
+  addChecklistItem: (taskId: string, title: string, order: number) => Promise<void>;
+  updateChecklistItem: (taskId: string, itemId: string, data: any) => Promise<void>;
+  deleteChecklistItem: (taskId: string, itemId: string) => Promise<void>;
+
+  addTimeLog: (taskId: string, data: any) => Promise<void>;
+  deleteTimeLog: (taskId: string, logId: string) => Promise<void>;
+
+  addWatcher: (taskId: string, employeeId: string) => Promise<void>;
+  removeWatcher: (taskId: string, employeeId: string) => Promise<void>;
+
+  addDependency: (taskId: string, dependentTaskId: string, type: string) => Promise<void>;
+  removeDependency: (taskId: string, dependentTaskId: string, type: string) => Promise<void>;
+
+  upsertRecurrence: (taskId: string, data: any) => Promise<void>;
+
+  requestApproval: (taskId: string, approverId: string) => Promise<void>;
+  approveTask: (taskId: string, comments?: string | null) => Promise<void>;
+  rejectTask: (taskId: string, comments?: string | null) => Promise<void>;
 }
 
 const initialFilters: TaskFilters = {
@@ -88,6 +123,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     'Completed': [],
     'Cancelled': [],
   },
+  calendarTasks: [],
+  workloadData: [],
+  productivityAnalytics: null,
+  timelineLogs: [],
+
   loading: false,
   taskLoading: false,
   error: null,
@@ -118,14 +158,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         'Cancelled': [],
       };
 
-      // Query all tasks for Kanban view if limit is small, but standard boards want all active ones:
-      // In this setup, we group current paginated lists or group them directly
       items.forEach((item: any) => {
-        const currentStatus = item.status; // e.g., 'Pending', 'In Progress', etc.
+        const currentStatus = item.status;
         if (kanban[currentStatus]) {
           kanban[currentStatus].push(item);
-        } else if (currentStatus === 'Overdue') {
-          // Put Overdue in Pending column for simplicity or treat separately
+        } else if (currentStatus === 'Overdue' || currentStatus === 'Pending Approval') {
           kanban['Pending'].push(item);
         }
       });
@@ -200,7 +237,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   patchStatus: async (id: string, status: string) => {
     try {
       await taskApi.patchStatus(id, status);
-      // Synchronize details if loaded
       const { currentTask } = get();
       if (currentTask && currentTask.id === id) {
         get().fetchTask(id);
@@ -267,6 +303,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     try {
       await taskApi.addComment(taskId, content);
       get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
     } catch (err: any) {
       set({ error: err.response?.data?.message || 'Failed to post comment.' });
       throw err;
@@ -277,6 +314,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     try {
       await taskApi.deleteComment(taskId, commentId);
       get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
     } catch (err: any) {
       set({ error: err.response?.data?.message || 'Failed to delete comment.' });
       throw err;
@@ -288,6 +326,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     try {
       await taskApi.uploadAttachment(taskId, formData);
       get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
     } catch (err: any) {
       set({ error: err.response?.data?.message || 'Failed to upload attachment.' });
       throw err;
@@ -298,8 +337,221 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     try {
       await taskApi.deleteAttachment(taskId, attachmentId);
       get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
     } catch (err: any) {
       set({ error: err.response?.data?.message || 'Failed to delete attachment.' });
+      throw err;
+    }
+  },
+
+  // --- EXTENSIONS FOR PROMPT 20 ---
+  fetchCalendar: async (start, end) => {
+    try {
+      const res = await taskApi.getCalendar(start, end);
+      set({ calendarTasks: res.data.data || [] });
+    } catch {
+      // Silently fail
+    }
+  },
+
+  fetchWorkload: async () => {
+    try {
+      const res = await taskApi.getWorkload();
+      set({ workloadData: res.data.data || [] });
+    } catch {
+      // Silently fail
+    }
+  },
+
+  fetchProductivity: async (timeframe = 'week') => {
+    try {
+      const res = await taskApi.getProductivity(timeframe);
+      set({ productivityAnalytics: res.data.data });
+    } catch {
+      // Silently fail
+    }
+  },
+
+  fetchTimeline: async (taskId) => {
+    try {
+      const res = await taskApi.getTimeline(taskId);
+      set({ timelineLogs: res.data.data || [] });
+    } catch {
+      // Silently fail
+    }
+  },
+
+  addSubtask: async (taskId, data) => {
+    try {
+      await taskApi.addSubtask(taskId, data);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to create subtask.' });
+      throw err;
+    }
+  },
+
+  updateSubtask: async (taskId, subtaskId, data) => {
+    try {
+      await taskApi.updateSubtask(taskId, subtaskId, data);
+      get().fetchTask(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update subtask.' });
+      throw err;
+    }
+  },
+
+  deleteSubtask: async (taskId, subtaskId) => {
+    try {
+      await taskApi.deleteSubtask(taskId, subtaskId);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete subtask.' });
+      throw err;
+    }
+  },
+
+  addChecklistItem: async (taskId, title, order) => {
+    try {
+      await taskApi.addChecklistItem(taskId, title, order);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to add checklist item.' });
+      throw err;
+    }
+  },
+
+  updateChecklistItem: async (taskId, itemId, data) => {
+    try {
+      await taskApi.updateChecklistItem(taskId, itemId, data);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update checklist item.' });
+      throw err;
+    }
+  },
+
+  deleteChecklistItem: async (taskId, itemId) => {
+    try {
+      await taskApi.deleteChecklistItem(taskId, itemId);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete checklist item.' });
+      throw err;
+    }
+  },
+
+  addTimeLog: async (taskId, data) => {
+    try {
+      await taskApi.addTimeLog(taskId, data);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to log time.' });
+      throw err;
+    }
+  },
+
+  deleteTimeLog: async (taskId, logId) => {
+    try {
+      await taskApi.deleteTimeLog(taskId, logId);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete time log.' });
+      throw err;
+    }
+  },
+
+  addWatcher: async (taskId, employeeId) => {
+    try {
+      await taskApi.addWatcher(taskId, employeeId);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to follow task.' });
+      throw err;
+    }
+  },
+
+  removeWatcher: async (taskId, employeeId) => {
+    try {
+      await taskApi.removeWatcher(taskId, employeeId);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to unfollow task.' });
+      throw err;
+    }
+  },
+
+  addDependency: async (taskId, dependentTaskId, type) => {
+    try {
+      await taskApi.addDependency(taskId, dependentTaskId, type);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to link dependency.' });
+      throw err;
+    }
+  },
+
+  removeDependency: async (taskId, dependentTaskId, type) => {
+    try {
+      await taskApi.removeDependency(taskId, dependentTaskId, type);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to remove dependency.' });
+      throw err;
+    }
+  },
+
+  upsertRecurrence: async (taskId, data) => {
+    try {
+      await taskApi.upsertRecurrence(taskId, data);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to set recurrence.' });
+      throw err;
+    }
+  },
+
+  requestApproval: async (taskId, approverId) => {
+    try {
+      await taskApi.requestApproval(taskId, approverId);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to request approval.' });
+      throw err;
+    }
+  },
+
+  approveTask: async (taskId, comments) => {
+    try {
+      await taskApi.approveTask(taskId, comments);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to approve task.' });
+      throw err;
+    }
+  },
+
+  rejectTask: async (taskId, comments) => {
+    try {
+      await taskApi.rejectTask(taskId, comments);
+      get().fetchTask(taskId);
+      get().fetchTimeline(taskId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to reject task.' });
       throw err;
     }
   },

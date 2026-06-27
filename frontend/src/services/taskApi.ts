@@ -61,6 +61,74 @@ export const taskApi = {
 
   deleteAttachment: (taskId: string, attachmentId: string) =>
     api.delete(`${TASKS_URL}/${taskId}/attachments/${attachmentId}`),
+
+  // --- EXTENSIONS FOR PROMPT 20 ---
+
+  getCalendar: (start: string, end: string) =>
+    api.get(`${TASKS_URL}/calendar`, { params: { start, end } }),
+
+  getWorkload: () =>
+    api.get(`${TASKS_URL}/workload`),
+
+  getProductivity: (timeframe: string) =>
+    api.get(`${TASKS_URL}/productivity`, { params: { timeframe } }),
+
+  getTimeline: (taskId: string) =>
+    api.get(`${TASKS_URL}/${taskId}/timeline`),
+
+  getSubtasks: (taskId: string) =>
+    api.get(`${TASKS_URL}/${taskId}/subtasks`),
+
+  addSubtask: (taskId: string, data: any) =>
+    api.post(`${TASKS_URL}/${taskId}/subtasks`, data),
+
+  updateSubtask: (taskId: string, subtaskId: string, data: any) =>
+    api.put(`${TASKS_URL}/${taskId}/subtasks/${subtaskId}`, data),
+
+  deleteSubtask: (taskId: string, subtaskId: string) =>
+    api.delete(`${TASKS_URL}/${taskId}/subtasks/${subtaskId}`),
+
+  addChecklistItem: (taskId: string, title: string, order: number) =>
+    api.post(`${TASKS_URL}/${taskId}/checklists`, { title, order }),
+
+  updateChecklistItem: (taskId: string, itemId: string, data: any) =>
+    api.put(`${TASKS_URL}/${taskId}/checklists/${itemId}`, data),
+
+  deleteChecklistItem: (taskId: string, itemId: string) =>
+    api.delete(`${TASKS_URL}/${taskId}/checklists/${itemId}`),
+
+  getTimeLogs: (taskId: string) =>
+    api.get(`${TASKS_URL}/${taskId}/time`),
+
+  addTimeLog: (taskId: string, data: any) =>
+    api.post(`${TASKS_URL}/${taskId}/time`, data),
+
+  deleteTimeLog: (taskId: string, logId: string) =>
+    api.delete(`${TASKS_URL}/${taskId}/time/${logId}`),
+
+  addWatcher: (taskId: string, employeeId: string) =>
+    api.post(`${TASKS_URL}/${taskId}/watchers`, { employeeId }),
+
+  removeWatcher: (taskId: string, employeeId: string) =>
+    api.delete(`${TASKS_URL}/${taskId}/watchers/${employeeId}`),
+
+  addDependency: (taskId: string, dependentTaskId: string, type: string) =>
+    api.post(`${TASKS_URL}/${taskId}/dependencies`, { dependentTaskId, type }),
+
+  removeDependency: (taskId: string, dependentTaskId: string, type: string) =>
+    api.delete(`${TASKS_URL}/${taskId}/dependencies/${dependentTaskId}/${type}`),
+
+  upsertRecurrence: (taskId: string, data: any) =>
+    api.post(`${TASKS_URL}/${taskId}/recurrence`, data),
+
+  requestApproval: (taskId: string, approverId: string) =>
+    api.post(`${TASKS_URL}/${taskId}/approve/request`, { approverId }),
+
+  approveTask: (taskId: string, comments?: string | null) =>
+    api.patch(`${TASKS_URL}/${taskId}/approve`, { comments }),
+
+  rejectTask: (taskId: string, comments?: string | null) =>
+    api.patch(`${TASKS_URL}/${taskId}/reject`, { comments }),
 };
 
 export default taskApi;

@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Breadcrumb } from '../../components/ui/Breadcrumb';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { Modal } from '../../components/ui/Modal';
+import { Input } from '../../components/ui/Input';
 import { useLeadStore } from '../../store/leadStore';
 import { leadApi } from '../../services/leadApi';
 import {
@@ -35,6 +36,11 @@ import {
   TrendingUp,
   ShieldCheck,
   Activity as ActivityIcon,
+  Award,
+  Settings,
+  Bell,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 
 // Subcomponents
@@ -48,16 +54,22 @@ import { PlaceholderTab } from './components/PlaceholderTab';
 import { RightPanelCards } from './components/RightPanelCards';
 
 const priorityColors: Record<string, string> = {
-  Critical: 'bg-red-50 text-red-700 border-red-200',
+  Critical: 'bg-red-50 text-red-700 border-red-200 shadow-sm',
   High: 'bg-orange-50 text-orange-700 border-orange-200',
   Medium: 'bg-blue-50 text-blue-700 border-blue-200',
   Low: 'bg-slate-50 text-slate-600 border-slate-200',
 };
 
+const SLAColors: Record<string, string> = {
+  Green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  Yellow: 'bg-amber-50 text-amber-700 border-amber-200',
+  Red: 'bg-red-50 text-red-750 border-red-250 animate-pulse',
+};
+
 const LeadView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   // Zustand Store
   const {
     currentLead,
@@ -68,10 +80,13 @@ const LeadView: React.FC = () => {
     files,
     history,
     employees,
+    followups,
+    scoreInfo,
+    healthInfo,
+    slaInfo,
     loading,
     error,
     selectedTab,
-    tabLoading,
     fetchProfile,
     fetchTimeline,
     fetchActivities,
@@ -82,18 +97,71 @@ const LeadView: React.FC = () => {
     setSelectedTab,
     deleteLead,
     clearCurrentLead,
+    fetchFollowups,
+    createFollowupAction,
+    assignLeadAction,
+    convertLeadAction,
+    saveWorkflowAction,
+    fetchScore,
+    fetchHealth,
+    fetchSla,
+    submitApprovalAction,
+    reassignLeadAction,
   } = useLeadStore();
 
   // Dialog Modals
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [convertModalOpen, setConvertModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [followupModalOpen, setFollowupModalOpen] = useState(false);
+  const [workflowModalOpen, setWorkflowModalOpen] = useState(false);
+  const [approvalModalOpen, setApprovalModalOpen] = useState(false);
   const [actionAlertMessage, setActionAlertMessage] = useState<string | null>(null);
+
+  // Reassignment Form State
+  const [assignedToId, setAssignedToId] = useState('');
+  const [assignRuleType, setAssignRuleType] = useState<'Manual' | 'ROUND_ROBIN' | 'LOAD_BASED'>('Manual');
+  const [assignReason, setAssignReason] = useState('');
+
+  // Follow-up Form State
+  const [followupType, setFollowupType] = useState('Phone Call');
+  const [followupDate, setFollowupDate] = useState('');
+  const [followupTime, setFollowupTime] = useState('');
+  const [followupNotes, setFollowupNotes] = useState('');
+  const [followupAssignee, setFollowupAssignee] = useState('');
+
+  // Conversion Wizard State
+  const [conversionStep, setConversionStep] = useState(1);
+  const [convSkipCompany, setConvSkipCompany] = useState(false);
+  const [convMergeContact, setConvMergeContact] = useState(false);
+  const [convCompanyId, setConvCompanyId] = useState('');
+  const [convContactId, setConvContactId] = useState('');
+  const [convDealName, setConvDealName] = useState('');
+  const [convDealStageId, setConvDealStageId] = useState('');
+  const [convNotes, setConvNotes] = useState('');
+  const [conversionResult, setConversionResult] = useState<any>(null);
+
+  // Workflow builder State
+  const [wfName, setWfName] = useState('');
+  const [wfTrigger, setWfTrigger] = useState('Lead Created');
+  const [wfConditionField, setWfConditionField] = useState('priority');
+  const [wfConditionVal, setWfConditionVal] = useState('High');
+  const [wfActionType, setWfActionType] = useState('Change Status');
+  const [wfActionVal, setWfActionVal] = useState('');
+
+  // Approval Form State
+  const [approvalType, setApprovalType] = useState('Conversion Approval');
+  const [approverId, setApproverId] = useState('');
+  const [approvalComments, setApprovalComments] = useState('');
 
   useEffect(() => {
     if (id) {
       fetchProfile(id);
       fetchEmployees();
+      fetchFollowups(id);
+      fetchScore(id);
+      fetchHealth(id);
+      fetchSla(id, 45); // Simulate response minutes tracking
       // Lazy load initial tab
       loadTabData(id, selectedTab);
     }
@@ -139,31 +207,97 @@ const LeadView: React.FC = () => {
     }
   };
 
-  const handleQuickAction = (type: 'Call' | 'SMS') => {
-    if (!profile) return;
-    const phone = profile.phone || profile.alternatePhone;
-    if (!phone) {
-      setActionAlertMessage('No phone number is available for this lead.');
-      return;
-    }
-    if (type === 'Call') {
-      setActionAlertMessage(`Initiating VoIP Call connection to ${phone}... (Integration active in the next phase)`);
-    } else {
-      setActionAlertMessage(`Opening SMS chat gateway for ${phone}... (Integration active in the next phase)`);
+  // Reassignment Submit Handler
+  const handleAssignSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+    try {
+      await assignLeadAction(id, {
+        assignedToId: assignRuleType === 'Manual' ? assignedToId : undefined,
+        ruleType: assignRuleType !== 'Manual' ? assignRuleType : undefined,
+        reason: assignReason || 'CRM Workspace Transfer',
+      });
+      fetchProfile(id);
+      setAssignModalOpen(false);
+      setAssignReason('');
+    } catch (err: any) {
+      setActionAlertMessage(err.message || 'Transfer failed.');
     }
   };
 
-  const handleQuickAssign = async (employeeId: string) => {
+  // Follow-up scheduler Submit Handler
+  const handleFollowupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !followupDate || !followupAssignee) return;
+    try {
+      const fullDateStr = `${followupDate}T${followupTime || '09:00'}:00.000Z`;
+      await createFollowupAction(id, {
+        type: followupType,
+        followupDate: fullDateStr,
+        assignedToId: followupAssignee,
+        notes: followupNotes,
+      });
+      setFollowupModalOpen(false);
+      setFollowupNotes('');
+      setFollowupTime('');
+      setFollowupDate('');
+    } catch (err: any) {
+      setActionAlertMessage(err.message || 'Followup scheduling failed.');
+    }
+  };
+
+  // Workflow builder submit
+  const handleWorkflowSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !wfName) return;
+    try {
+      await saveWorkflowAction(id, {
+        name: wfName,
+        trigger: wfTrigger,
+        conditions: { [wfConditionField]: wfConditionVal },
+        actions: [{ type: wfActionType, value: wfActionVal }],
+      });
+      setWorkflowModalOpen(false);
+      setWfName('');
+    } catch (err: any) {
+      setActionAlertMessage(err.message || 'Workflow builder mapping failed.');
+    }
+  };
+
+  // Approval submit
+  const handleApprovalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !approverId) return;
+    try {
+      await submitApprovalAction(id, {
+        type: approvalType,
+        approverId,
+        comments: approvalComments,
+      });
+      setApprovalModalOpen(false);
+      setApprovalComments('');
+    } catch (err: any) {
+      setActionAlertMessage(err.message || 'Approval request failed.');
+    }
+  };
+
+  // Lead Conversion wizard submit
+  const handleConvertSubmit = async () => {
     if (!id) return;
     try {
-      await leadApi.updateOwner(id, employeeId);
-      await fetchProfile(id);
-      setAssignModalOpen(false);
-      // Reload timeline and history if open
-      if (selectedTab === 'Timeline') fetchTimeline(id);
-      if (selectedTab === 'History') fetchHistory(id);
+      const res = await convertLeadAction(id, {
+        skipCompany: convSkipCompany,
+        mergeContact: convMergeContact,
+        companyId: convCompanyId || undefined,
+        contactId: convContactId || undefined,
+        dealName: convDealName || undefined,
+        dealStageId: convDealStageId || undefined,
+        notes: convNotes,
+      });
+      setConversionResult(res);
+      setConversionStep(6);
     } catch (err: any) {
-      setActionAlertMessage(err.response?.data?.message || 'Failed to reassign lead.');
+      setActionAlertMessage(err.message || 'Conversion wizard transaction failed.');
     }
   };
 
@@ -188,15 +322,10 @@ const LeadView: React.FC = () => {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <Skeleton className="h-48 w-full rounded-2xl" />
-            <Skeleton className="h-36 w-full rounded-2xl" />
-          </div>
-          <div className="space-y-6">
-            <Skeleton className="h-40 w-full rounded-2xl" />
-            <Skeleton className="h-32 w-full rounded-2xl" />
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <Skeleton className="lg:col-span-3 h-96 rounded-3xl" />
+          <Skeleton className="lg:col-span-6 h-96 rounded-3xl" />
+          <Skeleton className="lg:col-span-3 h-96 rounded-3xl" />
         </div>
       </div>
     );
@@ -206,7 +335,7 @@ const LeadView: React.FC = () => {
     return (
       <div className="space-y-6">
         <Breadcrumb items={[{ label: 'Leads', href: '/leads' }, { label: 'Error' }]} />
-        <div className="flex items-center gap-3 p-6 rounded-xl bg-red-50 border border-red-200 text-red-700 shadow-sm">
+        <div className="flex items-center gap-3 p-6 rounded-xl bg-red-50 border border-red-200 text-red-750 shadow-sm">
           <AlertCircle size={20} />
           <span>{error}</span>
           <Button variant="glass" size="sm" onClick={() => navigate('/leads')} className="ml-auto">
@@ -221,178 +350,184 @@ const LeadView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header breadcrumb & Meta */}
+      {/* Workspace Header Info */}
       <div className="flex flex-col gap-2">
         <Breadcrumb items={breadcrumbs} />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/leads')}
-              className="p-2.5 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-50 transition-all shadow-sm"
+              className="p-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm"
             >
               <ArrowLeft size={18} className="text-slate-500" />
             </button>
             <div>
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl font-bold tracking-tight text-slate-800">
-                  {profile.fullName}
-                </h1>
-                {profile.status && (
-                  <span
-                    className="inline-flex items-center px-3 py-0.5 rounded-lg text-xs font-semibold border"
-                    style={{
-                      backgroundColor: `${profile.status.color}15`,
-                      color: profile.status.color,
-                      borderColor: `${profile.status.color}30`,
-                    }}
-                  >
-                    {profile.status.name}
-                  </span>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-800">{profile.fullName}</h1>
+                <Badge variant="glass" className={`px-2.5 py-0.5 rounded-lg border text-[10px] font-bold ${
+                  profile.status?.name === 'Converted' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200'
+                }`}>
+                  {profile.status?.name || 'New'}
+                </Badge>
+                {slaInfo && (
+                  <Badge variant="glass" className={`px-2 py-0.5 rounded-lg border text-[9px] font-bold ${SLAColors[slaInfo.status] || SLAColors.Green}`}>
+                    SLA Status: {slaInfo.status}
+                  </Badge>
                 )}
               </div>
               <p className="text-xs text-slate-400 mt-1 font-mono tracking-wide">ID: {profile.leadNumber}</p>
             </div>
           </div>
-          
-          {/* Main Action buttons */}
+
           <div className="flex items-center gap-2">
             <Button
               variant="glass"
               size="sm"
-              onClick={() => navigate(`/leads/${id}/edit`)}
-              className="flex items-center gap-1.5 rounded-xl font-bold border-slate-200"
+              onClick={() => setConvertModalOpen(true)}
+              className="rounded-xl font-bold text-xs bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 flex items-center gap-1"
             >
-              <Pencil size={14} />
-              Edit Lead
+              <Sparkles size={13} />
+              Convert Lead
+            </Button>
+            <Button
+              variant="glass"
+              size="sm"
+              onClick={() => setFollowupModalOpen(true)}
+              className="rounded-xl font-bold text-xs flex items-center gap-1"
+            >
+              <CalendarDays size={13} />
+              Schedule Followup
+            </Button>
+            <Button
+              variant="glass"
+              size="sm"
+              onClick={() => setWorkflowModalOpen(true)}
+              className="rounded-xl font-bold text-xs flex items-center gap-1"
+            >
+              <Settings size={13} />
+              Automation Rules
+            </Button>
+            <Button
+              variant="glass"
+              size="sm"
+              onClick={() => setApprovalModalOpen(true)}
+              className="rounded-xl font-bold text-xs flex items-center gap-1 text-purple-700 border-purple-100 hover:bg-purple-50"
+            >
+              <Award size={13} />
+              Submit Approval
             </Button>
             <Button
               variant="glass"
               size="sm"
               onClick={() => setDeleteModalOpen(true)}
-              className="flex items-center gap-1.5 text-red-600 border-red-100 hover:bg-red-50 hover:border-red-200 rounded-xl font-bold"
+              className="rounded-xl font-bold text-red-650 border-red-100 hover:bg-red-50 text-xs"
             >
-              <Trash2 size={14} />
               Delete
             </Button>
           </div>
         </div>
       </div>
 
-      {/* THREE-PANEL WORKSPACE GRID */}
-      <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+      {actionAlertMessage && (
+        <Card className="p-3 bg-blue-50 border border-blue-200 rounded-2xl flex items-center justify-between text-xs font-bold text-blue-800 animate-fadeIn">
+          <span>{actionAlertMessage}</span>
+          <button onClick={() => setActionAlertMessage(null)} className="text-blue-500 hover:text-blue-700">Dismiss</button>
+        </Card>
+      )}
+
+      {/* THREE COLUMN GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* LEFT PANEL (30% Width) - Lead Summary Card */}
-        <div className="w-full lg:w-[30%] flex-shrink-0 space-y-6">
-          <Card className="p-6 bg-white/70 backdrop-blur-md border border-slate-200/60 shadow-sm rounded-3xl space-y-5">
-            {/* Profile Avatar & Primary Info */}
-            <div className="flex flex-col items-center text-center pb-4 border-b border-slate-100">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-black shadow-md mb-3">
-                {profile.firstName[0]}
-                {profile.lastName[0]}
-              </div>
-              <h2 className="text-lg font-bold text-slate-800 tracking-tight">{profile.fullName}</h2>
-              <p className="text-xs text-slate-400 font-semibold mt-0.5">{profile.jobTitle || 'No Title'} at {profile.companyName || 'No Company'}</p>
-              
-              <div className="flex gap-1.5 items-center mt-3">
-                <Badge variant="glass" className={`px-2 py-0.5 rounded-lg border text-[10px] font-bold ${priorityColors[profile.priority] || priorityColors.Medium}`}>
-                  {profile.priority}
+        {/* LEFT COLUMN (lg:col-span-3) - Health Card, Lead score, Metadata */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Intelligence Scorecard & Overall health gauge */}
+          {scoreInfo && healthInfo && (
+            <Card className="p-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl shadow border-none space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b border-white/10">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Lead Health Assessment</span>
+                <Badge variant="glass" className={`px-2 py-0.5 rounded border text-[9px] font-bold ${
+                  healthInfo.overallHealth === 'Healthy' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                }`}>
+                  {healthInfo.overallHealth}
                 </Badge>
-                {renderStars(profile.rating)}
               </div>
-            </div>
 
-            {/* Quick Actions Panel */}
-            <div className="grid grid-cols-4 gap-2 pb-4 border-b border-slate-100 text-center">
-              <button
-                onClick={() => handleQuickAction('Call')}
-                className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 transition-colors gap-1 border border-slate-100 shadow-sm"
-              >
-                <Phone size={16} className="text-green-600" />
-                <span className="text-[10px] font-bold text-slate-500">Call</span>
-              </button>
-              <button
-                onClick={() => handleTabChange('Emails')}
-                className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 transition-colors gap-1 border border-slate-100 shadow-sm"
-              >
-                <Mail size={16} className="text-blue-600" />
-                <span className="text-[10px] font-bold text-slate-500">Email</span>
-              </button>
-              <button
-                onClick={() => handleQuickAction('SMS')}
-                className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 transition-colors gap-1 border border-slate-100 shadow-sm"
-              >
-                <MessageSquare size={16} className="text-teal-600" />
-                <span className="text-[10px] font-bold text-slate-500">SMS</span>
-              </button>
-              <button
-                onClick={() => setConvertModalOpen(true)}
-                className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 transition-colors gap-1 border border-slate-100 shadow-sm"
-              >
-                <Sparkles size={16} className="text-amber-500" />
-                <span className="text-[10px] font-bold text-slate-500">Convert</span>
-              </button>
-            </div>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full border-4 border-blue-500 border-t-transparent flex items-center justify-center font-black text-xl text-blue-300">
+                  {scoreInfo.score}%
+                </div>
+                <div>
+                  <span className="text-xs font-bold block text-slate-200">Rule-Based CRM Score</span>
+                  <span className="text-[10px] text-slate-400 block mt-1">Factors Contributing:</span>
+                  <span className="text-[9px] text-slate-300 block font-semibold">Engagement, Deal budget</span>
+                </div>
+              </div>
 
-            {/* General Fields Info */}
-            <div className="space-y-3.5 text-xs">
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Owner</span>
-                <button
-                  onClick={() => setAssignModalOpen(true)}
-                  className="text-blue-600 font-bold hover:underline inline-flex items-center gap-1"
-                >
+              <div className="space-y-2 pt-2 border-t border-white/10 text-[10px] font-bold text-slate-350">
+                <div className="flex justify-between">
+                  <span>Engagement Level</span>
+                  <span>{healthInfo.engagementScore}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Activity Score</span>
+                  <span>{healthInfo.activityScore}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>SLA Compliance</span>
+                  <span>{healthInfo.communicationScore}%</span>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Lead General Details */}
+          <Card className="p-5 bg-white border border-slate-200/60 shadow-sm rounded-3xl space-y-4">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider pb-2 border-b border-slate-100">
+              Lead Information
+            </h3>
+
+            <div className="space-y-3.5 text-xs font-semibold text-slate-655">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Owner Assignee</span>
+                <button onClick={() => setAssignModalOpen(true)} className="text-blue-650 font-bold hover:underline inline-flex items-center gap-1">
                   {profile.assignedTo ? `${profile.assignedTo.firstName} ${profile.assignedTo.lastName}` : 'Unassigned'}
                   <UserCheck size={12} />
                 </button>
               </div>
 
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Source</span>
-                <span className="font-semibold text-slate-700">{profile.source?.name || '—'}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Deal Budget</span>
+                <span className="font-extrabold text-slate-800">${(profile.value || 0).toLocaleString()}</span>
               </div>
 
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Deal Value</span>
-                <span className="font-extrabold text-slate-800 text-sm">${profile.value.toLocaleString()}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lead Source</span>
+                <span>{profile.source?.name || '—'}</span>
               </div>
 
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Closing Date</span>
-                <span className="font-semibold text-slate-700">
-                  {profile.expectedClosingDate ? new Date(profile.expectedClosingDate).toLocaleDateString() : '—'}
-                </span>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Industry</span>
+                <span>{profile.industry || '—'}</span>
               </div>
 
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Industry</span>
-                <span className="font-semibold text-slate-700">{profile.industry || '—'}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Location</span>
-                <span className="font-semibold text-slate-700">
-                  {profile.city && profile.country ? `${profile.city}, ${profile.country}` : profile.country || '—'}
-                </span>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Location</span>
+                <span className="truncate max-w-[120px]">{profile.city || profile.country || '—'}</span>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* CENTER PANEL (45% Width) - Tabs Nav & Views */}
-        <div className="w-full lg:w-[45%] flex-shrink-0 space-y-6">
-          
-          {/* Scrollable Tab Navigation bar */}
-          <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-200">
+        {/* CENTER COLUMN (lg:col-span-6) - Tabs navigation panel */}
+        <div className="lg:col-span-6 space-y-6">
+          <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
             {[
               { id: 'Overview', label: 'Overview', icon: User },
-              { id: 'Timeline', label: 'Timeline', icon: Clock },
-              { id: 'Activities', label: 'Activities', icon: ActivityIcon },
-              { id: 'Notes', label: 'Notes', icon: MessageSquare },
-              { id: 'Files', label: 'Files', icon: Paperclip },
-              { id: 'Emails', label: 'Emails', icon: Mail },
-              { id: 'Meetings', label: 'Meetings', icon: CalendarDays },
-              { id: 'Tasks', label: 'Tasks', icon: CheckCircle },
-              { id: 'History', label: 'History', icon: HistoryIcon },
+              { id: 'Timeline', label: 'Timeline & Timeline Logs', icon: Clock },
+              { id: 'Activities', label: 'Activities List', icon: ActivityIcon },
+              { id: 'Notes', label: 'Discussion Notes', icon: MessageSquare },
+              { id: 'Files', label: 'Attachments', icon: Paperclip },
+              { id: 'History', label: 'Audit Change History', icon: HistoryIcon },
             ].map((tab) => {
               const TabIcon = tab.icon;
               const active = selectedTab === tab.id;
@@ -400,10 +535,10 @@ const LeadView: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 shadow-sm ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border shrink-0 ${
                     active
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-blue-100'
-                      : 'bg-white text-slate-500 border-slate-200/80 hover:bg-slate-50 hover:text-slate-700'
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                      : 'bg-white text-slate-400 border-slate-200/80 hover:bg-slate-50 hover:text-slate-600'
                   }`}
                 >
                   <TabIcon size={14} />
@@ -413,30 +548,61 @@ const LeadView: React.FC = () => {
             })}
           </div>
 
-          {/* Independent lazy loading views */}
-          <Card className="p-6 bg-white/50 backdrop-blur-md border border-slate-200/50 rounded-3xl shadow-sm">
+          <Card className="p-6 bg-white border border-slate-200/50 rounded-3xl shadow-sm min-h-[380px]">
             {selectedTab === 'Overview' && <OverviewTab profile={profile} />}
             {selectedTab === 'Timeline' && <TimelineTab leadId={id as string} />}
             {selectedTab === 'Activities' && <ActivitiesTab leadId={id as string} />}
             {selectedTab === 'Notes' && <NotesTab leadId={id as string} />}
             {selectedTab === 'Files' && <FilesTab leadId={id as string} />}
-            {['Emails', 'Meetings', 'Tasks'].includes(selectedTab) && (
-              <PlaceholderTab tabName={selectedTab as 'Emails' | 'Meetings' | 'Tasks'} />
-            )}
             {selectedTab === 'History' && <HistoryTab leadId={id as string} />}
           </Card>
         </div>
 
-        {/* RIGHT PANEL (25% Width) - Widgets & Metrics */}
-        <div className="w-full lg:w-[25%] flex-shrink-0">
+        {/* RIGHT COLUMN (lg:col-span-3) - Scheduled followups list, timeline summaries */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Scheduled Follow-ups card */}
+          <Card className="p-4 bg-white border border-slate-200/60 shadow-sm rounded-3xl space-y-4">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center justify-between">
+              <span>Scheduled Follow-ups</span>
+              <Badge variant="glass" className="bg-blue-50 text-blue-700 border-blue-200 font-bold px-1.5 py-0.2 rounded border text-[9px]">
+                {followups.length}
+              </Badge>
+            </h3>
+
+            <div className="space-y-3.5 max-h-[220px] overflow-y-auto pr-1">
+              {followups.length > 0 ? (
+                followups.map((follow) => (
+                  <div key={follow.id} className="p-2.5 bg-slate-50/50 hover:bg-white border border-slate-100 rounded-xl space-y-1.5 transition-colors text-[10px] font-semibold text-slate-600">
+                    <div className="flex justify-between items-center font-bold text-slate-800">
+                      <span>{follow.type}</span>
+                      <Badge variant="glass" className="bg-slate-100 text-slate-500 border-slate-200 px-1 py-0.2 rounded text-[8px]">
+                        {follow.status}
+                      </Badge>
+                    </div>
+                    <p className="text-slate-500 font-medium leading-relaxed">{follow.notes || 'Schedule follow-up discussion.'}</p>
+                    <div className="flex justify-between items-center text-[9px] text-slate-400 pt-1 border-t border-slate-50 font-mono">
+                      <span>{new Date(follow.followupDate).toLocaleString()}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-slate-400 font-bold">
+                  <CalendarDays size={24} className="mx-auto text-slate-300 mb-2" />
+                  <p className="text-[10px]">No followups scheduled.</p>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Quick sidebar elements */}
           <RightPanelCards notes={notes} activities={activities} files={files} />
         </div>
 
       </div>
 
-      {/* --- DIALOG MODALS --- */}
+      {/* --- DIALOG WORKSPACE MODALS --- */}
 
-      {/* Delete Confirmation Modal */}
+      {/* DELETE CONFIRMATION */}
       <Modal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
@@ -444,8 +610,8 @@ const LeadView: React.FC = () => {
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Are you sure you want to permanently delete lead <strong>{profile.fullName}</strong>? This action can be undone later by system admins.
+          <p className="text-xs text-slate-505 leading-relaxed">
+            Are you sure you want to permanently delete lead <strong>{profile.fullName}</strong>?
           </p>
           <div className="flex items-center justify-end gap-3">
             <Button variant="glass" size="sm" onClick={() => setDeleteModalOpen(false)}>
@@ -453,100 +619,515 @@ const LeadView: React.FC = () => {
             </Button>
             <Button
               onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-md text-xs"
+              className="bg-red-650 hover:bg-red-750 text-white font-bold rounded-xl text-xs py-2 px-5"
             >
-              Delete Lead
+              Delete lead
             </Button>
           </div>
         </div>
       </Modal>
 
-      {/* Convert Lead Placeholder Modal */}
-      <Modal
-        isOpen={convertModalOpen}
-        onClose={() => setConvertModalOpen(false)}
-        title="Convert Lead to Account & Contact"
-        size="sm"
-      >
-        <div className="space-y-4">
-          <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 text-blue-700 text-xs font-medium leading-relaxed flex items-start gap-2.5">
-            <Sparkles className="mt-0.5 shrink-0" size={16} />
-            <div>
-              <span className="font-bold">Architecture Ready Panel</span>
-              <p className="mt-0.5 text-slate-600">
-                Lead Conversion to client account records will be fully configured and automated in Phase 5.
-              </p>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs" onClick={() => setConvertModalOpen(false)}>
-              Proceed
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Assign Owner Selection Modal */}
+      {/* OWNERSHIP ASSIGNMENT ENGINE */}
       <Modal
         isOpen={assignModalOpen}
         onClose={() => setAssignModalOpen(false)}
-        title="Reassign Lead Ownership"
+        title="CRM Lead Assignment Selector"
         size="sm"
       >
-        <div className="space-y-4">
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Select a sales executive to assign the ownership of <strong>{profile.fullName}</strong>.
-          </p>
-          <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto border border-slate-200/60 rounded-xl bg-white shadow-inner">
-            {employees.length > 0 ? (
-              employees.map((emp) => (
-                <button
-                  key={emp.id}
-                  onClick={() => handleQuickAssign(emp.id)}
-                  className="w-full text-left p-3 hover:bg-slate-50 transition-colors flex items-center justify-between text-xs"
-                >
-                  <div>
-                    <span className="font-bold text-slate-700">{emp.firstName} {emp.lastName}</span>
-                    <span className="text-slate-400 block font-semibold">{emp.email}</span>
-                  </div>
-                  <UserCheck size={14} className="text-slate-300 hover:text-blue-600" />
-                </button>
-              ))
-            ) : (
-              <p className="p-4 text-xs text-slate-400 italic">No employees found.</p>
-            )}
+        <form onSubmit={handleAssignSubmit} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Routing Strategy</label>
+            <select
+              value={assignRuleType}
+              onChange={(e) => setAssignRuleType(e.target.value as any)}
+              className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2.5 focus:outline-none"
+            >
+              <option value="Manual">Manual owner selection</option>
+              <option value="ROUND_ROBIN">Round Robin sequential routing</option>
+              <option value="LOAD_BASED">Load-Based lowest workload</option>
+            </select>
           </div>
-          <div className="flex justify-end">
+
+          {assignRuleType === 'Manual' && (
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Target Assignee</label>
+              <select
+                value={assignedToId}
+                onChange={(e) => setAssignedToId(e.target.value)}
+                required
+                className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2.5 focus:outline-none"
+              >
+                <option value="">Choose User...</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Reason for transfer</label>
+            <Input
+              value={assignReason}
+              onChange={(e) => setAssignReason(e.target.value)}
+              placeholder="e.g. Territory update"
+              className="rounded-xl text-xs bg-white border-slate-200"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
             <Button variant="glass" size="sm" onClick={() => setAssignModalOpen(false)}>
               Cancel
             </Button>
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs py-2 px-4"
+            >
+              Confirm Routing
+            </Button>
           </div>
-        </div>
+        </form>
       </Modal>
 
-      {/* Action Gateway Alerts */}
-      {actionAlertMessage && (
-        <Modal
-          isOpen={!!actionAlertMessage}
-          onClose={() => setActionAlertMessage(null)}
-          title="CRM Action Notification"
-          size="sm"
-        >
-          <div className="space-y-4">
-            <p className="text-xs font-semibold text-slate-600 leading-relaxed">
-              {actionAlertMessage}
-            </p>
-            <div className="flex justify-end">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs" onClick={() => setActionAlertMessage(null)}>
-                Close
-              </Button>
+      {/* FOLLOW-UP SCHEDULER */}
+      <Modal
+        isOpen={followupModalOpen}
+        onClose={() => setFollowupModalOpen(false)}
+        title="Schedule Follow-up calendar activity"
+        size="sm"
+      >
+        <form onSubmit={handleFollowupSubmit} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Activity Category</label>
+            <select
+              value={followupType}
+              onChange={(e) => setFollowupType(e.target.value)}
+              className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2.5 focus:outline-none"
+            >
+              <option value="Phone Call">Phone Call</option>
+              <option value="Email">Email followup</option>
+              <option value="Meeting">Meeting discussion</option>
+              <option value="Demo">Visit Demo presentation</option>
+              <option value="Visit">On-site Visit</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Date</label>
+              <Input
+                type="date"
+                value={followupDate}
+                onChange={(e) => setFollowupDate(e.target.value)}
+                required
+                className="rounded-xl text-xs bg-white border-slate-200"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Time</label>
+              <Input
+                type="time"
+                value={followupTime}
+                onChange={(e) => setFollowupTime(e.target.value)}
+                className="rounded-xl text-xs bg-white border-slate-200"
+              />
             </div>
           </div>
-        </Modal>
-      )}
 
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Assigned User</label>
+            <select
+              value={followupAssignee}
+              onChange={(e) => setFollowupAssignee(e.target.value)}
+              required
+              className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2.5 focus:outline-none"
+            >
+              <option value="">Select User...</option>
+              {employees.map(emp => (
+                <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Notes</label>
+            <textarea
+              value={followupNotes}
+              onChange={(e) => setFollowupNotes(e.target.value)}
+              placeholder="Discussion goals notes..."
+              rows={2}
+              className="w-full text-xs border border-slate-200 rounded-xl p-2.5 focus:outline-none bg-white font-medium"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="glass" size="sm" onClick={() => setFollowupModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs"
+            >
+              Confirm schedule
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* WORKFLOW RULE BUILDER */}
+      <Modal
+        isOpen={workflowModalOpen}
+        onClose={() => setWorkflowModalOpen(false)}
+        title="Custom Lead Workflow Rule Builder"
+        size="md"
+      >
+        <form onSubmit={handleWorkflowSubmit} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Workflow Rule Name</label>
+            <Input
+              value={wfName}
+              onChange={(e) => setWfName(e.target.value)}
+              placeholder="e.g. Route critical leads to Super Admin"
+              required
+              className="rounded-xl border-slate-200 bg-white"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Trigger Event</label>
+              <select
+                value={wfTrigger}
+                onChange={(e) => setWfTrigger(e.target.value)}
+                className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2 focus:outline-none"
+              >
+                <option value="Lead Created">Lead Created</option>
+                <option value="Lead Updated">Lead Updated</option>
+                <option value="Lead Assigned">Lead Assigned</option>
+                <option value="Status Changed">Status Changed</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Condition Target Field</label>
+              <select
+                value={wfConditionField}
+                onChange={(e) => setWfConditionField(e.target.value)}
+                className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2 focus:outline-none"
+              >
+                <option value="priority">Priority</option>
+                <option value="industry">Industry Tech</option>
+                <option value="minValue">MinValue expected value</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Condition Target Value</label>
+              <Input
+                value={wfConditionVal}
+                onChange={(e) => setWfConditionVal(e.target.value)}
+                placeholder="e.g. Critical, Technology"
+                className="rounded-xl text-xs bg-white border-slate-200"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Dispatch Action</label>
+              <select
+                value={wfActionType}
+                onChange={(e) => setWfActionType(e.target.value)}
+                className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2 focus:outline-none"
+              >
+                <option value="Change Status">Change status state</option>
+                <option value="Assign User">Assign target user</option>
+                <option value="Create Task">Create task activity</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Action parameter value</label>
+            <Input
+              value={wfActionVal}
+              onChange={(e) => setWfActionVal(e.target.value)}
+              placeholder="Status ID, employee ID or Task title text..."
+              className="rounded-xl text-xs bg-white border-slate-200"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="glass" size="sm" onClick={() => setWorkflowModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs py-2 px-5"
+            >
+              Add Workflow Automator
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* APPROVAL SUBMISSION PANEL */}
+      <Modal
+        isOpen={approvalModalOpen}
+        onClose={() => setApprovalModalOpen(false)}
+        title="Submit Approval Request"
+        size="sm"
+      >
+        <form onSubmit={handleApprovalSubmit} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Approval Category</label>
+            <select
+              value={approvalType}
+              onChange={(e) => setApprovalType(e.target.value)}
+              className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2.5 focus:outline-none"
+            >
+              <option value="Value Approval">Value limit approval</option>
+              <option value="Transfer Approval">Ownership transfer approval</option>
+              <option value="Conversion Approval">Conversion Wizard approval</option>
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Designated Approver</label>
+            <select
+              value={approverId}
+              onChange={(e) => setApproverId(e.target.value)}
+              required
+              className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2.5 focus:outline-none"
+            >
+              <option value="">Choose Employee...</option>
+              {employees.map(emp => (
+                <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Request remarks</label>
+            <textarea
+              value={approvalComments}
+              onChange={(e) => setApprovalComments(e.target.value)}
+              placeholder="Remarks for request approval..."
+              rows={2}
+              className="w-full text-xs border border-slate-200 rounded-xl p-2.5 focus:outline-none bg-white font-medium"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="glass" size="sm" onClick={() => setApprovalModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs"
+            >
+              Request Approval
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* LEAD CONVERSION WIZARD (6 STEPS) */}
+      <Modal
+        isOpen={convertModalOpen}
+        onClose={() => {
+          setConvertModalOpen(false);
+          setConversionStep(1);
+          setConversionResult(null);
+        }}
+        title="CRM Lead Conversion Wizard"
+        size="md"
+      >
+        <div className="space-y-4">
+          {/* Progress tracker steps */}
+          <div className="flex justify-between items-center pb-3 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-wider">
+            <span>Step {conversionStep} of 6</span>
+            <span>
+              {conversionStep === 1 && 'Verify Lead Info'}
+              {conversionStep === 2 && 'Map Company Details'}
+              {conversionStep === 3 && 'Establish Contact'}
+              {conversionStep === 4 && 'Sales Deal Stage'}
+              {conversionStep === 5 && 'Verify layout review'}
+              {conversionStep === 6 && 'Conversions completed!'}
+            </span>
+          </div>
+
+          {conversionStep === 1 && (
+            <div className="space-y-4 text-xs font-semibold text-slate-700">
+              <p>Confirm the details from the lead file below:</p>
+              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-150">
+                <div>First Name: {profile.firstName}</div>
+                <div>Last Name: {profile.lastName}</div>
+                <div className="col-span-2">Email: {profile.email || '—'}</div>
+                <div>Company Name: {profile.companyName || '—'}</div>
+                <div>Deal Value: ${(profile.value || 0).toLocaleString()}</div>
+              </div>
+              <div className="flex justify-end pt-3">
+                <Button onClick={() => setConversionStep(2)} className="bg-blue-600 text-white font-bold rounded-xl text-xs py-2 px-5">
+                  Next Step
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {conversionStep === 2 && (
+            <div className="space-y-4">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={convSkipCompany}
+                  onChange={(e) => setConvSkipCompany(e.target.checked)}
+                  className="rounded text-blue-600"
+                />
+                Skip company record creation (Use general placeholder)
+              </label>
+
+              {!convSkipCompany && (
+                <div className="space-y-3.5 p-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-semibold text-slate-700">
+                  <div className="font-bold text-slate-800">New Company properties to create:</div>
+                  <div>Company Name: {profile.companyName || 'Lead Company record'}</div>
+                  <div>Industry Category: {profile.industry || '—'}</div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-3">
+                <Button variant="glass" size="sm" onClick={() => setConversionStep(1)}>
+                  Back
+                </Button>
+                <Button onClick={() => setConversionStep(3)} className="bg-blue-600 text-white font-bold rounded-xl text-xs">
+                  Next Step
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {conversionStep === 3 && (
+            <div className="space-y-4">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={convMergeContact}
+                  onChange={(e) => setConvMergeContact(e.target.checked)}
+                  className="rounded text-blue-600"
+                />
+                Merge duplicate contact card if exists
+              </label>
+
+              {convMergeContact && (
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Target Contact ID</label>
+                  <Input
+                    value={convContactId}
+                    onChange={(e) => setConvContactId(e.target.value)}
+                    placeholder="Past duplicate Contact UUID..."
+                    className="rounded-xl text-xs bg-white"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-3">
+                <Button variant="glass" size="sm" onClick={() => setConversionStep(2)}>
+                  Back
+                </Button>
+                <Button onClick={() => setConversionStep(4)} className="bg-blue-600 text-white font-bold rounded-xl text-xs">
+                  Next Step
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {conversionStep === 4 && (
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Auto-Generated Deal Name</label>
+                <Input
+                  value={convDealName}
+                  onChange={(e) => setConvDealName(e.target.value)}
+                  placeholder="e.g. Enterprise package deal"
+                  className="rounded-xl border-slate-200 bg-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pipeline Stage</label>
+                <select
+                  value={convDealStageId}
+                  onChange={(e) => setConvDealStageId(e.target.value)}
+                  className="w-full text-xs font-bold border border-slate-200 bg-white rounded-xl p-2.5 focus:outline-none"
+                >
+                  <option value="">Select Pipeline Stage...</option>
+                  <option value="1">New opportunity stage</option>
+                  <option value="2">Qualified Stage</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3">
+                <Button variant="glass" size="sm" onClick={() => setConversionStep(3)}>
+                  Back
+                </Button>
+                <Button onClick={() => setConversionStep(5)} className="bg-blue-600 text-white font-bold rounded-xl text-xs">
+                  Next Step
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {conversionStep === 5 && (
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Conversion summary remarks</label>
+                <textarea
+                  value={convNotes}
+                  onChange={(e) => setConvNotes(e.target.value)}
+                  placeholder="Review notes..."
+                  rows={2}
+                  className="w-full text-xs border border-slate-200 rounded-xl p-2.5 focus:outline-none bg-white font-medium"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3">
+                <Button variant="glass" size="sm" onClick={() => setConversionStep(4)}>
+                  Back
+                </Button>
+                <Button onClick={handleConvertSubmit} className="bg-blue-600 text-white font-bold rounded-xl text-xs">
+                  Convert Lead Now
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {conversionStep === 6 && (
+            <div className="space-y-4 text-center py-4">
+              <CheckCircle2 size={48} className="mx-auto text-emerald-500 mb-2 animate-bounce" />
+              <div className="space-y-1">
+                <span className="text-sm font-bold text-slate-800 block">✓ Lead successfully converted!</span>
+                <span className="text-[10px] text-slate-400 block">All note logs and file timelines are preserved.</span>
+              </div>
+
+              <div className="flex justify-center pt-3">
+                <Button
+                  onClick={() => {
+                    setConvertModalOpen(false);
+                    setConversionStep(1);
+                    fetchProfile(id as string);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-750 text-white font-bold rounded-xl text-xs py-2 px-6"
+                >
+                  Close & Redirect
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };
 
 export default LeadView;
+export { LeadView };

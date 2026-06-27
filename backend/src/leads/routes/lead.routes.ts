@@ -36,6 +36,19 @@ router.get('/statuses', requirePermission('leads:view'), leadController.getStatu
 router.get('/statistics', requirePermission('leads:view'), leadController.getStatistics);
 router.get('/employees', requirePermission('leads:view'), leadController.getEmployees);
 
+// Advanced workspace routes
+router.get('/search', requirePermission('leads:view'), leadController.search);
+router.get('/filter', requirePermission('leads:view'), leadController.filter);
+router.get('/views', requirePermission('leads:manage-views'), leadController.getViews);
+router.post('/save-view', requirePermission('leads:manage-views'), leadController.saveView);
+router.delete('/views/:id', requirePermission('leads:manage-views'), leadController.deleteView);
+router.post('/import', requirePermission('leads:import'), leadController.importLeads);
+router.get('/export', requirePermission('leads:export'), leadController.exportLeads);
+router.patch('/bulk-update', requirePermission('leads:bulk-edit'), leadController.bulkUpdate);
+router.patch('/archive', requirePermission('leads:archive'), leadController.archive);
+router.patch('/restore', requirePermission('leads:restore'), leadController.restore);
+router.post('/merge', requirePermission('leads:merge'), leadController.merge);
+
 // CRUD routes
 router.get(
   '/',
@@ -108,6 +121,18 @@ router.patch(
   logActivity('leads', 'LEAD_RATING_CHANGED'),
   leadController.updateRating
 );
+
+// Lead Automation & Intelligence Routes
+router.post('/:id/assign', requirePermission('leads:assign'), leadController.assign);
+router.post('/:id/convert', requirePermission('leads:convert'), leadController.convert);
+router.post('/:id/follow-up', requirePermission('leads:edit'), leadController.createFollowup);
+router.get('/:id/follow-ups', requirePermission('leads:view'), leadController.getFollowups);
+router.patch('/:id/workflow', requirePermission('leads:workflow-manage'), leadController.workflow);
+router.get('/:id/score', requirePermission('leads:score-view'), leadController.score);
+router.get('/:id/health', requirePermission('leads:score-view'), leadController.health);
+router.get('/:id/sla', requirePermission('leads:view'), leadController.sla);
+router.post('/:id/approval', requirePermission('leads:approve'), leadController.approval);
+router.patch('/:id/reassign', requirePermission('leads:reassign'), leadController.reassign);
 
 // Detailed profile route
 router.get(

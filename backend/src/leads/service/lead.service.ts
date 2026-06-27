@@ -4,6 +4,13 @@ import { leadHistoryRepository } from '../repository/leadHistory.repository';
 import { leadTimelineService } from './leadTimeline.service';
 import { prisma } from '../../database/db';
 
+const leadInclude = {
+  source: { select: { id: true, name: true } },
+  status: { select: { id: true, name: true, color: true, order: true } },
+  assignedTo: { select: { id: true, firstName: true, lastName: true, email: true } },
+  tagMappings: { include: { tag: true } },
+};
+
 /**
  * Clean empty string values from input data — convert them to null
  */
@@ -475,6 +482,270 @@ export const leadService = {
    */
   getEmployees: async () => {
     return leadRepository.getEmployees();
+  },
+
+  /**
+   * Global Search
+   */
+  globalSearch: async (params: { query: string; page?: number; limit?: number }) => {
+    return leadRepository.globalSearch(params);
+  },
+
+  /**
+   * Advanced Filter builder
+   */
+  advancedFilter: async (params: {
+    filters: any;
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortDir?: string;
+  }) => {
+    return leadRepository.advancedFilter(params);
+  },
+
+  /**
+   * Bulk Update leads
+   */
+  bulkUpdate: async (params: {
+    ids: string[];
+    statusId?: string;
+    priority?: string;
+    rating?: number;
+    assignedToId?: string;
+    sourceId?: string;
+    industry?: string;
+    tags?: string[];
+    userId?: string;
+  }) => {
+    return leadRepository.bulkUpdate(params);
+  },
+
+  /**
+   * Archive leads list
+   */
+  archiveLeads: async (ids: string[], archivedBy: string) => {
+    return leadRepository.archiveLeads(ids, archivedBy);
+  },
+
+  /**
+   * Restore leads list
+   */
+  restoreLeads: async (ids: string[]) => {
+    return leadRepository.restoreLeads(ids);
+  },
+
+  /**
+   * Merge duplicates records into primary
+   */
+  mergeLeads: async (params: {
+    primaryId: string;
+    secondaryIds: string[];
+    fieldValues: any;
+    userId: string;
+  }) => {
+    return leadRepository.mergeLeads(params);
+  },
+
+  /**
+   * Custom Views
+   */
+  saveView: async (userId: string, data: any) => {
+    const { id, name, filters, columns, isDefault, isPinned } = data;
+    if (id) {
+      return prisma.savedView.update({
+        where: { id, userId },
+        data: { name, filters, columns, isDefault, isPinned },
+      });
+    }
+    return prisma.savedView.create({
+      data: {
+        name,
+        filters,
+        columns,
+        isDefault,
+        isPinned,
+        userId,
+      },
+    });
+  },
+
+  getViews: async (userId: string) => {
+    return prisma.savedView.findMany({
+      where: { userId, deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+    });
+  },
+
+  deleteView: async (id: string, userId: string) => {
+    return prisma.savedView.delete({
+      where: { id, userId },
+    });
+  },
+
+  /**
+   * Rollback Transaction Safe Leads CSV Importer
+   */
+  importLeads: async (userId: string, fileName: string, rows: any[], mapping: any) => {
+    let successCount = 0;
+    let failedCount = 0;
+    let errorDetails = '';
+
+    try {
+      // Transaction wrapper ensures ALL or NOTHING rollback
+      await prisma.$transaction(async (tx) => {
+        for (const row of rows) {
+          // Map fields using user custom configurations
+          const mappedData: any = {};
+          Object.keys(mapping).forEach((schemaKey) => {
+            const fileKey = mapping[schemaKey];
+            if (fileKey && row[fileKey] !== undefined) {
+              mappedData[schemaKey] = String(row[fileKey]).trim();
+            }
+          });
+
+          // Required fields validation
+          if (!mappedData.firstName || !mappedData.lastName) {
+            failedCount++;
+            throw new Error(`Row missing required 'firstName' or 'lastName' attributes: ${JSON.stringify(row)}`);
+          }
+
+          // Duplicate checks warnings
+          const duplicateCheck = await tx.lead.findFirst({
+            where: {
+              deletedAt: null,
+              OR: [
+                mappedData.email ? { email: mappedData.email } : undefined,
+                mappedData.phone ? { phone: mappedData.phone } : undefined,
+              ].filter(Boolean) as any,
+            },
+          });
+
+          const leadNumber = await leadRepository.getNextLeadNumber();
+          const newLead = await tx.lead.create({
+            data: {
+              leadNumber,
+              firstName: mappedData.firstName,
+              lastName: mappedData.lastName,
+              fullName: `${mappedData.firstName} ${mappedData.lastName}`,
+              email: mappedData.email || null,
+              phone: mappedData.phone || null,
+              companyName: mappedData.companyName || null,
+              industry: mappedData.industry || null,
+              website: mappedData.website || null,
+              address: mappedData.address || null,
+              city: mappedData.city || null,
+              state: mappedData.state || null,
+              country: mappedData.country || null,
+              priority: mappedData.priority || 'Medium',
+              value: mappedData.value ? parseFloat(mappedData.value) : 0.0,
+              createdBy: userId,
+            },
+          });
+
+          // Tag association mappings
+          if (mappedData.tags) {
+            const tagsList = String(mappedData.tags).split(',').map((t) => t.trim()).filter(Boolean);
+            for (const tagName of tagsList) {
+              const tag = await tx.leadTag.upsert({
+                where: { name: tagName },
+                update: {},
+                create: { name: tagName },
+              });
+              await tx.leadTagMapping.create({
+                data: { leadId: newLead.id, tagId: tag.id },
+              });
+            }
+          }
+
+          // Connect duplicate warnings mappings
+          if (duplicateCheck) {
+            await tx.leadDuplicate.create({
+              data: {
+                leadId1: duplicateCheck.id,
+                leadId2: newLead.id,
+                reason: duplicateCheck.email === mappedData.email ? 'Same Email' : 'Same Phone',
+                status: 'Pending',
+              },
+            });
+          }
+
+          successCount++;
+        }
+      });
+
+      // Log success import
+      await prisma.leadImportLog.create({
+        data: {
+          fileName,
+          totalRows: rows.length,
+          successCount,
+          failedCount,
+          importedById: userId,
+        },
+      });
+
+      return { success: true, successCount, failedCount };
+    } catch (err: any) {
+      errorDetails = err.message || 'CSV row validation failed.';
+      // Log failed import audit
+      await prisma.leadImportLog.create({
+        data: {
+          fileName,
+          totalRows: rows.length,
+          successCount: 0,
+          failedCount: rows.length,
+          errorDetails,
+          importedById: userId,
+        },
+      });
+      throw err;
+    }
+  },
+
+  /**
+   * Export leads records to format files
+   */
+  exportLeads: async (userId: string, type: string, params: {
+    selectedIds?: string[];
+    filters?: any;
+    pageLeads?: string[];
+  }) => {
+    let leadsToExport: any[] = [];
+
+    if (params.selectedIds && params.selectedIds.length > 0) {
+      leadsToExport = await prisma.lead.findMany({
+        where: { id: { in: params.selectedIds }, deletedAt: null },
+        include: leadInclude,
+      });
+    } else if (params.filters) {
+      const advancedResult = await leadRepository.advancedFilter({
+        filters: params.filters,
+        limit: 10000,
+      });
+      leadsToExport = advancedResult.items;
+    } else if (params.pageLeads && params.pageLeads.length > 0) {
+      leadsToExport = await prisma.lead.findMany({
+        where: { id: { in: params.pageLeads }, deletedAt: null },
+        include: leadInclude,
+      });
+    } else {
+      leadsToExport = await prisma.lead.findMany({
+        where: { deletedAt: null },
+        include: leadInclude,
+      });
+    }
+
+    // Save Export Log
+    await prisma.leadExportLog.create({
+      data: {
+        exportType: type.toUpperCase(),
+        rowsExported: leadsToExport.length,
+        userId,
+      },
+    });
+
+    return leadsToExport;
   },
 };
 

@@ -275,6 +275,269 @@ export class TaskController {
       next(error);
     }
   };
+
+  /**
+   * Calendar View
+   * GET /api/v1/tasks/calendar
+   */
+  getCalendar = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const start = req.query.start as string || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+      const end = req.query.end as string || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString();
+      const result = await taskService.getCalendar(start, end);
+      ResponseHelper.sendSuccess(req, res, 200, 'Calendar tasks retrieved successfully.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Workload Management
+   * GET /api/v1/tasks/workload
+   */
+  getWorkload = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await taskService.getWorkload();
+      ResponseHelper.sendSuccess(req, res, 200, 'Team workload calculated successfully.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Productivity Dashboard
+   * GET /api/v1/tasks/productivity
+   */
+  getProductivity = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const timeframe = req.query.timeframe as string || 'week';
+      const result = await taskService.getProductivity(timeframe);
+      ResponseHelper.sendSuccess(req, res, 200, 'Productivity analytics retrieved successfully.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Task Timeline Logs
+   * GET /api/v1/tasks/:id/timeline
+   */
+  getTimeline = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await taskService.getTimeline(req.params.id as string);
+      ResponseHelper.sendSuccess(req, res, 200, 'Task timeline history retrieved.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Subtasks
+   * GET /api/v1/tasks/:id/subtasks
+   * POST /api/v1/tasks/:id/subtasks
+   */
+  getSubtasks = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const task = await taskService.getTask(req.params.id as string);
+      ResponseHelper.sendSuccess(req, res, 200, 'Subtasks retrieved.', task.subtasks || []);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  addSubtask = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      const result = await taskService.addSubtask(req.params.id as string, req.body, author);
+      ResponseHelper.sendSuccess(req, res, 201, 'Subtask created successfully.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateSubtask = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      const result = await taskService.updateSubtask(req.params.subtaskId as string, req.body, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Subtask updated successfully.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteSubtask = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      await taskService.deleteSubtask(req.params.subtaskId as string, req.params.id as string, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Subtask removed successfully.');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Checklists
+   */
+  addChecklistItem = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      const result = await taskService.addChecklistItem(req.params.id as string, req.body.title, req.body.order || 0, author);
+      ResponseHelper.sendSuccess(req, res, 201, 'Checklist item added.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateChecklistItem = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      const result = await taskService.updateChecklistItem(req.params.itemId as string, req.body, req.params.id as string, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Checklist item updated.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteChecklistItem = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      await taskService.deleteChecklistItem(req.params.itemId as string, req.params.id as string, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Checklist item deleted.');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Time Logs / Worklogs
+   * GET /api/v1/tasks/:id/time
+   * POST /api/v1/tasks/:id/time
+   */
+  getTimeLogs = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const task = await taskService.getTask(req.params.id as string);
+      ResponseHelper.sendSuccess(req, res, 200, 'Time logs retrieved.', task.timeLogs || []);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  addTimeLog = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      const empId = await this.getEmployeeId(req.user?.id as string) || '';
+      const result = await taskService.addTimeLog(req.params.id as string, req.body, author, empId);
+      ResponseHelper.sendSuccess(req, res, 201, 'Time entry logged.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteTimeLog = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      await taskService.deleteTimeLog(req.params.logId as string, req.params.id as string, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Time log deleted.');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Watchers
+   */
+  addWatcher = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      await taskService.addWatcher(req.params.id as string, req.body.employeeId, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Watcher added successfully.');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  removeWatcher = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      await taskService.removeWatcher(req.params.id as string, req.params.employeeId as string, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Watcher removed successfully.');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Dependencies
+   */
+  addDependency = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      await taskService.addDependency(req.params.id as string, req.body.dependentTaskId, req.body.type, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Dependency linked successfully.');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  removeDependency = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      await taskService.removeDependency(req.params.id as string, req.params.dependentTaskId as string, req.params.type as string, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Dependency linkage removed.');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Recurrence
+   */
+  upsertRecurrence = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      const result = await taskService.upsertRecurrence(req.params.id as string, req.body, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Recurrence options updated.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Approvals
+   * POST /api/v1/tasks/:id/approve/request
+   * PATCH /api/v1/tasks/:id/approve
+   * PATCH /api/v1/tasks/:id/reject
+   */
+  requestApproval = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      const result = await taskService.requestApproval(req.params.id as string, req.body.approverId, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Approval workflow request initiated.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  approveTask = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      await taskService.approveTask(req.params.id as string, req.body.comments || null, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Task approved.');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  rejectTask = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const author = req.user?.email || 'System';
+      await taskService.rejectTask(req.params.id as string, req.body.comments || null, author);
+      ResponseHelper.sendSuccess(req, res, 200, 'Task approval rejected.');
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export const taskController = new TaskController();
+

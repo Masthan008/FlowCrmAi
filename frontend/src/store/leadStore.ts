@@ -83,6 +83,36 @@ interface LeadState {
   // File Upload Actions
   uploadFile: (id: string, formData: FormData) => Promise<void>;
   deleteFile: (id: string, fileId: string) => Promise<void>;
+
+  // Advanced Workspace
+  savedViews: any[];
+  fetchViews: () => Promise<void>;
+  saveCustomView: (data: any) => Promise<void>;
+  deleteCustomView: (id: string) => Promise<void>;
+  bulkUpdateLeads: (data: any) => Promise<void>;
+  archiveLeadsAction: (ids: string[]) => Promise<void>;
+  restoreLeadsAction: (ids: string[]) => Promise<void>;
+  mergeLeadsAction: (data: any) => Promise<void>;
+  importLeadsAction: (data: any) => Promise<any>;
+  exportLeadsAction: (params?: any) => Promise<any>;
+  searchLeadsAction: (query: string) => Promise<void>;
+  filterLeadsAction: (filters: any) => Promise<void>;
+
+  // Lead Automation & Intelligence
+  followups: any[];
+  scoreInfo: any | null;
+  healthInfo: any | null;
+  slaInfo: any | null;
+  fetchFollowups: (id: string) => Promise<void>;
+  createFollowupAction: (id: string, data: any) => Promise<void>;
+  assignLeadAction: (id: string, data: any) => Promise<void>;
+  convertLeadAction: (id: string, data: any) => Promise<any>;
+  saveWorkflowAction: (id: string, data: any) => Promise<void>;
+  fetchScore: (id: string) => Promise<void>;
+  fetchHealth: (id: string) => Promise<void>;
+  fetchSla: (id: string, responseMinutes: number) => Promise<void>;
+  submitApprovalAction: (id: string, data: any) => Promise<void>;
+  reassignLeadAction: (id: string, data: any) => Promise<void>;
 }
 
 export const useLeadStore = create<LeadState>((set, get) => ({
@@ -107,6 +137,11 @@ export const useLeadStore = create<LeadState>((set, get) => ({
   selectedIds: [],
   selectedTab: 'Overview',
   tabLoading: {},
+  savedViews: [],
+  followups: [],
+  scoreInfo: null,
+  healthInfo: null,
+  slaInfo: null,
 
   fetchLeads: async () => {
     set({ loading: true, error: null });
@@ -478,6 +513,245 @@ export const useLeadStore = create<LeadState>((set, get) => ({
       get().fetchTimeline(id);
     } catch (err: any) {
       set({ error: err.response?.data?.message || 'Failed to delete file' });
+      throw err;
+    }
+  },
+
+  // Advanced Workspace
+  fetchViews: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await leadApi.getViews();
+      set({ savedViews: res.data.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch saved views', loading: false });
+    }
+  },
+
+  saveCustomView: async (data: any) => {
+    try {
+      await leadApi.saveView(data);
+      get().fetchViews();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to save view' });
+      throw err;
+    }
+  },
+
+  deleteCustomView: async (id: string) => {
+    try {
+      await leadApi.deleteView(id);
+      get().fetchViews();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete view' });
+      throw err;
+    }
+  },
+
+  bulkUpdateLeads: async (data: any) => {
+    set({ loading: true, error: null });
+    try {
+      await leadApi.bulkUpdateLeads(data);
+      get().fetchLeads();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to perform bulk update', loading: false });
+      throw err;
+    }
+  },
+
+  archiveLeadsAction: async (ids: string[]) => {
+    set({ loading: true, error: null });
+    try {
+      await leadApi.archiveLeads(ids);
+      get().fetchLeads();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to archive leads', loading: false });
+      throw err;
+    }
+  },
+
+  restoreLeadsAction: async (ids: string[]) => {
+    set({ loading: true, error: null });
+    try {
+      await leadApi.restoreLeads(ids);
+      get().fetchLeads();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to restore leads', loading: false });
+      throw err;
+    }
+  },
+
+  mergeLeadsAction: async (data: any) => {
+    set({ loading: true, error: null });
+    try {
+      await leadApi.mergeLeads(data);
+      get().fetchLeads();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to merge leads', loading: false });
+      throw err;
+    }
+  },
+
+  importLeadsAction: async (data: any) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await leadApi.importLeads(data);
+      get().fetchLeads();
+      return res.data;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to import leads', loading: false });
+      throw err;
+    }
+  },
+
+  exportLeadsAction: async (params?: any) => {
+    try {
+      const res = await leadApi.exportLeads(params);
+      return res.data.data;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to export leads' });
+      throw err;
+    }
+  },
+
+  searchLeadsAction: async (query: string) => {
+    set({ loading: true, error: null });
+    try {
+      const { pagination } = get();
+      const res = await leadApi.searchLeads(query, {
+        page: pagination.page,
+        limit: pagination.limit,
+      });
+      set({
+        leads: res.data.data || [],
+        pagination: res.data.pagination
+          ? { ...res.data.pagination }
+          : get().pagination,
+        loading: false,
+      });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to search leads', loading: false });
+    }
+  },
+
+  filterLeadsAction: async (filters: any) => {
+    set({ loading: true, error: null });
+    try {
+      const { pagination } = get();
+      const res = await leadApi.filterLeads(filters, {
+        page: pagination.page,
+        limit: pagination.limit,
+      });
+      set({
+        leads: res.data.data || [],
+        pagination: res.data.pagination
+          ? { ...res.data.pagination }
+          : get().pagination,
+        loading: false,
+      });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to filter leads', loading: false });
+    }
+  },
+
+  // Lead Automation & Intelligence
+  fetchFollowups: async (id: string) => {
+    try {
+      const res = await leadApi.getFollowups(id);
+      set({ followups: res.data.data || [] });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch followups' });
+    }
+  },
+
+  createFollowupAction: async (id: string, data: any) => {
+    try {
+      await leadApi.scheduleFollowup(id, data);
+      get().fetchFollowups(id);
+      get().fetchTimeline(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to schedule followup' });
+      throw err;
+    }
+  },
+
+  assignLeadAction: async (id: string, data: any) => {
+    try {
+      await leadApi.assignLeadOwner(id, data);
+      get().fetchLead(id);
+      get().fetchTimeline(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to assign owner' });
+      throw err;
+    }
+  },
+
+  convertLeadAction: async (id: string, data: any) => {
+    try {
+      const res = await leadApi.convertLead(id, data);
+      get().fetchLead(id);
+      get().fetchTimeline(id);
+      return res.data;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to convert lead' });
+      throw err;
+    }
+  },
+
+  saveWorkflowAction: async (id: string, data: any) => {
+    try {
+      await leadApi.saveWorkflow(id, data);
+      get().fetchTimeline(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to save workflow' });
+      throw err;
+    }
+  },
+
+  fetchScore: async (id: string) => {
+    try {
+      const res = await leadApi.getScore(id);
+      set({ scoreInfo: res.data.data });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to calculate score' });
+    }
+  },
+
+  fetchHealth: async (id: string) => {
+    try {
+      const res = await leadApi.getHealth(id);
+      set({ healthInfo: res.data.data });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch health indicators' });
+    }
+  },
+
+  fetchSla: async (id: string, responseMinutes: number) => {
+    try {
+      const res = await leadApi.updateSla(id, { responseMinutes });
+      set({ slaInfo: res.data.data });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update SLA status' });
+    }
+  },
+
+  submitApprovalAction: async (id: string, data: any) => {
+    try {
+      await leadApi.submitApproval(id, data);
+      get().fetchTimeline(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to submit approval request' });
+      throw err;
+    }
+  },
+
+  reassignLeadAction: async (id: string, data: any) => {
+    try {
+      await leadApi.reassignLead(id, data);
+      get().fetchLead(id);
+      get().fetchTimeline(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to reassign lead' });
       throw err;
     }
   },
