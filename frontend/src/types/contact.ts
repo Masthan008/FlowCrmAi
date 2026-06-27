@@ -140,3 +140,191 @@ export interface ContactPagination {
   totalItems: number;
   totalPages: number;
 }
+
+export interface ContactNote {
+  id: string;
+  contactId: string;
+  content: string;
+  isPinned: boolean;
+  title: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContactActivity {
+  id: string;
+  contactId: string;
+  type: string;
+  title: string;
+  description: string | null;
+  activityDate: string;
+  status: string;
+  priority: string;
+  isCompleted: boolean;
+  assignedToId: string | null;
+  assignedTo?: { id: string; firstName: string; lastName: string; email: string } | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContactFile {
+  id: string;
+  contactId: string;
+  name: string;
+  path: string;
+  mimeType: string;
+  size: number;
+  createdBy?: string | null;
+  createdAt: string;
+}
+
+export interface ContactTimeline {
+  id: string;
+  contactId: string;
+  type: string;
+  title: string;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  eventDate: string;
+  createdBy?: string | null;
+}
+
+export interface ContactHistory {
+  id: string;
+  contactId: string;
+  action: string;
+  fieldName: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+  userId: string | null;
+  createdAt: string;
+}
+
+export interface ContactEmail {
+  id: string;
+  subject: string;
+  sender: string;
+  recipient: string;
+  status: 'Sent' | 'Delivered' | 'Failed' | 'Draft';
+  sentDate: string;
+  hasAttachments: boolean;
+  previewText: string;
+}
+
+export interface ContactRelationship {
+  id: string;
+  contactId: string;
+  relatedContactId: string | null;
+  relatedCompanyId: string | null;
+  role: string;
+  joiningDate: string | null;
+  leavingDate: string | null;
+  position: string | null;
+  department: string | null;
+  reportingManager: string | null;
+  businessUnit: string | null;
+  createdAt?: string;
+}
+
+export interface ContactCall {
+  id: string;
+  contactId: string;
+  direction: string;
+  duration: number;
+  outcome: string;
+  notes: string | null;
+  nextFollowUp: string | null;
+  recordingPath: string | null;
+  createdAt: string;
+}
+
+export interface ContactEmailLog {
+  id: string;
+  contactId: string;
+  subject: string;
+  sender: string;
+  recipient: string;
+  cc: string | null;
+  bcc: string | null;
+  body: string | null;
+  status: string;
+  deliveryStatus: string | null;
+  openStatus: boolean;
+  hasAttachments: boolean;
+  createdAt: string;
+}
+
+export interface ContactWhatsAppLog {
+  id: string;
+  contactId: string;
+  direction: string;
+  message: string;
+  mediaPath: string | null;
+  status: string;
+  timestamp: string;
+}
+
+export interface ContactMeetingLog {
+  id: string;
+  contactId: string;
+  title: string;
+  agenda: string | null;
+  minutes: string | null;
+  outcome: string | null;
+  followUp: string | null;
+  meetingDate: string;
+  duration: number;
+  location: string | null;
+  status: string;
+  participants: string[];
+  createdAt: string;
+}
+
+export interface ContactBusinessMetric {
+  id: string;
+  contactId: string;
+  totalRevenue: number;
+  dealsClosed: number;
+  invoicesCount: number;
+  paymentsCount: number;
+  averageDealSize: number;
+  lifetimeValue: number;
+  currentOpportunityVal: number;
+}
+
+export interface ContactHealth {
+  id: string;
+  contactId: string;
+  communicationFreq: number;
+  activityLevel: number;
+  meetingFreq: number;
+  responseTime: number;
+  dealProgress: number;
+  revenueScore: number;
+  overallHealth: 'Green' | 'Yellow' | 'Red';
+}
+
+export interface ContactEngagement {
+  id: string;
+  contactId: string;
+  emailActivityScore: number;
+  callActivityScore: number;
+  meetingScore: number;
+  taskScore: number;
+  followUpScore: number;
+  overallScore: number;
+}
+
+export interface JourneyEvent {
+  stage: string;
+  date: string | null;
+  desc: string;
+  completed: boolean;
+}
+
+

@@ -184,10 +184,24 @@ export const leadAutomationService = {
       }
 
       if (!config.mergeContact && !contactId) {
+        const lastContact = await tx.contact.findFirst({
+          orderBy: { createdAt: 'desc' },
+          select: { contactNumber: true },
+        });
+        let nextNum = 1;
+        if (lastContact?.contactNumber) {
+          const parts = lastContact.contactNumber.split('-');
+          const num = parseInt(parts[1], 10);
+          if (!isNaN(num)) nextNum = num + 1;
+        }
+        const contactNumber = `CNT-${String(nextNum).padStart(5, '0')}`;
+
         const newContact = await tx.contact.create({
           data: {
+            contactNumber,
             firstName: lead.firstName,
             lastName: lead.lastName,
+            fullName: `${lead.firstName} ${lead.lastName}`.trim(),
             email: lead.email || '',
             phone: lead.phone || null,
             companyId,

@@ -47,7 +47,7 @@ export const contactController = {
   getById: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const contact = await contactService.getById(id);
+      const contact = await contactService.getById(id as string);
       ResponseHelper.sendSuccess(req, res, 200, 'Contact retrieved successfully.', contact);
     } catch (error) {
       next(error);
@@ -74,7 +74,7 @@ export const contactController = {
     try {
       const { id } = req.params;
       const currentUserId = req.user?.id || 'system';
-      const contact = await contactService.update(id, req.body, currentUserId);
+      const contact = await contactService.update(id as string, req.body, currentUserId);
       ResponseHelper.sendSuccess(req, res, 200, 'Contact updated successfully.', contact);
     } catch (error) {
       next(error);
@@ -88,7 +88,7 @@ export const contactController = {
     try {
       const { id } = req.params;
       const currentUserId = req.user?.id || 'system';
-      await contactService.delete(id, currentUserId);
+      await contactService.delete(id as string, currentUserId);
       ResponseHelper.sendSuccess(req, res, 200, 'Contact deleted successfully.');
     } catch (error) {
       next(error);

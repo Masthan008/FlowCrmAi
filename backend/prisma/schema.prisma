@@ -295,6 +295,7 @@ model Employee {
   leadApprovals     LeadApproval[]
   leadNotifications LeadNotification[]
   contacts          Contact[]          @relation("ContactOwner")
+  contactActivities ContactActivity[]
 
   @@map("employees")
 }
@@ -452,6 +453,19 @@ model Contact {
   
   // Relations
   tasks                  Task[]
+  notes                  ContactNote[]
+  activities             ContactActivity[]
+  files                  ContactFile[]
+  timeline               ContactTimeline[]
+  history                ContactHistory[]
+  relationships          ContactRelationship[]
+  calls                  ContactCall[]
+  emailsLogs             ContactEmailLog[]
+  whatsappLogs           ContactWhatsAppLog[]
+  meetingsLogs           ContactMeetingLog[]
+  businessMetric         ContactBusinessMetric?
+  healthMetric           ContactHealth?
+  engagementMetric       ContactEngagement?
 
   @@index([email])
   @@index([phone])
@@ -1973,4 +1987,308 @@ model LeadNotification {
 
   @@map("lead_notifications")
 }
+
+// ==========================================
+// CONTACT 360 WORKSPACE ADDITIONS
+// ==========================================
+
+model ContactNote {
+  id          String    @id @default(uuid()) @db.Uuid
+  contactId   String    @db.Uuid
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  content     String    @db.Text
+  isPinned    Boolean   @default(false)
+  title       String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("contact_notes")
+}
+
+model ContactActivity {
+  id            String    @id @default(uuid()) @db.Uuid
+  contactId     String    @db.Uuid
+  contact       Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  type          String    // Call, Meeting, Email, SMS, WhatsApp, Visit, Demo, Support, Custom
+  title         String
+  description   String?   @db.Text
+  activityDate  DateTime
+  status        String    @default("Planned") // Planned, Completed, Cancelled
+  priority      String    @default("Medium")  // Low, Medium, High
+  isCompleted   Boolean   @default(false)
+  assignedToId  String?   @db.Uuid
+  assignedTo    Employee? @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  // Auditing
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@map("contact_activities")
+}
+
+model ContactFile {
+  id          String    @id @default(uuid()) @db.Uuid
+  contactId   String    @db.Uuid
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  name        String
+  path        String
+  mimeType    String
+  size        Int
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("contact_files")
+}
+
+model ContactTimeline {
+  id          String    @id @default(uuid()) @db.Uuid
+  contactId   String    @db.Uuid
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  type        String    // CONTACT_CREATED, CONTACT_UPDATED, STATUS_CHANGED, OWNER_CHANGED, MEETING_SCHEDULED, TASK_CREATED, FILE_UPLOADED, NOTE_ADDED, EMAIL_SENT, CALL_LOGGED, DEAL_LINKED, OPPORTUNITY_CREATED
+  title       String
+  description String?   @db.Text
+  icon        String?
+  color       String?
+  eventDate   DateTime  @default(now())
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("contact_timeline")
+}
+
+model ContactHistory {
+  id          String    @id @default(uuid()) @db.Uuid
+  contactId   String    @db.Uuid
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  action      String    // Created, Updated, Viewed, Assigned, Deleted, Status Changed, Email Changed, Phone Changed, Company Changed
+  fieldName   String?
+  oldValue    String?   @db.Text
+  newValue    String?   @db.Text
+  userId      String?   @db.Uuid
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("contact_history")
+}
+
+// ==========================================
+// CONTACT RELATIONSHIPS & CUSTOMER INTELLIGENCE
+// ==========================================
+
+model ContactRelationship {
+  id              String    @id @default(uuid()) @db.Uuid
+  contactId       String    @db.Uuid
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  relatedContactId String?  @db.Uuid
+  relatedCompanyId String?  @db.Uuid
+  role            String    // Manager, Assistant, Decision Maker, Influencer, Technical, Billing, Partner, Custom
+  joiningDate     DateTime?
+  leavingDate     DateTime?
+  position        String?
+  department      String?
+  reportingManager String?
+  businessUnit    String?
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  @@map("contact_relationships")
+}
+
+model ContactCall {
+  id              String    @id @default(uuid()) @db.Uuid
+  contactId       String    @db.Uuid
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  direction       String    // Incoming, Outgoing, Missed
+  duration        Int       // In seconds
+  outcome         String    // Connected, Busy, Voicemail, No Answer
+  notes           String?   @db.Text
+  nextFollowUp    DateTime?
+  recordingPath   String?
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  @@map("contact_calls")
+}
+
+model ContactEmailLog {
+  id              String    @id @default(uuid()) @db.Uuid
+  contactId       String    @db.Uuid
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  subject         String
+  sender          String
+  recipient       String
+  cc              String?
+  bcc             String?
+  body            String?   @db.Text
+  status          String    // Sent, Delivered, Failed, Draft
+  deliveryStatus  String?
+  openStatus      Boolean   @default(false)
+  hasAttachments  Boolean   @default(false)
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  @@map("contact_emails")
+}
+
+model ContactWhatsAppLog {
+  id              String    @id @default(uuid()) @db.Uuid
+  contactId       String    @db.Uuid
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  direction       String    // Sent, Received
+  message         String    @db.Text
+  mediaPath       String?
+  status          String    // Sent, Delivered, Read
+  timestamp       DateTime  @default(now())
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  @@map("contact_whatsapp")
+}
+
+model ContactMeetingLog {
+  id              String    @id @default(uuid()) @db.Uuid
+  contactId       String    @db.Uuid
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  title           String
+  agenda          String?   @db.Text
+  minutes         String?   @db.Text
+  outcome         String?   @db.Text
+  followUp        String?   @db.Text
+  meetingDate     DateTime
+  duration        Int       // In minutes
+  location        String?
+  status          String    // Upcoming, Completed, Cancelled
+  participants    String[]
+
+  // Auditing
+  createdBy       String?
+  updatedBy       String?
+  deletedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  @@map("contact_meetings")
+}
+
+model ContactBusinessMetric {
+  id                    String    @id @default(uuid()) @db.Uuid
+  contactId             String    @unique @db.Uuid
+  contact               Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  totalRevenue          Decimal   @default(0.0) @db.Decimal(12, 2)
+  dealsClosed           Int       @default(0)
+  invoicesCount         Int       @default(0)
+  paymentsCount         Int       @default(0)
+  averageDealSize       Decimal   @default(0.0) @db.Decimal(12, 2)
+  lifetimeValue         Decimal   @default(0.0) @db.Decimal(12, 2)
+  currentOpportunityVal Decimal   @default(0.0) @db.Decimal(12, 2)
+
+  // Auditing
+  createdBy             String?
+  updatedBy             String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("contact_business_metrics")
+}
+
+model ContactHealth {
+  id                    String    @id @default(uuid()) @db.Uuid
+  contactId             String    @unique @db.Uuid
+  contact               Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  communicationFreq     Int       // Score out of 100
+  activityLevel         Int       // Score out of 100
+  meetingFreq           Int       // Score out of 100
+  responseTime          Int       // Response time in minutes
+  dealProgress          Int       // Score out of 100
+  revenueScore          Int       // Score out of 100
+  overallHealth         String    // Green (Good), Yellow (Average), Red (At Risk)
+
+  // Auditing
+  createdBy             String?
+  updatedBy             String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("contact_health")
+}
+
+model ContactEngagement {
+  id                    String    @id @default(uuid()) @db.Uuid
+  contactId             String    @unique @db.Uuid
+  contact               Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  emailActivityScore    Int       @default(0)
+  callActivityScore     Int       @default(0)
+  meetingScore          Int       @default(0)
+  taskScore             Int       @default(0)
+  followUpScore         Int       @default(0)
+  overallScore          Int       @default(0) // Calculated index 0-100
+
+  // Auditing
+  createdBy             String?
+  updatedBy             String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("contact_engagement")
+}
+
+
 
