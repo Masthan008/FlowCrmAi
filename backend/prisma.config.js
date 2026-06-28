@@ -12,5 +12,6 @@ module.exports = {
   },
   migrations: {
     path: "prisma/migrations",
+    seed: "node prisma/seed.js",
   },
 };
