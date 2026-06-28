@@ -2,6 +2,7 @@ FROM node:20-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
+COPY prisma.config.js ./
 COPY prisma ./prisma
 RUN npx prisma generate
 COPY tsconfig.json ./
@@ -12,6 +13,7 @@ FROM node:20-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
+COPY prisma.config.js ./
 COPY prisma ./prisma
 RUN npx prisma generate
 COPY --from=build /app/dist ./dist
