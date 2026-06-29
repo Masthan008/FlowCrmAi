@@ -222,9 +222,19 @@ export const leadAutomationService = {
 
       // Step 4: Resolve Deal mapping
       if (config.dealName && config.dealStageId) {
+        const lastDeal = await tx.deal.findFirst({ orderBy: { createdAt: 'desc' }, select: { dealNumber: true } });
+        let nextNum = 1;
+        if (lastDeal?.dealNumber) {
+          const parts = lastDeal.dealNumber.split('-');
+          const num = parseInt(parts[1], 10);
+          if (!isNaN(num)) nextNum = num + 1;
+        }
+        const dealNumber = `DL-${String(nextNum).padStart(5, '0')}`;
+
         const newDeal = await tx.deal.create({
           data: {
             name: config.dealName,
+            dealNumber,
             customerId: customerId as string,
             stageId: config.dealStageId,
             value: lead.value || 0.0,

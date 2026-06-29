@@ -176,7 +176,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   activities: [],
   tasks: [],
   deals: [],
-  timeframe: '12m',
+  timeframe: '30d',
 
   businessOverview: null,
   pipelineData: [],

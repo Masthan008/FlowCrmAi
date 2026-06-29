@@ -223,6 +223,300 @@ class LeadRepository extends base_repository_1.BaseRepository {
             orderBy: { order: 'asc' },
         });
     }
+    /**
+     * Get all assignable employees
+     */
+    /**
+     * Global fuzzy search across all fields
+     */
+    async globalSearch(params) {
+        const { query, page = 1, limit = 20 } = params;
+        const skip = (page - 1) * limit;
+        const where = {
+            deletedAt: null,
+            archivedAt: null,
+            OR: [
+                { leadNumber: { contains: query, mode: 'insensitive' } },
+                { firstName: { contains: query, mode: 'insensitive' } },
+                { lastName: { contains: query, mode: 'insensitive' } },
+                { fullName: { contains: query, mode: 'insensitive' } },
+                { email: { contains: query, mode: 'insensitive' } },
+                { phone: { contains: query, mode: 'insensitive' } },
+                { alternatePhone: { contains: query, mode: 'insensitive' } },
+                { companyName: { contains: query, mode: 'insensitive' } },
+                { website: { contains: query, mode: 'insensitive' } },
+                { industry: { contains: query, mode: 'insensitive' } },
+                { city: { contains: query, mode: 'insensitive' } },
+                { state: { contains: query, mode: 'insensitive' } },
+                { country: { contains: query, mode: 'insensitive' } },
+                { description: { contains: query, mode: 'insensitive' } },
+                { source: { name: { contains: query, mode: 'insensitive' } } },
+                { status: { name: { contains: query, mode: 'insensitive' } } },
+                { assignedTo: { firstName: { contains: query, mode: 'insensitive' } } },
+                { assignedTo: { lastName: { contains: query, mode: 'insensitive' } } },
+                { tagMappings: { some: { tag: { name: { contains: query, mode: 'insensitive' } } } } },
+            ],
+        };
+        const [items, totalItems] = await Promise.all([
+            db_1.prisma.lead.findMany({
+                where,
+                include: {
+                    ...leadInclude,
+                    tagMappings: { include: { tag: true } },
+                },
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+            }),
+            db_1.prisma.lead.count({ where }),
+        ]);
+        return {
+            items,
+            totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            page,
+            limit,
+        };
+    }
+    /**
+     * Advanced query filter builder supporting AND/OR groups
+     */
+    async advancedFilter(params) {
+        const { filters, page = 1, limit = 20, sortBy = 'createdAt', sortDir = 'desc' } = params;
+        const skip = (page - 1) * limit;
+        const baseWhere = { deletedAt: null };
+        // Build the query tree from custom builder rules
+        if (filters && filters.rules && filters.rules.length > 0) {
+            const condition = filters.condition === 'OR' ? 'OR' : 'AND';
+            const clauses = filters.rules.map((rule) => {
+                const { field, operator, value } = rule;
+                const clause = {};
+                // Special handlers
+                if (field === 'tags') {
+                    const tagsArr = Array.isArray(value) ? value : [value];
+                    return {
+                        tagMappings: {
+                            some: {
+                                tag: {
+                                    name: { in: tagsArr, mode: 'insensitive' },
+                                },
+                            },
+                        },
+                    };
+                }
+                if (field === 'dateCreated' || field === 'dateUpdated' || field === 'expectedClosingDate') {
+                    const mappedField = field === 'dateCreated' ? 'createdAt' : field === 'dateUpdated' ? 'updatedAt' : field;
+                    if (operator === 'between' && Array.isArray(value)) {
+                        return {
+                            [mappedField]: {
+                                gte: new Date(value[0]),
+                                lte: new Date(value[1]),
+                            },
+                        };
+                    }
+                    if (operator === 'gte')
+                        return { [mappedField]: { gte: new Date(value) } };
+                    if (operator === 'lte')
+                        return { [mappedField]: { lte: new Date(value) } };
+                    return { [mappedField]: { equals: new Date(value) } };
+                }
+                // Standard operator parsing
+                if (operator === 'equals') {
+                    clause[field] = value;
+                }
+                else if (operator === 'contains') {
+                    clause[field] = { contains: value, mode: 'insensitive' };
+                }
+                else if (operator === 'in') {
+                    clause[field] = { in: Array.isArray(value) ? value : [value] };
+                }
+                else if (operator === 'gte') {
+                    clause[field] = { gte: typeof value === 'string' ? parseFloat(value) : value };
+                }
+                else if (operator === 'lte') {
+                    clause[field] = { lte: typeof value === 'string' ? parseFloat(value) : value };
+                }
+                return clause;
+            });
+            baseWhere[condition] = clauses;
+        }
+        const orderBy = {};
+        if (sortBy) {
+            orderBy[sortBy] = sortDir === 'asc' ? 'asc' : 'desc';
+        }
+        const [items, totalItems] = await Promise.all([
+            db_1.prisma.lead.findMany({
+                where: baseWhere,
+                include: {
+                    ...leadInclude,
+                    tagMappings: { include: { tag: true } },
+                },
+                skip,
+                take: limit,
+                orderBy,
+            }),
+            db_1.prisma.lead.count({ where: baseWhere }),
+        ]);
+        return {
+            items,
+            totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            page,
+            limit,
+        };
+    }
+    /**
+     * Sync color-coded tags for a single lead record
+     */
+    async syncLeadTags(leadId, tagNames) {
+        await db_1.prisma.leadTagMapping.deleteMany({ where: { leadId } });
+        for (const name of tagNames) {
+            const formattedName = name.trim();
+            if (!formattedName)
+                continue;
+            // Upsert LeadTag
+            const tag = await db_1.prisma.leadTag.upsert({
+                where: { name: formattedName },
+                update: {},
+                create: {
+                    name: formattedName,
+                    color: this.getRandomColor(formattedName),
+                },
+            });
+            await db_1.prisma.leadTagMapping.create({
+                data: { leadId, tagId: tag.id },
+            });
+        }
+    }
+    getRandomColor(name) {
+        const colors = ['#EF4444', '#F97316', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#64748B'];
+        const hash = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+        return colors[hash % colors.length];
+    }
+    /**
+     * Bulk modify status, priority, rating, owner, source, or industry
+     */
+    async bulkUpdate(params) {
+        const { ids, statusId, priority, rating, assignedToId, sourceId, industry, tags, userId } = params;
+        const data = { updatedBy: userId || 'system' };
+        if (statusId)
+            data.statusId = statusId;
+        if (priority)
+            data.priority = priority;
+        if (rating !== undefined)
+            data.rating = rating;
+        if (assignedToId)
+            data.assignedToId = assignedToId;
+        if (sourceId)
+            data.sourceId = sourceId;
+        if (industry)
+            data.industry = industry;
+        await db_1.prisma.lead.updateMany({
+            where: { id: { in: ids } },
+            data,
+        });
+        if (tags && tags.length > 0) {
+            for (const leadId of ids) {
+                await this.syncLeadTags(leadId, tags);
+            }
+        }
+    }
+    /**
+     * Soft-archive lead records instead of permanent deletes
+     */
+    async archiveLeads(ids, archivedBy) {
+        return db_1.prisma.lead.updateMany({
+            where: { id: { in: ids } },
+            data: {
+                archivedAt: new Date(),
+                archivedBy,
+            },
+        });
+    }
+    /**
+     * Restore soft-archived records
+     */
+    async restoreLeads(ids) {
+        return db_1.prisma.lead.updateMany({
+            where: { id: { in: ids } },
+            data: {
+                archivedAt: null,
+                archivedBy: null,
+            },
+        });
+    }
+    /**
+     * Merge secondary duplicates records into primary lead survivor
+     */
+    async mergeLeads(params) {
+        const { primaryId, secondaryIds, fieldValues, userId } = params;
+        // Update primary lead with chosen survivors fields values
+        await db_1.prisma.lead.update({
+            where: { id: primaryId },
+            data: {
+                ...fieldValues,
+                updatedBy: userId,
+            },
+        });
+        // Migrating notes, files, activities, and timeline history events to surviving primary lead
+        await Promise.all([
+            db_1.prisma.leadNote.updateMany({
+                where: { leadId: { in: secondaryIds } },
+                data: { leadId: primaryId },
+            }),
+            db_1.prisma.leadFile.updateMany({
+                where: { leadId: { in: secondaryIds } },
+                data: { leadId: primaryId },
+            }),
+            db_1.prisma.leadActivity.updateMany({
+                where: { leadId: { in: secondaryIds } },
+                data: { leadId: primaryId },
+            }),
+            db_1.prisma.leadTimeline.updateMany({
+                where: { leadId: { in: secondaryIds } },
+                data: { leadId: primaryId },
+            }),
+        ]);
+        // Soft-delete secondary records
+        await db_1.prisma.lead.updateMany({
+            where: { id: { in: secondaryIds } },
+            data: {
+                deletedAt: new Date(),
+                deletedBy: userId,
+            },
+        });
+        // Save Merge history
+        await db_1.prisma.leadMergeHistory.create({
+            data: {
+                primaryLeadId: primaryId,
+                mergedLeadIds: secondaryIds,
+                mergedDetails: fieldValues,
+                createdBy: userId,
+            },
+        });
+        // Log surviving timeline log
+        await db_1.prisma.leadTimeline.create({
+            data: {
+                leadId: primaryId,
+                type: 'LEAD_MERGED',
+                title: 'Lead Merged',
+                description: `Merged duplicate records: ${secondaryIds.join(', ')}`,
+                createdBy: userId,
+            },
+        });
+    }
+    async getEmployees() {
+        return db_1.prisma.employee.findMany({
+            where: { deletedAt: null },
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+            },
+            orderBy: { firstName: 'asc' },
+        });
+    }
 }
 exports.LeadRepository = LeadRepository;
 exports.leadRepository = new LeadRepository();

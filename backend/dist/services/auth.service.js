@@ -43,8 +43,7 @@ class AuthService {
             throw err;
         }
         // 4. Resolve default role
-        // Default to 'Viewer' if not Super Admin or custom
-        let defaultRole = await db_1.prisma.role.findUnique({ where: { name: 'Viewer' } });
+        let defaultRole = await db_1.prisma.role.findUnique({ where: { name: 'Admin' } });
         if (!defaultRole) {
             defaultRole = await db_1.prisma.role.findFirst();
         }

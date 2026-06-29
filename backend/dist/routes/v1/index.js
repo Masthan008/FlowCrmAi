@@ -10,6 +10,11 @@ const placeholder_1 = require("./placeholder");
 const auth_1 = __importDefault(require("./auth"));
 const dashboard_routes_1 = __importDefault(require("../../dashboard/routes/dashboard.routes"));
 const lead_routes_1 = __importDefault(require("../../leads/routes/lead.routes"));
+const task_routes_1 = __importDefault(require("../../tasks/routes/task.routes"));
+const contact_routes_1 = __importDefault(require("../../contacts/routes/contact.routes"));
+const company_routes_1 = __importDefault(require("../../companies/routes/company.routes"));
+const companyIntelligence_routes_1 = __importDefault(require("../../companies/routes/companyIntelligence.routes"));
+const deal_routes_1 = __importDefault(require("../../deals/routes/deal.routes"));
 const router = (0, express_1.Router)();
 // Health check endpoint
 router.get('/health', async (req, res) => {
@@ -34,17 +39,18 @@ router.get('/health', async (req, res) => {
 router.use('/auth', auth_1.default);
 router.use('/dashboard', dashboard_routes_1.default);
 router.use('/leads', lead_routes_1.default);
-// Generate placeholder routers for all 20 remaining CRM infrastructure modules
+router.use('/tasks', task_routes_1.default);
+router.use('/contacts', contact_routes_1.default);
+router.use('/companies', company_routes_1.default);
+router.use('/companies', companyIntelligence_routes_1.default);
+router.use('/deals', deal_routes_1.default);
+// Generate placeholder routers for all remaining CRM infrastructure modules
 const placeholderModules = [
     'users',
     'roles',
     'permissions',
     'customers',
-    'contacts',
-    'companies',
-    'deals',
     'activities',
-    'tasks',
     'calendar',
     'meetings',
     'products',
@@ -54,7 +60,8 @@ const placeholderModules = [
     'notifications',
     'reports',
     'analytics',
-    'settings'
+    'settings',
+    'pipelines'
 ];
 placeholderModules.forEach((moduleName) => {
     router.use(`/${moduleName}`, (0, placeholder_1.createPlaceholderRouter)(moduleName));

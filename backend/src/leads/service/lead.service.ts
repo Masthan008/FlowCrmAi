@@ -589,9 +589,23 @@ export const leadService = {
   importLeads: async (userId: string, fileName: string, rows: any[], mapping: any) => {
     let successCount = 0;
     let failedCount = 0;
+    let duplicateCount = 0;
     let errorDetails = '';
 
     try {
+      // Retrieve initial next index before starting transaction to avoid concurrency unique index collisions
+      const lastLead = await prisma.lead.findFirst({
+        orderBy: { createdAt: 'desc' },
+        select: { leadNumber: true },
+      });
+
+      let nextNum = 1;
+      if (lastLead?.leadNumber) {
+        const parts = lastLead.leadNumber.split('-');
+        const num = parseInt(parts[1], 10);
+        if (!isNaN(num)) nextNum = num + 1;
+      }
+
       // Transaction wrapper ensures ALL or NOTHING rollback
       await prisma.$transaction(async (tx) => {
         for (const row of rows) {
@@ -621,7 +635,9 @@ export const leadService = {
             },
           });
 
-          const leadNumber = await leadRepository.getNextLeadNumber();
+          const leadNumber = `LEAD-${String(nextNum).padStart(5, '0')}`;
+          nextNum++;
+
           const newLead = await tx.lead.create({
             data: {
               leadNumber,
@@ -660,6 +676,7 @@ export const leadService = {
 
           // Connect duplicate warnings mappings
           if (duplicateCheck) {
+            duplicateCount++;
             await tx.leadDuplicate.create({
               data: {
                 leadId1: duplicateCheck.id,
@@ -685,7 +702,7 @@ export const leadService = {
         },
       });
 
-      return { success: true, successCount, failedCount };
+      return { success: true, successCount, failedCount, duplicateCount };
     } catch (err: any) {
       errorDetails = err.message || 'CSV row validation failed.';
       // Log failed import audit

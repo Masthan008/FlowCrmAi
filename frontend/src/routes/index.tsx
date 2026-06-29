@@ -183,7 +183,9 @@ export const router = createBrowserRouter([
         path: 'deals',
         element: (
           <ProtectedRoute requiredPermission="deals:view">
-            <Deals />
+            <ErrorBoundary>
+              <Deals />
+            </ErrorBoundary>
           </ProtectedRoute>
         ),
       },

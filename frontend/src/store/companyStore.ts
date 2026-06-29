@@ -226,6 +226,14 @@ export const useCompanyStore = create<CompanyState>((set, get) => ({
     try {
       const { filters, pagination } = get();
       const params: any = { ...filters, page: pagination.page, limit: pagination.limit };
+      
+      // Clean undefined, null, or empty string values from params
+      Object.keys(params).forEach((key) => {
+        if (params[key] === undefined || params[key] === null || params[key] === '') {
+          delete params[key];
+        }
+      });
+
       const res = await companyApi.getCompanies(params);
       set({ companies: res.data.data, pagination: res.data.pagination, loading: false });
     } catch (err: any) {

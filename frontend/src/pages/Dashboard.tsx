@@ -98,7 +98,26 @@ export const Dashboard: React.FC = () => {
   const handleTimeframeChange = (tf: string) => {
     setTimeframe(tf);
     setGlobalFilter(tf);
-    fetchCharts(tf);
+    fetchDashboardData(tf);
+  };
+
+  const getTimeframePrefix = (tf: string) => {
+    switch (tf.toLowerCase()) {
+      case 'today':
+        return "Today's";
+      case 'yesterday':
+        return "Yesterday's";
+      case '7d':
+        return '7D';
+      case '30d':
+        return '30D';
+      case 'quarter':
+        return "This Quarter's";
+      case 'year':
+        return "This Year's";
+      default:
+        return 'Period';
+    }
   };
 
   // 10 sections definitions for smart widgets layout mapping
@@ -245,13 +264,29 @@ export const Dashboard: React.FC = () => {
   // Filter hidden widgets
   const hiddenWidgetsList = widgetsList.filter(w => widgetLayout[w.id]?.hidden);
   
-  // Custom global search action (mock/placeholder alert)
+  // Custom global search action
   const handleGlobalSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      alert(`Search target: "${searchQuery}" is placeholder. Real module indices will sync in subsequent phases.`);
-    }
   };
+
+  const filteredDeals = deals.filter(d => {
+    if (!searchQuery.trim()) return true;
+    return (
+      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.stage.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+
+  const filteredActivities = activities.filter(act => {
+    if (!searchQuery.trim()) return true;
+    return (
+      act.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      act.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      act.module.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   const handleExport = async (type: string) => {
     const id = 'dashboard-export-area';
@@ -298,10 +333,12 @@ export const Dashboard: React.FC = () => {
         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
           <div className="flex items-center gap-1 bg-slate-50 border border-slate-200/60 p-1 rounded-xl">
             {[
-              { label: 'Daily', value: 'today' },
-              { label: 'Weekly', value: '7d' },
-              { label: '3 Days', value: '3d' },
-              { label: 'Monthly', value: '30d' },
+              { label: 'Today', value: 'today' },
+              { label: 'Yesterday', value: 'yesterday' },
+              { label: '7D', value: '7d' },
+              { label: '30D', value: '30d' },
+              { label: 'Quarter', value: 'quarter' },
+              { label: 'Year', value: 'year' },
             ].map((f) => (
               <button
                 key={f.value}
@@ -431,7 +468,7 @@ export const Dashboard: React.FC = () => {
         className="grid grid-cols-1 lg:grid-cols-3 gap-6"
       >
         
-        {/* SECTION 1: Today's Business Overview */}
+        {/* SECTION 1: Timeframe Business Overview */}
         {!widgetLayout.todayOverview?.hidden && (
           <motion.div
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
@@ -440,19 +477,19 @@ export const Dashboard: React.FC = () => {
           <Card className={`bg-white/70 border-slate-100 shadow-glossy-sm p-5 ${
             widgetLayout.todayOverview?.pinned ? 'ring-2 ring-brand-550/40 order-first' : ''
           }`}>
-            {renderWidgetHeader('todayOverview', "Today's Business Overview", 'Operational pipeline velocities')}
+            {renderWidgetHeader('todayOverview', `${getTimeframePrefix(timeframe)} Business Overview`, 'Operational pipeline velocities')}
             
             {!widgetLayout.todayOverview?.collapsed && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                 {[
-                  { label: "Today's Leads", val: businessOverview?.leads || 0, icon: <Users2 size={13} className="text-brand-550" />, progress: 42, color: 'blue' },
-                  { label: "Today's Meetings", val: businessOverview?.meetings || 0, icon: <Calendar size={13} className="text-indigo-500" />, progress: 60, color: 'indigo' },
-                  { label: "Today's Calls", val: businessOverview?.calls || 0, icon: <Activity size={13} className="text-emerald-500" />, progress: 80, color: 'emerald' },
-                  { label: "Today's Tasks", val: businessOverview?.tasks || 0, icon: <CheckSquare size={13} className="text-rose-500" />, progress: 25, color: 'rose' },
-                  { label: "Today's Revenue", val: `$${(businessOverview?.revenue || 0).toLocaleString()}`, icon: <DollarSign size={13} className="text-emerald-600" />, progress: 75, color: 'emerald' },
-                  { label: "Today's Follow-ups", val: businessOverview?.followups || 0, icon: <Clock size={13} className="text-indigo-600" />, progress: 50, color: 'indigo' },
-                  { label: "Closed Deals", val: businessOverview?.closedDeals || 0, icon: <Briefcase size={13} className="text-blue-600" />, progress: 90, color: 'blue' },
-                  { label: "New Customers", val: businessOverview?.newCustomers || 0, icon: <Sparkles size={13} className="text-amber-500" />, progress: 35, color: 'amber' },
+                  { label: `${getTimeframePrefix(timeframe)} Leads`, val: businessOverview?.leads || 0, icon: <Users2 size={13} className="text-brand-550" />, progress: 42, color: 'blue' },
+                  { label: `${getTimeframePrefix(timeframe)} Meetings`, val: businessOverview?.meetings || 0, icon: <Calendar size={13} className="text-indigo-500" />, progress: 60, color: 'indigo' },
+                  { label: `${getTimeframePrefix(timeframe)} Calls`, val: businessOverview?.calls || 0, icon: <Activity size={13} className="text-emerald-500" />, progress: 80, color: 'emerald' },
+                  { label: `${getTimeframePrefix(timeframe)} Tasks`, val: businessOverview?.tasks || 0, icon: <CheckSquare size={13} className="text-rose-500" />, progress: 25, color: 'rose' },
+                  { label: `${getTimeframePrefix(timeframe)} Revenue`, val: `$${(businessOverview?.revenue || 0).toLocaleString()}`, icon: <DollarSign size={13} className="text-emerald-600" />, progress: 75, color: 'emerald' },
+                  { label: `${getTimeframePrefix(timeframe)} Follow-ups`, val: businessOverview?.followups || 0, icon: <Clock size={13} className="text-indigo-600" />, progress: 50, color: 'indigo' },
+                  { label: `${getTimeframePrefix(timeframe)} Closed Deals`, val: businessOverview?.closedDeals || 0, icon: <Briefcase size={13} className="text-blue-600" />, progress: 90, color: 'blue' },
+                  { label: `${getTimeframePrefix(timeframe)} New Customers`, val: businessOverview?.newCustomers || 0, icon: <Sparkles size={13} className="text-amber-500" />, progress: 35, color: 'amber' },
                 ].map((item, idx) => (
                   <div key={idx} className="p-3.5 rounded-2xl border border-slate-100/80 bg-white shadow-glossy-sm hover:scale-[1.02] hover:shadow-glossy-md transition-all text-left">
                     <div className="flex justify-between items-center mb-2">
@@ -753,13 +790,13 @@ export const Dashboard: React.FC = () => {
             
             {!widgetLayout.customerActivities?.collapsed && (
               <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin text-left">
-                {activities.length === 0 ? (
+                {filteredActivities.length === 0 ? (
                   <div className="py-16 text-center">
                     <Activity className="w-8 h-8 text-slate-300 mx-auto mb-1" />
                     <p className="text-xs font-semibold text-slate-500">No activity logs parsed</p>
                   </div>
                 ) : (
-                  activities.map((act) => (
+                  filteredActivities.map((act) => (
                     <div key={act.id} className="flex gap-3 items-start p-2 rounded-xl hover:bg-slate-50/50">
                       <Avatar name={act.userName} size="sm" className="w-8 h-8 flex-shrink-0 mt-0.5" />
                       <div className="min-w-0">
@@ -817,7 +854,7 @@ export const Dashboard: React.FC = () => {
             
             {!widgetLayout.watchlist?.collapsed && (
               <div className="mt-2">
-                {deals.length === 0 ? (
+                {filteredDeals.length === 0 ? (
                   <div className="py-12 text-center">
                     <Activity className="w-8 h-8 text-slate-350 mx-auto mb-1" />
                     <p className="text-xs font-semibold text-slate-600">No active deals found</p>
@@ -825,7 +862,7 @@ export const Dashboard: React.FC = () => {
                 ) : (
                   <DataTable
                     columns={dealColumns}
-                    data={deals}
+                    data={filteredDeals}
                     searchColumnId="name"
                     searchPlaceholder="Search watchlist..."
                   />

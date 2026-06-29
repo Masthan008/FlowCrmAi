@@ -126,7 +126,7 @@ class DashboardService {
         const rawTasks = await dashboard_repository_1.dashboardRepository.getUpcomingTasks();
         return rawTasks.map((t) => ({
             id: t.id,
-            subject: t.subject,
+            subject: t.title,
             priority: t.priority,
             status: t.status,
             dueDate: t.dueDate,
@@ -144,7 +144,7 @@ class DashboardService {
             stage: d.stage?.name || 'Prospecting',
             value: d.value,
             owner: d.assignedTo ? `${d.assignedTo.firstName} ${d.assignedTo.lastName}` : 'Unassigned',
-            expectedCloseDate: d.closeDate,
+            expectedCloseDate: d.expectedCloseDate,
         }));
     }
     /**
@@ -158,7 +158,39 @@ class DashboardService {
         const rawData = await dashboard_repository_1.dashboardRepository.getCharts(timeframe);
         const now = new Date();
         const dataPoints = [];
-        if (timeframe === '7d') {
+        const isYearly = timeframe === 'year' || timeframe === '12m' || timeframe === 'custom';
+        const isQuarterly = timeframe === 'quarter' || timeframe === '90d';
+        const isHourly = timeframe === 'today' || timeframe === 'yesterday';
+        if (timeframe === 'today') {
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date();
+                d.setHours(now.getHours() - i * 2);
+                const dateString = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                const dateKey = d.toISOString().split(':')[0]; // YYYY-MM-DDTHH
+                dataPoints.push({ label: dateString, revenue: 0, leads: 0, deals: 0, conversionRate: 0, dateKey });
+            }
+        }
+        else if (timeframe === 'yesterday') {
+            const yesterday = new Date();
+            yesterday.setDate(now.getDate() - 1);
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date(yesterday);
+                d.setHours(i * 2);
+                const dateString = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                const dateKey = d.toISOString().split(':')[0]; // YYYY-MM-DDTHH
+                dataPoints.push({ label: dateString, revenue: 0, leads: 0, deals: 0, conversionRate: 0, dateKey });
+            }
+        }
+        else if (timeframe === '3d') {
+            for (let i = 2; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(now.getDate() - i);
+                const dateString = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const dateKey = d.toISOString().split('T')[0];
+                dataPoints.push({ label: dateString, revenue: 0, leads: 0, deals: 0, conversionRate: 0, dateKey });
+            }
+        }
+        else if (timeframe === '7d') {
             for (let i = 6; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(now.getDate() - i);
@@ -176,7 +208,7 @@ class DashboardService {
                 dataPoints.push({ label: dateString, revenue: 0, leads: 0, deals: 0, conversionRate: 0, dateKey });
             }
         }
-        else if (timeframe === '90d') {
+        else if (isQuarterly) {
             for (let i = 11; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(now.getDate() - i * 7);
@@ -196,42 +228,48 @@ class DashboardService {
         }
         rawData.leads.forEach((l) => {
             const match = dataPoints.find((dp) => {
-                if (timeframe === '12m')
+                if (isYearly) {
                     return l.createdAt.toISOString().startsWith(dp.dateKey);
-                else if (timeframe === '90d') {
+                }
+                else if (isQuarterly) {
                     const diff = Math.abs(new Date(dp.dateKey).getTime() - l.createdAt.getTime());
                     return diff < 7 * 24 * 60 * 60 * 1000;
                 }
-                else
+                else {
                     return l.createdAt.toISOString().startsWith(dp.dateKey);
+                }
             });
             if (match)
                 match.leads += 1;
         });
         rawData.deals.forEach((d) => {
             const match = dataPoints.find((dp) => {
-                if (timeframe === '12m')
+                if (isYearly) {
                     return d.createdAt.toISOString().startsWith(dp.dateKey);
-                else if (timeframe === '90d') {
+                }
+                else if (isQuarterly) {
                     const diff = Math.abs(new Date(dp.dateKey).getTime() - d.createdAt.getTime());
                     return diff < 7 * 24 * 60 * 60 * 1000;
                 }
-                else
+                else {
                     return d.createdAt.toISOString().startsWith(dp.dateKey);
+                }
             });
             if (match)
                 match.deals += 1;
         });
         rawData.payments.forEach((p) => {
             const match = dataPoints.find((dp) => {
-                if (timeframe === '12m')
+                if (isYearly) {
                     return p.createdAt.toISOString().startsWith(dp.dateKey);
-                else if (timeframe === '90d') {
+                }
+                else if (isQuarterly) {
                     const diff = Math.abs(new Date(dp.dateKey).getTime() - p.createdAt.getTime());
                     return diff < 7 * 24 * 60 * 60 * 1000;
                 }
-                else
+                else {
                     return p.createdAt.toISOString().startsWith(dp.dateKey);
+                }
             });
             if (match)
                 match.revenue += p.amount;

@@ -14,6 +14,8 @@ const errorHandler_1 = require("./middlewares/errorHandler");
 const rateLimiter_1 = require("./middlewares/rateLimiter");
 const v1_1 = __importDefault(require("./routes/v1"));
 const app = (0, express_1.default)();
+// Trust reverse proxy (Nginx)
+app.set('trust proxy', 1);
 // Security Middlewares
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
@@ -32,6 +34,10 @@ app.use(requestId_1.requestIdMiddleware);
 app.use(logger_1.requestLogger);
 // Rate limiter on api namespace
 app.use('/api', rateLimiter_1.apiRateLimiter);
+// Serve file uploads statically
+const path_1 = __importDefault(require("path"));
+const config_1 = require("./config");
+app.use('/uploads', express_1.default.static(path_1.default.resolve(config_1.config.uploadPath)));
 // Mount API versioned routes
 app.use('/api/v1', v1_1.default);
 // 404 Route handler

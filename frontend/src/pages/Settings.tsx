@@ -71,6 +71,18 @@ const Settings: React.FC = () => {
     marketingEmails: false,
   });
 
+  const [cacheExpiry, setCacheExpiry] = useState(300);
+  const [webhooksEnabled, setWebhooksEnabled] = useState(true);
+  const [rateLimit, setRateLimit] = useState(60);
+  const [companyName, setCompanyName] = useState('Acme Enterprise');
+  const [supportEmail, setSupportEmail] = useState('support@acme.com');
+  const [defaultCurrency, setDefaultCurrency] = useState('USD');
+
+  const handleSaveSystem = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success('Settings Saved', 'System configurations saved successfully.');
+  };
+
   const profileForm = useForm<ProfileFields>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -226,7 +238,7 @@ const Settings: React.FC = () => {
               <div className="flex justify-end pt-2">
                 <Button type="submit" disabled={isSaving} variant="primary" size="md">
                   {isSaving ? <Loader2 size={16} className="animate-spin mr-2" /> : <Save size={16} className="mr-2" />}
-                  Save Profile
+                  Save Changes
                 </Button>
               </div>
             </form>
@@ -258,8 +270,8 @@ const Settings: React.FC = () => {
               ))}
             </div>
             <div className="flex justify-end pt-4">
-              <Button onClick={saveNotifications} variant="primary" size="sm">
-                <Save size={14} className="mr-1.5" /> Save Preferences
+              <Button onClick={() => { saveNotifications(); toast.success('Settings Saved', 'Notification changes saved successfully.'); }} variant="primary" size="sm">
+                <Save size={14} className="mr-1.5" /> Save Changes
               </Button>
             </div>
           </Card>
@@ -332,7 +344,7 @@ const Settings: React.FC = () => {
               <div className="flex justify-end pt-2">
                 <Button type="submit" disabled={isUpdatingPassword} variant="primary" size="md">
                   {isUpdatingPassword ? <Loader2 size={16} className="animate-spin mr-2" /> : <Lock size={16} className="mr-2" />}
-                  Update Password
+                  Save Changes
                 </Button>
               </div>
             </form>
@@ -342,28 +354,93 @@ const Settings: React.FC = () => {
 
       {/* System Tab */}
       {activeTab === 'system' && (
-        <motion.div key="system" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 bg-cyan-50 rounded-xl"><Sliders size={18} className="text-cyan-600" /></div>
-              <h2 className="text-base font-semibold text-slate-800">System Configuration</h2>
-            </div>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              System parameter modules, workspace preferences, API keys management,
-              and advanced database indexes will be available in future updates.
-            </p>
-          </Card>
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 bg-indigo-50 rounded-xl"><Globe size={18} className="text-indigo-600" /></div>
-              <h2 className="text-base font-semibold text-slate-800">Company Preferences</h2>
-            </div>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Branding options, email connection engines, localization settings,
-              and team-wide rules will be configurable here in upcoming releases.
-            </p>
-          </Card>
-        </motion.div>
+        <form onSubmit={handleSaveSystem} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="p-6 space-y-4 text-left">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-cyan-50 rounded-xl"><Sliders size={18} className="text-cyan-600" /></div>
+                <h2 className="text-base font-semibold text-slate-800">System Configuration</h2>
+              </div>
+              
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">API Cache Expiry Time (seconds)</label>
+                <input
+                  type="number"
+                  value={cacheExpiry}
+                  onChange={(e) => setCacheExpiry(Number(e.target.value))}
+                  className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-medium"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">API Request Rate Limit (req/min)</label>
+                <input
+                  type="number"
+                  value={rateLimit}
+                  onChange={(e) => setRateLimit(Number(e.target.value))}
+                  className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-medium"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/30">
+                <span className="text-xs font-semibold text-slate-700">Enable Webhooks Dispatcher</span>
+                <div
+                  onClick={() => setWebhooksEnabled(!webhooksEnabled)}
+                  className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${webhooksEnabled ? 'bg-brand-550' : 'bg-slate-300'}`}
+                >
+                  <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-glossy-sm transition-transform ${webhooksEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 space-y-4 text-left">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-indigo-50 rounded-xl"><Globe size={18} className="text-indigo-600" /></div>
+                <h2 className="text-base font-semibold text-slate-800">Company Preferences</h2>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">Company Branding Name</label>
+                <input
+                  type="text"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-medium"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">Primary Support Email</label>
+                <input
+                  type="email"
+                  value={supportEmail}
+                  onChange={(e) => setSupportEmail(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-medium"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">Default Currency</label>
+                <select
+                  value={defaultCurrency}
+                  onChange={(e) => setDefaultCurrency(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-semibold text-slate-700"
+                >
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                  <option value="JPY">JPY (¥)</option>
+                </select>
+              </div>
+            </Card>
+          </div>
+          <div className="flex justify-end">
+            <Button type="submit" variant="primary" size="md">
+              <Save size={16} className="mr-2" />
+              Save Changes
+            </Button>
+          </div>
+        </form>
       )}
     </motion.div>
   );

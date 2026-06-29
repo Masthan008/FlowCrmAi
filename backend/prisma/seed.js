@@ -109,6 +109,9 @@ async function main() {
     { name: 'deals:create', module: 'deals', action: 'create', description: 'Create new deals' },
     { name: 'deals:edit', module: 'deals', action: 'edit', description: 'Edit deals' },
     { name: 'deals:delete', module: 'deals', action: 'delete', description: 'Delete deals' },
+    { name: 'deals:assign', module: 'deals', action: 'assign', description: 'Assign deals to team members' },
+    { name: 'deals:export', module: 'deals', action: 'export', description: 'Export deals data' },
+    { name: 'pipeline:manage', module: 'pipeline', action: 'manage', description: 'Manage deal pipelines and stages' },
 
     // Reports & Analytics
     { name: 'reports:view', module: 'reports', action: 'view', description: 'View reports' },
@@ -208,6 +211,7 @@ async function main() {
     p.module === 'dashboard' ||
     (p.module === 'leads' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'export' || p.action === 'insights-view')) ||
     (p.module === 'contacts' && (p.action === 'view')) ||
+    (p.module === 'deals' && p.action === 'view') ||
     (p.module === 'tasks' && (p.action === 'view' || p.action === 'create')) ||
     p.module === 'reports'
   );
@@ -217,6 +221,7 @@ async function main() {
     p.module === 'dashboard' ||
     (p.module === 'contacts' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'notes:create' || p.action === 'notes:edit')) ||
     (p.module === 'companies' && p.action === 'view') ||
+    (p.module === 'deals' && p.action === 'view') ||
     (p.module === 'tasks' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'complete'))
   );
 
@@ -235,8 +240,7 @@ async function main() {
     (p.module === 'users' && p.action === 'view')
   );
 
-<<<<<<< HEAD:backend/prisma/seed.ts
-  // Team Lead: lifecycle, tag, score, health, risk view, followup, recommendation
+  // Team Lead: lifecycle, tag, score, health, risk view, followup, recommendation, deal view & edit
   await assignPermissions('Team Lead', (p) =>
     p.name === 'company:lifecycle:manage' ||
     p.name === 'company:tag:manage' ||
@@ -244,10 +248,11 @@ async function main() {
     p.name === 'company:health:view' ||
     p.name === 'company:risk:view' ||
     p.name === 'company:followup:manage' ||
-    p.name === 'company:recommendation:view'
+    p.name === 'company:recommendation:view' ||
+    (p.module === 'deals' && (p.action === 'view' || p.action === 'edit'))
   );
 
-  // Viewer: only view & access actions plus Phase 6 company view permissions
+  // Viewer: only view & access actions plus company view permissions
   await assignPermissions('Viewer', (p) =>
     p.action === 'view' ||
     p.action === 'access' ||
@@ -256,10 +261,6 @@ async function main() {
     p.name === 'company:score:view' ||
     p.name === 'company:recommendation:view'
   );
-=======
-  // Viewer
-  await assignPermissions('Viewer', (p) => p.action === 'view' || p.action === 'access');
->>>>>>> 32f2f661d1a4dc3e4791f7639eb28c858b06eb9a:backend/prisma/seed.js
 
   console.log('Linked permissions to all 9 roles.');
 

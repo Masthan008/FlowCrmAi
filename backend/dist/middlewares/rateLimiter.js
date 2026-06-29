@@ -8,7 +8,7 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const response_1 = require("../helpers/response");
 exports.apiRateLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes window
-    max: 100, // Limit each IP to 100 requests per window
+    max: process.env.NODE_ENV === 'production' ? 100 : 10000, // Limit each IP to 10000 requests in dev
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {
@@ -18,7 +18,7 @@ exports.apiRateLimiter = (0, express_rate_limit_1.default)({
 });
 exports.authRateLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes window
-    max: 10, // Limit each IP to 10 login/refresh attempts per window
+    max: process.env.NODE_ENV === 'production' ? 10 : 1000, // Limit each IP to 1000 login/refresh attempts in dev
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {

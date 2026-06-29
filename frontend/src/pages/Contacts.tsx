@@ -166,6 +166,7 @@ export const Contacts: React.FC = () => {
       inactiveOnly: tab === 'inactive' ? true : undefined,
       archivedOnly: tab === 'archived' ? true : undefined,
       myContactsOnly: tab === 'my' ? true : undefined,
+      status: undefined, // Reset explicit dropdown status filter
     };
     setFilters(newFilters);
   };
@@ -592,12 +593,24 @@ export const Contacts: React.FC = () => {
             </select>
 
             {/* Clear Filters */}
-            {(filters.search || filters.status || filters.owner) && (
+            {(filters.search || filters.status || filters.owner || filters.vip || filters.customerOnly || filters.partnerOnly || filters.inactiveOnly || filters.archivedOnly || filters.myContactsOnly || filters.recentlyAdded) && (
               <Button
                 variant="ghost"
                 onClick={() => {
                   setSearchQuery('');
-                  setFilters({ search: undefined, status: undefined, owner: undefined });
+                  setActiveTab('all');
+                  setFilters({
+                    search: undefined,
+                    status: undefined,
+                    owner: undefined,
+                    vip: undefined,
+                    recentlyAdded: undefined,
+                    customerOnly: undefined,
+                    partnerOnly: undefined,
+                    inactiveOnly: undefined,
+                    archivedOnly: undefined,
+                    myContactsOnly: undefined,
+                  });
                 }}
                 className="text-xs font-bold text-rose-500 hover:bg-rose-50 rounded-xl"
               >
@@ -766,10 +779,11 @@ export const Contacts: React.FC = () => {
                     )}
                     <td className="pr-6 py-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
-                        <Link to={`/contacts/${contact.id}`}>
-                          <button className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                            <Eye size={14} />
-                          </button>
+                        <Link
+                          to={`/contacts/${contact.id}`}
+                          className="p-1.5 text-slate-400 hover:text-slate-650 hover:bg-slate-100 rounded-lg transition-colors inline-block"
+                        >
+                          <Eye size={14} />
                         </Link>
                         <button
                           onClick={() => handleOpenEdit(contact)}
@@ -925,6 +939,24 @@ export const Contacts: React.FC = () => {
                         className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50"
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-600 uppercase">Category (Status) *</label>
+                    <select
+                      {...register('status')}
+                      className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-semibold text-slate-700"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                      <option value="VIP">VIP</option>
+                      <option value="Prospect">Prospect</option>
+                      <option value="Customer">Customer</option>
+                      <option value="Partner">Partner</option>
+                      <option value="Vendor">Vendor</option>
+                      <option value="Former Customer">Former Customer</option>
+                      <option value="Archived">Archived</option>
+                    </select>
                   </div>
 
                   <div className="space-y-1">

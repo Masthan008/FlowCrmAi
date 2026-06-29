@@ -9,6 +9,7 @@ import taskRouter from '../../tasks/routes/task.routes';
 import contactRouter from '../../contacts/routes/contact.routes';
 import companyRouter from '../../companies/routes/company.routes';
 import companyIntelligenceRouter from '../../companies/routes/companyIntelligence.routes';
+import dealRouter from '../../deals/routes/deal.routes';
 
 const router = Router();
 
@@ -40,14 +41,14 @@ router.use('/tasks', taskRouter);
 router.use('/contacts', contactRouter);
 router.use('/companies', companyRouter);
 router.use('/companies', companyIntelligenceRouter);
+router.use('/deals', dealRouter);
 
-// Generate placeholder routers for all 20 remaining CRM infrastructure modules
+// Generate placeholder routers for all remaining CRM infrastructure modules
 const placeholderModules = [
   'users',
   'roles',
   'permissions',
   'customers',
-  'deals',
   'activities',
   'calendar',
   'meetings',
@@ -58,7 +59,8 @@ const placeholderModules = [
   'notifications',
   'reports',
   'analytics',
-  'settings'
+  'settings',
+  'pipelines'
 ];
 
 placeholderModules.forEach((moduleName) => {

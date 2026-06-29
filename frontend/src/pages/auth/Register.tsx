@@ -8,12 +8,16 @@ import { useToast } from '../../components/ui/ToastProvider';
 import { api } from '../../services/api';
 import { Button } from '../../components/ui/Button';
 
+const phoneRegex = /^[+]?[\d\s\-().]*$/;
+
 // Validation schema
 const registerSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50, 'Max 50 characters'),
   lastName: z.string().min(1, 'Last name is required').max(50, 'Max 50 characters'),
   email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
-  phone: z.string().optional(),
+  phone: z.string().optional().refine(val => !val || phoneRegex.test(val), {
+    message: 'Mobile number must contain only numbers and optional symbols (+, -, spacing)',
+  }),
   department: z.string().optional(),
   jobTitle: z.string().optional(),
   password: z
@@ -157,8 +161,11 @@ export const Register: React.FC = () => {
                 type="tel"
                 placeholder="+1 (555) 000-0000"
                 {...register('phone')}
-                className={inputClass(false)}
+                className={inputClass(!!errors.phone)}
               />
+              {errors.phone && (
+                <p className="text-xs font-semibold text-rose-500">{errors.phone.message}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-650 tracking-wide uppercase">

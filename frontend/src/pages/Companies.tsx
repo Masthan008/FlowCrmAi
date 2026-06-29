@@ -67,11 +67,23 @@ export const Companies: React.FC = () => {
   }, [pagination.page, filters]);
 
   useEffect(() => {
+    const resetTabFilters = {
+      myCompaniesOnly: undefined,
+      customersOnly: undefined,
+      partnersOnly: undefined,
+      prospectsOnly: undefined,
+      recentlyAdded: undefined,
+      highRevenue: undefined,
+      highPriority: undefined,
+      archivedOnly: undefined,
+    };
     if (activeTab === 'all') {
-      setFilters({});
+      setFilters(resetTabFilters);
     } else {
       const tab = quickTabs.find(t => t.id === activeTab);
-      if (tab) setFilters(tab.filter);
+      if (tab) {
+        setFilters({ ...resetTabFilters, ...tab.filter });
+      }
     }
   }, [activeTab]);
 

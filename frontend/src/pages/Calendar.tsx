@@ -55,9 +55,30 @@ export const Calendar: React.FC = () => {
     setType('Video Call');
   };
 
-  // Generate calendar days for June 2026
-  // June 1st, 2026 is a Monday. June has 30 days.
-  const daysInJune = Array.from({ length: 30 }, (_, i) => i + 1);
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 5, 1)); // Default June 2026
+
+  const handlePrevMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  };
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const totalDays = new Date(year, month + 1, 0).getDate();
+
+  // Mon-Sun grid offset where Mon=0, Tue=1, ..., Sun=6
+  let startDayOffset = new Date(year, month, 1).getDay(); // Sunday=0, Monday=1
+  startDayOffset = startDayOffset === 0 ? 6 : startDayOffset - 1;
+
+  const daysInMonth = Array.from({ length: totalDays }, (_, i) => i + 1);
+  const emptyDaysBefore = Array.from({ length: startDayOffset }, (_, i) => i);
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   return (
     <div className="space-y-6 text-slate-700 text-xs">
@@ -77,13 +98,13 @@ export const Calendar: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* June 2026 Grid layout (8 cols) */}
+        {/* Calendar Grid layout (8 cols) */}
         <div className="lg:col-span-8 glass-card p-6 space-y-4">
           <div className="flex justify-between items-center select-none">
-            <h3 className="text-sm font-bold text-slate-855 dark:text-slate-100">June 2026</h3>
+            <h3 className="text-sm font-bold text-slate-855 dark:text-slate-100">{monthNames[month]} {year}</h3>
             <div className="flex gap-1.5">
-              <button className="p-1 border border-slate-150 rounded-lg hover:bg-slate-50"><ChevronLeft size={14} /></button>
-              <button className="p-1 border border-slate-150 rounded-lg hover:bg-slate-50"><ChevronRight size={14} /></button>
+              <button onClick={handlePrevMonth} className="p-1 border border-slate-150 rounded-lg hover:bg-slate-50"><ChevronLeft size={14} /></button>
+              <button onClick={handleNextMonth} className="p-1 border border-slate-150 rounded-lg hover:bg-slate-50"><ChevronRight size={14} /></button>
             </div>
           </div>
 
@@ -99,8 +120,11 @@ export const Calendar: React.FC = () => {
 
           {/* Calendar Grid */}
           <div className="grid grid-cols-7 gap-2 min-h-[300px]">
-            {daysInJune.map((day) => {
-              const formattedDate = `2026-06-${String(day).padStart(2, '0')}`;
+            {emptyDaysBefore.map((idx) => (
+              <div key={`empty-${idx}`} className="p-2 border border-transparent rounded-xl min-h-[50px]" />
+            ))}
+            {daysInMonth.map((day) => {
+              const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
               const dayEvents = events.filter(e => e.date === formattedDate);
               return (
                 <div key={day} className="p-2 border border-slate-100/50 dark:border-slate-800 rounded-xl min-h-[50px] flex flex-col justify-between hover:bg-slate-50/50">

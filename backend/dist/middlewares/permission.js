@@ -34,6 +34,11 @@ const requirePermission = (permission) => {
             response_1.ResponseHelper.sendError(req, res, 401, 'User context not found. Authentication is required.');
             return;
         }
+        // Super Admin role has access to all actions and bypasses checking
+        if (req.user.role === 'Super Admin') {
+            next();
+            return;
+        }
         const hasAccess = hasPermissionMatch(req.user.permissions, permission);
         if (!hasAccess) {
             res.status(403);

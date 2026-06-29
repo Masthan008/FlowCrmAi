@@ -39,6 +39,7 @@ import { Avatar } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { api } from '../services/api';
+import { useNotificationStore } from '../store/notificationStore';
 
 export const DashboardLayout: React.FC = () => {
   const { settings, toggleSidebar } = useSettingsStore();
@@ -52,6 +53,9 @@ export const DashboardLayout: React.FC = () => {
   const [notifOpen, setNotifOpen] = useState(false);
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const { theme, setTheme } = useThemeStore();
+  const { systemNotifications, markAsRead } = useNotificationStore();
+  const unreadNotifications = systemNotifications.filter(n => !n.read);
+  const unreadCount = unreadNotifications.length;
 
   useEffect(() => {
     if (theme === 'dark' || theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -335,34 +339,62 @@ export const DashboardLayout: React.FC = () => {
                 className="text-slate-500 hover:text-slate-800 p-2 rounded-xl hover:bg-slate-50 border border-slate-100/50 transition-colors relative"
               >
                 <Bell size={18} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-550" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-550" />
+                )}
               </button>
 
               {notifOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setNotifOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-white border border-slate-100 shadow-glossy-md p-4 z-20">
+                  <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-white border border-slate-100 shadow-glossy-md p-4 z-20 text-left">
                     <div className="flex justify-between items-center mb-3">
                       <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Notifications</h4>
-                      <Badge variant="info">New</Badge>
+                      {unreadCount > 0 ? (
+                        <Badge variant="info">{unreadCount} New</Badge>
+                      ) : (
+                        <Badge variant="neutral">All Read</Badge>
+                      )}
                     </div>
                     <div className="h-px bg-slate-100 my-2" />
-                    <div className="space-y-3 py-1">
-                      <div className="flex gap-3">
-                        <div className="w-2 h-2 mt-1.5 rounded-full bg-brand-550 flex-shrink-0" />
-                        <div>
-                          <p className="text-xs font-semibold text-slate-800 leading-tight">New lead assigned</p>
-                          <p className="text-[10px] text-slate-400 mt-0.5">Bruce Wayne from Wayne Enterprises has been added.</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <div className="w-2 h-2 mt-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                        <div>
-                          <p className="text-xs font-semibold text-slate-800 leading-tight">Deal Proposal Qualified</p>
-                          <p className="text-[10px] text-slate-400 mt-0.5">Cyberdyne Systems pipeline value updated.</p>
-                        </div>
-                      </div>
+                    <div className="space-y-3 py-1 max-h-60 overflow-y-auto">
+                      {systemNotifications.length === 0 ? (
+                        <p className="text-[10px] text-slate-400 italic text-center py-2">No notifications found.</p>
+                      ) : (
+                        systemNotifications.map((n) => (
+                          <div
+                            key={n.id}
+                            onClick={() => {
+                              markAsRead(n.id);
+                              toast.info(n.title, n.description);
+                            }}
+                            className={`flex gap-3 p-1.5 rounded-lg transition-colors cursor-pointer hover:bg-slate-50 ${
+                              !n.read ? 'bg-slate-50/50' : ''
+                            }`}
+                          >
+                            <div className={`w-2 h-2 mt-1.5 rounded-full flex-shrink-0 ${
+                              !n.read
+                                ? n.type === 'lead' ? 'bg-brand-550' : n.type === 'deal' ? 'bg-emerald-500' : 'bg-indigo-500'
+                                : 'bg-slate-200'
+                            }`} />
+                            <div>
+                              <p className={`text-xs leading-tight ${!n.read ? 'font-bold text-slate-850' : 'font-medium text-slate-500'}`}>
+                                {n.title}
+                              </p>
+                              <p className="text-[9px] text-slate-400 mt-0.5">{n.description}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
+                    <div className="h-px bg-slate-100 my-2" />
+                    <Link
+                      to="/notifications"
+                      onClick={() => setNotifOpen(false)}
+                      className="block text-center text-[10px] font-bold text-brand-600 hover:underline pt-1"
+                    >
+                      View All Notifications
+                    </Link>
                   </div>
                 </>
               )}

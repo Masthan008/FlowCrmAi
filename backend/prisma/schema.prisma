@@ -262,6 +262,7 @@ model Company {
   customers       Customer[]
   tasks           Task[]
   contacts        Contact[]       @relation("CompanyContacts")
+  deals           Deal[]
   companyNotes    CompanyNote[]
   companyActivities CompanyActivity[]
   companyFiles    CompanyFile[]
@@ -688,6 +689,7 @@ model Contact {
   history                ContactHistory[]
   relationships          ContactRelationship[]
   calls                  ContactCall[]
+  deals                  Deal[]
   emailsLogs             ContactEmailLog[]
   whatsappLogs           ContactWhatsAppLog[]
   meetingsLogs           ContactMeetingLog[]
@@ -835,6 +837,7 @@ model Lead {
   sla                LeadSla?
   approvals          LeadApproval[]
   contacts           Contact[]         @relation("LeadContacts")
+  deals              Deal[]
 
   @@index([leadNumber])
   @@index([fullName])
@@ -865,6 +868,7 @@ model Pipeline {
   version     Int             @default(1)
 
   // Relations
+  deals       Deal[]
   stages      PipelineStage[]
 
   @@map("pipelines")
@@ -896,16 +900,37 @@ model PipelineStage {
 
 // 20. DEALS
 model Deal {
-  id           String        @id @default(uuid()) @db.Uuid
-  customerId   String        @db.Uuid
-  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  name         String
-  stageId      String        @db.Uuid
-  stage        PipelineStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
-  assignedToId String?       @db.Uuid
-  assignedTo   Employee?     @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
-  value        Float         @default(0.0)
-  closeDate    DateTime?
+  id              String        @id @default(uuid()) @db.Uuid
+  dealNumber      String        @unique
+  name            String
+  opportunityName String?
+  customerId      String        @db.Uuid
+  customer        Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  companyId       String?       @db.Uuid
+  company         Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  primaryContactId String?      @db.Uuid
+  primaryContact  Contact?      @relation(fields: [primaryContactId], references: [id], onDelete: SetNull)
+  leadId          String?       @db.Uuid
+  lead            Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  pipelineId      String?       @db.Uuid
+  pipeline        Pipeline?     @relation(fields: [pipelineId], references: [id], onDelete: SetNull)
+  stageId         String        @db.Uuid
+  stage           PipelineStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  assignedToId    String?       @db.Uuid
+  assignedTo      Employee?     @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  status          String        @default("Open") // Open, Qualified, Proposal Sent, Negotiation, Won, Lost, Cancelled, On Hold, Archived
+  priority        String        @default("Medium") // Low, Medium, High, Critical
+  probability     Float         @default(0.0)
+  value           Float         @default(0.0)
+  expectedRevenue Float         @default(0.0)
+  expectedCloseDate DateTime?
+  actualCloseDate DateTime?
+  currency        String        @default("USD")
+  source          String?       @default("Other") // Referral, Website, Email, Call, Social, Partner, Other
+  industry        String?
+  businessType    String?
+  description     String?       @db.Text
+  tags            String[]      @default([])
 
   // Auditing
   createdBy    String?
@@ -923,7 +948,15 @@ model Deal {
   quotes       Quote[]
   invoices     Invoice[]
 
+  @@index([dealNumber])
   @@index([name])
+  @@index([status])
+  @@index([pipelineId])
+  @@index([stageId])
+  @@index([assignedToId])
+  @@index([companyId])
+  @@index([primaryContactId])
+  @@index([expectedCloseDate])
   @@index([createdAt])
   @@map("deals")
 }
