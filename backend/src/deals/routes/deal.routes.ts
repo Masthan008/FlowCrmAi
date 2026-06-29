@@ -86,4 +86,35 @@ router.patch(
   dealController.bulkUpdateOwner
 );
 
+// --- DEAL 360° WORKSPACE EXTENSIONS ---
+import { dealWorkspaceController } from '../controller/dealWorkspace.controller';
+
+// Profile details
+router.get('/:id/profile', requirePermission('deals:view'), dealWorkspaceController.getProfile);
+
+// Sales timeline logs
+router.get('/:id/timeline', requirePermission('deals:view'), dealWorkspaceController.getTimeline);
+
+// Notes CRUD
+router.get('/:id/notes', requirePermission('deals:view'), dealWorkspaceController.getNotes);
+router.post('/:id/notes', requirePermission('deals:edit'), dealWorkspaceController.createNote);
+router.put('/:id/notes/:noteId', requirePermission('deals:edit'), dealWorkspaceController.updateNote);
+router.delete('/:id/notes/:noteId', requirePermission('deals:edit'), dealWorkspaceController.deleteNote);
+
+// Activities CRUD
+router.get('/:id/activities', requirePermission('deals:view'), dealWorkspaceController.getActivities);
+router.post('/:id/activities', requirePermission('deals:edit'), dealWorkspaceController.createActivity);
+router.put('/:id/activities/:activityId', requirePermission('deals:edit'), dealWorkspaceController.updateActivity);
+router.delete('/:id/activities/:activityId', requirePermission('deals:edit'), dealWorkspaceController.deleteActivity);
+
+// Files CRUD
+router.get('/:id/files', requirePermission('deals:view'), dealWorkspaceController.getFiles);
+router.post('/:id/files', requirePermission('deals:edit'), dealWorkspaceController.createFile);
+router.delete('/:id/files/:fileId', requirePermission('deals:edit'), dealWorkspaceController.deleteFile);
+
+// History, Products, Quotes
+router.get('/:id/history', requirePermission('deals:view'), dealWorkspaceController.getHistory);
+router.get('/:id/products', requirePermission('deals:view'), dealWorkspaceController.getProducts);
+router.get('/:id/quotes', requirePermission('deals:view'), dealWorkspaceController.getQuotes);
+
 export default router;

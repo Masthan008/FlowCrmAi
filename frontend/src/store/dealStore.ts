@@ -25,6 +25,14 @@ interface DealState {
   pagination: DealPagination;
   selectedIds: string[];
 
+  dealNotes: any[];
+  dealActivities: any[];
+  dealFiles: any[];
+  dealTimeline: any[];
+  dealHistory: any[];
+  dealProducts: any[];
+  dealQuotes: any[];
+
   fetchDeals: () => Promise<void>;
   fetchDeal: (id: string) => Promise<void>;
   createDeal: (data: DealFormData) => Promise<Deal>;
@@ -47,6 +55,22 @@ interface DealState {
   bulkUpdateStatus: (ids: string[], status: string) => Promise<void>;
   updateStage: (id: string, stageId: string) => Promise<void>;
   bulkUpdateOwner: (ids: string[], ownerId: string) => Promise<void>;
+
+  fetchNotes: (id: string, search?: string) => Promise<void>;
+  createNote: (id: string, content: string, title?: string) => Promise<void>;
+  updateNote: (id: string, noteId: string, data: any) => Promise<void>;
+  deleteNote: (id: string, noteId: string) => Promise<void>;
+  fetchActivities: (id: string, filters?: any) => Promise<void>;
+  createActivity: (id: string, data: any) => Promise<void>;
+  updateActivity: (id: string, activityId: string, data: any) => Promise<void>;
+  deleteActivity: (id: string, activityId: string) => Promise<void>;
+  fetchFiles: (id: string, search?: string) => Promise<void>;
+  uploadFile: (id: string, fileData: any) => Promise<void>;
+  deleteFile: (id: string, fileId: string) => Promise<void>;
+  fetchTimeline: (id: string, search?: string) => Promise<void>;
+  fetchHistory: (id: string, search?: string) => Promise<void>;
+  fetchProducts: (id: string, search?: string) => Promise<void>;
+  fetchQuotes: (id: string, search?: string) => Promise<void>;
 }
 
 export const useDealStore = create<DealState>((set, get) => ({
@@ -64,6 +88,14 @@ export const useDealStore = create<DealState>((set, get) => ({
   filters: {},
   pagination: { page: 1, limit: 20, totalItems: 0, totalPages: 0 },
   selectedIds: [],
+
+  dealNotes: [],
+  dealActivities: [],
+  dealFiles: [],
+  dealTimeline: [],
+  dealHistory: [],
+  dealProducts: [],
+  dealQuotes: [],
 
   fetchDeals: async () => {
     set({ loading: true, error: null });
@@ -308,6 +340,183 @@ export const useDealStore = create<DealState>((set, get) => ({
         loading: false,
       });
       throw err;
+    }
+  },
+
+  fetchNotes: async (id, search) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await api.get(`/deals/${id}/notes`, { params: { search } });
+      set({ dealNotes: res.data.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch notes', loading: false });
+    }
+  },
+
+  createNote: async (id, content, title) => {
+    set({ loading: true, error: null });
+    try {
+      await api.post(`/deals/${id}/notes`, { content, title });
+      set({ loading: false });
+      get().fetchNotes(id);
+      get().fetchTimeline(id);
+      get().fetchHistory(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to create note', loading: false });
+      throw err;
+    }
+  },
+
+  updateNote: async (id, noteId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await api.put(`/deals/${id}/notes/${noteId}`, data);
+      set({ loading: false });
+      get().fetchNotes(id);
+      get().fetchHistory(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update note', loading: false });
+      throw err;
+    }
+  },
+
+  deleteNote: async (id, noteId) => {
+    set({ loading: true, error: null });
+    try {
+      await api.delete(`/deals/${id}/notes/${noteId}`);
+      set({ loading: false });
+      get().fetchNotes(id);
+      get().fetchHistory(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete note', loading: false });
+      throw err;
+    }
+  },
+
+  fetchActivities: async (id, filters) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await api.get(`/deals/${id}/activities`, { params: filters });
+      set({ dealActivities: res.data.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch activities', loading: false });
+    }
+  },
+
+  createActivity: async (id, data) => {
+    set({ loading: true, error: null });
+    try {
+      await api.post(`/deals/${id}/activities`, data);
+      set({ loading: false });
+      get().fetchActivities(id);
+      get().fetchTimeline(id);
+      get().fetchHistory(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to create activity', loading: false });
+      throw err;
+    }
+  },
+
+  updateActivity: async (id, activityId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await api.put(`/deals/${id}/activities/${activityId}`, data);
+      set({ loading: false });
+      get().fetchActivities(id);
+      get().fetchHistory(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update activity', loading: false });
+      throw err;
+    }
+  },
+
+  deleteActivity: async (id, activityId) => {
+    set({ loading: true, error: null });
+    try {
+      await api.delete(`/deals/${id}/activities/${activityId}`);
+      set({ loading: false });
+      get().fetchActivities(id);
+      get().fetchHistory(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete activity', loading: false });
+      throw err;
+    }
+  },
+
+  fetchFiles: async (id, search) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await api.get(`/deals/${id}/files`, { params: { search } });
+      set({ dealFiles: res.data.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch files', loading: false });
+    }
+  },
+
+  uploadFile: async (id, fileData) => {
+    set({ loading: true, error: null });
+    try {
+      await api.post(`/deals/${id}/files`, fileData);
+      set({ loading: false });
+      get().fetchFiles(id);
+      get().fetchTimeline(id);
+      get().fetchHistory(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to attach file', loading: false });
+      throw err;
+    }
+  },
+
+  deleteFile: async (id, fileId) => {
+    set({ loading: true, error: null });
+    try {
+      await api.delete(`/deals/${id}/files/${fileId}`);
+      set({ loading: false });
+      get().fetchFiles(id);
+      get().fetchHistory(id);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete file', loading: false });
+      throw err;
+    }
+  },
+
+  fetchTimeline: async (id, search) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await api.get(`/deals/${id}/timeline`, { params: { search } });
+      set({ dealTimeline: res.data.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch timeline', loading: false });
+    }
+  },
+
+  fetchHistory: async (id, search) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await api.get(`/deals/${id}/history`, { params: { search } });
+      set({ dealHistory: res.data.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch history', loading: false });
+    }
+  },
+
+  fetchProducts: async (id, search) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await api.get(`/deals/${id}/products`, { params: { search } });
+      set({ dealProducts: res.data.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch products', loading: false });
+    }
+  },
+
+  fetchQuotes: async (id, search) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await api.get(`/deals/${id}/quotes`, { params: { search } });
+      set({ dealQuotes: res.data.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch quotes', loading: false });
     }
   },
 }));

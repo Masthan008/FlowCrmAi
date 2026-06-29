@@ -641,7 +641,7 @@ export const Deals: React.FC = () => {
                       <td className="p-3"><input type="checkbox" checked={isSelected} onChange={() => toggleSelection(deal.id)}
                         className="rounded border-slate-300 text-brand-550 focus:ring-brand-100" /></td>
                       <td className="p-3">
-                        <button onClick={() => handleView(deal)} className="text-left">
+                        <button onClick={() => navigate(`/deals/${deal.id}`)} className="text-left">
                           <p className="text-xs font-bold text-slate-800 hover:text-brand-550 transition-colors">{deal.name}</p>
                           <p className="text-[9px] text-slate-400 font-semibold">{deal.dealNumber}</p>
                         </button>
@@ -661,7 +661,7 @@ export const Deals: React.FC = () => {
                       <td className="p-3"><Badge variant="custom" className={`${statusColors[deal.status] || 'bg-slate-50 text-slate-600'} text-[10px]`}>{deal.status}</Badge></td>
                       <td className="p-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => handleView(deal)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all" title="View"><Eye size={13} /></button>
+                          <button onClick={() => navigate(`/deals/${deal.id}`)} className="p-1.5 hover:bg-brand-50 rounded-lg text-slate-400 hover:text-brand-600 transition-all" title="360° Workspace"><Eye size={13} /></button>
                           <button onClick={() => handleEdit(deal)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all" title="Edit"><Edit2 size={13} /></button>
                           <button onClick={() => setDeleteConfirm(deal.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-all" title="Delete"><Trash2 size={13} /></button>
                         </div>

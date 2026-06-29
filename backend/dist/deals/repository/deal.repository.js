@@ -211,7 +211,7 @@ class DealRepository extends base_repository_1.BaseRepository {
             }),
         ]);
         return {
-            total,
+            totalDeals: total,
             openDeals,
             wonDeals,
             lostDeals,
