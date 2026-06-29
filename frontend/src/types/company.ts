@@ -327,3 +327,182 @@ export interface CompanyRevenueDashboard {
 export interface CompanyBusinessNetworkGrouped {
   [key: string]: CompanyBusinessNetworkEntry[];
 }
+
+// Phase 6: Enterprise Company Intelligence
+export interface CompanyLifecycle {
+  id: string;
+  companyId: string;
+  currentStage: string;
+  previousStage: string | null;
+  enteredStageAt: string;
+  duration: number;
+  lastTransition: string;
+  transitionCount: number;
+}
+
+export interface CompanyStageHistory {
+  id: string;
+  companyId: string;
+  fromStage: string | null;
+  toStage: string;
+  changedBy: string | null;
+  changeReason: string | null;
+  durationInStage: number | null;
+  createdAt: string;
+}
+
+export interface CompanyScore {
+  id: string;
+  companyId: string;
+  overallScore: number;
+  revenueScore: number;
+  dealValueScore: number;
+  engagementScore: number;
+  meetingScore: number;
+  taskScore: number;
+  communicationScore: number;
+  lifetimeScore: number;
+  lastCalculatedAt: string;
+}
+
+export interface CompanyHealth {
+  id: string;
+  companyId: string;
+  overallHealth: number;
+  healthStatus: string;
+  communicationHealth: number;
+  dealSuccessHealth: number;
+  revenueGrowthHealth: number;
+  meetingHealth: number;
+  satisfactionHealth: number;
+  supportHealth: number;
+  paymentHealth: number;
+  activityHealth: number;
+  lastCalculatedAt: string;
+}
+
+export interface CompanyRisk {
+  id: string;
+  companyId: string;
+  overallRisk: number;
+  riskLevel: string;
+  inactiveDaysRisk: number;
+  lostDealsRisk: number;
+  pendingPaymentsRisk: number;
+  noMeetingsRisk: number;
+  lowEngagementRisk: number;
+  revenueDeclineRisk: number;
+  expiredContractsRisk: number;
+  riskReasons: string[];
+  lastCalculatedAt: string;
+}
+
+export interface CompanySegment {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string | null;
+  icon: string | null;
+  isDynamic: boolean;
+  matchType: string;
+  isActive: boolean;
+  companyCount: number;
+  rules: CompanySegmentRule[];
+  createdAt: string;
+}
+
+export interface CompanySegmentRule {
+  id: string;
+  segmentId: string;
+  field: string;
+  operator: string;
+  value: string;
+  value2: string | null;
+  logicGroup: string | null;
+}
+
+export interface CompanyTag {
+  id: string;
+  name: string;
+  color: string | null;
+  description: string | null;
+  isActive: boolean;
+  usageCount: number;
+}
+
+export interface CompanyTagMapping {
+  id: string;
+  companyId: string;
+  tagId: string;
+  tag: CompanyTag;
+  assignedAt: string;
+}
+
+export interface CompanyWorkflow {
+  id: string;
+  companyId: string | null;
+  name: string;
+  description: string | null;
+  triggerType: string;
+  triggerConfig: any;
+  conditions: any[];
+  actions: any[];
+  isActive: boolean;
+  isTemplate: boolean;
+  runCount: number;
+  lastRunAt: string | null;
+  createdAt: string;
+}
+
+export interface CompanyRecommendation {
+  id: string;
+  companyId: string;
+  type: string;
+  title: string;
+  description: string | null;
+  priority: string;
+  confidence: number;
+  isRead: boolean;
+  isActioned: boolean;
+  actionedAt: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+}
+
+export interface CompanyFollowup {
+  id: string;
+  companyId: string;
+  type: string;
+  title: string;
+  description: string | null;
+  ownerId: string | null;
+  owner: { id: string; firstName: string; lastName: string; email: string } | null;
+  dueDate: string;
+  priority: string;
+  status: string;
+  reminderDate: string | null;
+  reminderSent: boolean;
+  completedAt: string | null;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface BusinessInsights {
+  highestRevenueCompany: { name: string; annualRevenue: number } | null;
+  fastestGrowingCompany: { name: string; revenueGrowth: number } | null;
+  mostActiveCompany: { name: string; activityCount: number } | null;
+  highestLifetimeValue: { name: string; lifetimeValue: number } | null;
+  mostMeetings: { name: string; meetingCount: number } | null;
+  mostDeals: { name: string; dealCount: number } | null;
+  mostContacts: { name: string; contactCount: number } | null;
+  highestPipelineValue: { name: string; pipelineValue: number } | null;
+}
+
+export interface CompanyAnalytics {
+  revenueTrend: { month: string; revenue: number }[];
+  growthTrend: { month: string; growth: number }[];
+  industryDistribution: { industry: string; count: number }[];
+  lifecycleDistribution: { stage: string; count: number }[];
+  customerDistribution: { type: string; count: number }[];
+  geographicalDistribution: { country: string; count: number }[];
+}

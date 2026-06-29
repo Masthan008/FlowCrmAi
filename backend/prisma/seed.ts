@@ -81,6 +81,16 @@ async function main() {
     { name: 'companies:create', module: 'companies', action: 'create', description: 'Create new companies' },
     { name: 'companies:edit', module: 'companies', action: 'edit', description: 'Edit companies' },
     { name: 'companies:delete', module: 'companies', action: 'delete', description: 'Delete companies' },
+    { name: 'company:workflow:manage', module: 'companies', action: 'workflow:manage', description: 'Manage company workflows and automation' },
+    { name: 'company:analytics:view', module: 'companies', action: 'analytics:view', description: 'View company analytics and insights' },
+    { name: 'company:health:view', module: 'companies', action: 'health:view', description: 'View company health status' },
+    { name: 'company:risk:view', module: 'companies', action: 'risk:view', description: 'View company risk assessment' },
+    { name: 'company:segment:manage', module: 'companies', action: 'segment:manage', description: 'Manage company segments' },
+    { name: 'company:lifecycle:manage', module: 'companies', action: 'lifecycle:manage', description: 'Manage company lifecycle stages' },
+    { name: 'company:tag:manage', module: 'companies', action: 'tag:manage', description: 'Manage company tags' },
+    { name: 'company:followup:manage', module: 'companies', action: 'followup:manage', description: 'Manage company follow-ups' },
+    { name: 'company:recommendation:view', module: 'companies', action: 'recommendation:view', description: 'View company recommendations' },
+    { name: 'company:score:view', module: 'companies', action: 'score:view', description: 'View company scores' },
 
     // Deals
     { name: 'deals:view', module: 'deals', action: 'view', description: 'View opportunities and deals' },
@@ -119,6 +129,7 @@ async function main() {
     'Admin',
     'Sales Manager',
     'Sales Executive',
+    'Team Lead',
     'Marketing',
     'Support',
     'Finance',
@@ -164,7 +175,7 @@ async function main() {
     p.module === 'dashboard' ||
     (p.module === 'leads' && !p.action.startsWith('workflow') && !p.action.startsWith('score') && !p.action.startsWith('insights')) ||
     (p.module === 'contacts' && !p.action.startsWith('workflow') && !p.action.startsWith('segment') && !p.action.startsWith('score') && !p.action.startsWith('risk') && !p.action.startsWith('preferences')) ||
-    p.module === 'companies' ||
+    (p.module === 'companies' && p.name !== 'company:analytics:view') ||
     p.module === 'deals' ||
     (p.module === 'tasks') ||
     (p.module === 'reports') ||
@@ -213,8 +224,26 @@ async function main() {
     (p.module === 'users' && p.action === 'view')
   );
 
-  // Viewer: only view & access actions
-  await assignPermissions('Viewer', (p) => p.action === 'view' || p.action === 'access');
+  // Team Lead: lifecycle, tag, score, health, risk view, followup, recommendation
+  await assignPermissions('Team Lead', (p) =>
+    p.name === 'company:lifecycle:manage' ||
+    p.name === 'company:tag:manage' ||
+    p.name === 'company:score:view' ||
+    p.name === 'company:health:view' ||
+    p.name === 'company:risk:view' ||
+    p.name === 'company:followup:manage' ||
+    p.name === 'company:recommendation:view'
+  );
+
+  // Viewer: only view & access actions plus Phase 6 company view permissions
+  await assignPermissions('Viewer', (p) =>
+    p.action === 'view' ||
+    p.action === 'access' ||
+    p.name === 'company:health:view' ||
+    p.name === 'company:risk:view' ||
+    p.name === 'company:score:view' ||
+    p.name === 'company:recommendation:view'
+  );
 
   console.log('Linked permissions to all 9 roles.');
 

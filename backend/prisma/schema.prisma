@@ -239,10 +239,19 @@ model Company {
   status          String     @default("Prospect")
   priority        String     @default("Medium")
   rating          Int        @default(0)
+  lifecycleStage  String     @default("Prospect")
   ownerId         String?    @db.Uuid
   parentCompanyId String?    @db.Uuid
   description     String?    @db.Text
   tags            String[]   @default([])
+
+  // Communication Preferences
+  preferredContactMethod String?  @default("email")
+  preferredLanguage      String?  @default("en")
+  businessHours          String?
+  marketingConsent       Boolean? @default(false)
+  newsletterConsent      Boolean? @default(false)
+  notificationPrefs      Json?    @default("{}")
 
   // Relations
   parentCompany   Company?   @relation("ParentCompany", fields: [parentCompanyId], references: [id], onDelete: SetNull)
@@ -266,6 +275,18 @@ model Company {
   revenues          CompanyRevenue[]
   journey           CompanyCustomerJourney[]
 
+  // Phase 6 Relations
+  lifecycle        CompanyLifecycle?
+  stageHistory     CompanyStageHistory[]
+  score            CompanyScore?
+  health           CompanyHealth?
+  risk             CompanyRisk?
+  segmentMappings  CompanySegmentMapping[]  @relation("CompanySegments")
+  tagMappings      CompanyTagMapping[]
+  workflows        CompanyWorkflow[]
+  recommendations CompanyRecommendation[]
+  followups        CompanyFollowup[]
+
   // Auditing
   createdBy   String?
   updatedBy   String?
@@ -280,6 +301,7 @@ model Company {
   @@index([primaryEmail])
   @@index([primaryPhone])
   @@index([gstNumber])
+  @@index([lifecycleStage])
   @@index([registrationNumber])
   @@index([status])
   @@index([industry])
@@ -501,6 +523,7 @@ model Employee {
   contacts          Contact[]          @relation("ContactOwner")
   contactActivities ContactActivity[]
   companyActivities CompanyActivity[]
+  companyFollowups  CompanyFollowup[]
 
   @@map("employees")
 }
@@ -2824,5 +2847,326 @@ model CompanyHistory {
   @@map("company_history")
 }
 
+// ============================================================
+// PHASE 6 — ENTERPRISE COMPANY INTELLIGENCE MODELS
+// ============================================================
 
+// 88. COMPANY LIFECYCLE
+model CompanyLifecycle {
+  id              String   @id @default(uuid()) @db.Uuid
+  companyId       String   @unique @db.Uuid
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  currentStage    String   @default("Prospect")
+  previousStage   String?
+  enteredStageAt  DateTime @default(now())
+  duration        Int      @default(0) // days in current stage
+  lastTransition  DateTime @default(now())
+  transitionCount Int      @default(0)
 
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("company_lifecycle")
+}
+
+// 89. COMPANY STAGE HISTORY
+model CompanyStageHistory {
+  id             String   @id @default(uuid()) @db.Uuid
+  companyId      String   @db.Uuid
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fromStage      String?
+  toStage        String
+  changedBy      String?  @db.Uuid
+  changeReason   String?  @db.Text
+  durationInStage Int?    // days
+  metadata       Json?    @default("{}")
+
+  // Auditing
+  createdBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([companyId])
+  @@map("company_stage_history")
+}
+
+// 90. COMPANY SCORE
+model CompanyScore {
+  id                String   @id @default(uuid()) @db.Uuid
+  companyId         String   @unique @db.Uuid
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  overallScore      Int      @default(0)
+  revenueScore      Int      @default(0)
+  dealValueScore    Int      @default(0)
+  engagementScore   Int      @default(0)
+  meetingScore      Int      @default(0)
+  taskScore         Int      @default(0)
+  communicationScore Int     @default(0)
+  lifetimeScore     Int      @default(0)
+  lastCalculatedAt  DateTime @default(now())
+  scoreMetadata     Json?    @default("{}")
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  version     Int       @default(1)
+
+  @@map("company_scores")
+}
+
+// 91. COMPANY HEALTH
+model CompanyHealth {
+  id                    String   @id @default(uuid()) @db.Uuid
+  companyId             String   @unique @db.Uuid
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  overallHealth         Int      @default(0)
+  healthStatus          String   @default("Good") // Excellent, Good, Average, Poor, Critical
+  communicationHealth   Int      @default(0)
+  dealSuccessHealth     Int      @default(0)
+  revenueGrowthHealth   Int      @default(0)
+  meetingHealth         Int      @default(0)
+  satisfactionHealth    Int      @default(0) // placeholder
+  supportHealth         Int      @default(0) // placeholder
+  paymentHealth         Int      @default(0)
+  activityHealth        Int      @default(0)
+  lastCalculatedAt      DateTime @default(now())
+  healthMetadata        Json?    @default("{}")
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  version     Int       @default(1)
+
+  @@map("company_health")
+}
+
+// 92. COMPANY RISK
+model CompanyRisk {
+  id                  String   @id @default(uuid()) @db.Uuid
+  companyId           String   @unique @db.Uuid
+  company             Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  overallRisk         Int      @default(0)
+  riskLevel           String   @default("Low") // Low, Medium, High, Critical
+  inactiveDaysRisk    Int      @default(0)
+  lostDealsRisk       Int      @default(0)
+  pendingPaymentsRisk Int      @default(0)
+  noMeetingsRisk      Int      @default(0)
+  lowEngagementRisk   Int      @default(0)
+  revenueDeclineRisk  Int      @default(0)
+  expiredContractsRisk Int     @default(0)
+  riskReasons         Json?    @default("[]")
+  lastCalculatedAt    DateTime @default(now())
+  riskMetadata        Json?    @default("{}")
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  version     Int       @default(1)
+
+  @@map("company_risk")
+}
+
+// 93. COMPANY SEGMENT
+model CompanySegment {
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String
+  description    String?  @db.Text
+  color          String?  @default("#3b82f6")
+  icon           String?
+  isDynamic      Boolean  @default(false)
+  matchType      String   @default("ALL") // ALL (AND) or ANY (OR)
+  isActive       Boolean  @default(true)
+  companyCount   Int      @default(0)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  rules        CompanySegmentRule[]
+  companyMappings CompanySegmentMapping[] @relation("SegmentCompanies")
+
+  @@index([name])
+  @@map("company_segments")
+}
+
+// 94. COMPANY SEGMENT RULE
+model CompanySegmentRule {
+  id             String          @id @default(uuid()) @db.Uuid
+  segmentId      String          @db.Uuid
+  segment        CompanySegment  @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  field          String          // industry, revenue, country, lifecycleStage, status, owner, employeeCount, riskLevel
+  operator       String          // equals, notEquals, contains, greaterThan, lessThan, in, between
+  value          String          @db.Text
+  value2         String?         @db.Text // for between operator
+  logicGroup     String?         @default("AND") // for nested conditions
+
+  // Auditing
+  createdBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([segmentId])
+  @@map("company_segment_rules")
+}
+
+// Company-Segment many-to-many mapping
+model CompanySegmentMapping {
+  companyId   String        @db.Uuid
+  company     Company       @relation("CompanySegments", fields: [companyId], references: [id], onDelete: Cascade)
+  segmentId   String        @db.Uuid
+  segment     CompanySegment @relation("SegmentCompanies", fields: [segmentId], references: [id], onDelete: Cascade)
+  assignedAt  DateTime      @default(now())
+
+  @@id([companyId, segmentId])
+  @@map("company_segment_mappings")
+}
+
+// 95. COMPANY TAG
+model CompanyTag {
+  id          String             @id @default(uuid()) @db.Uuid
+  name        String             @unique
+  color       String?            @default("#3b82f6")
+  description String?            @db.Text
+  isActive    Boolean            @default(true)
+  usageCount  Int                @default(0)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  deletedAt   DateTime?
+  version     Int                @default(1)
+
+  mappings    CompanyTagMapping[]
+
+  @@index([name])
+  @@map("company_tags")
+}
+
+// 96. COMPANY TAG MAPPING
+model CompanyTagMapping {
+  id        String     @id @default(uuid()) @db.Uuid
+  companyId String     @db.Uuid
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tagId     String     @db.Uuid
+  tag       CompanyTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  assignedBy String?   @db.Uuid
+  assignedAt DateTime  @default(now())
+
+  @@unique([companyId, tagId])
+  @@index([companyId])
+  @@index([tagId])
+  @@map("company_tag_mappings")
+}
+
+// 97. COMPANY WORKFLOW
+model CompanyWorkflow {
+  id            String   @id @default(uuid()) @db.Uuid
+  companyId     String?  @db.Uuid // null = global workflow templates
+  company       Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?  @db.Text
+  triggerType   String   // company_created, status_changed, lifecycle_changed, owner_changed, revenue_updated, deal_closed, invoice_generated, payment_received, branch_added
+  triggerConfig Json?    @default("{}") // { field: "status", value: "Active" }
+  conditions    Json?    @default("[]")
+  actions       Json?    @default("[]")
+  isActive      Boolean  @default(true)
+  isTemplate    Boolean  @default(false)
+  runCount      Int      @default(0)
+  lastRunAt     DateTime?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([companyId])
+  @@index([triggerType])
+  @@map("company_workflows")
+}
+
+// 98. COMPANY RECOMMENDATION
+model CompanyRecommendation {
+  id              String   @id @default(uuid()) @db.Uuid
+  companyId       String   @db.Uuid
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type            String   // upsell, cross_sell, renewal_reminder, contact_time, risk_warning, follow_up, general
+  title           String
+  description     String?  @db.Text
+  priority        String   @default("Medium") // Low, Medium, High, Critical
+  confidence      Int      @default(0)
+  isRead          Boolean  @default(false)
+  isActioned      Boolean  @default(false)
+  actionedAt      DateTime?
+  expiresAt       DateTime?
+  metadata        Json?    @default("{}")
+
+  // Auditing
+  createdBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([companyId])
+  @@index([type])
+  @@map("company_recommendations")
+}
+
+// 99. COMPANY FOLLOWUP
+model CompanyFollowup {
+  id            String   @id @default(uuid()) @db.Uuid
+  companyId     String   @db.Uuid
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type          String   @default("Business Review") // Business Review, Renewal, Contract Discussion, Quarterly Meeting, Executive Meeting, Sales Visit, Customer Success Review, Escalation
+  title         String
+  description   String?  @db.Text
+  ownerId       String?  @db.Uuid
+  owner         Employee? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  dueDate       DateTime
+  priority      String   @default("Medium")
+  status        String   @default("Pending") // Pending, Completed, Cancelled, Overdue
+  reminderDate  DateTime?
+  reminderSent  Boolean  @default(false)
+  completedAt   DateTime?
+  notes         String?  @db.Text
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([companyId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("company_followups")
+}

@@ -20,6 +20,9 @@ export class DashboardRepository {
         endDate.setDate(now.getDate() - 1);
         endDate.setHours(23, 59, 59, 999);
         break;
+      case '3d':
+        startDate.setDate(now.getDate() - 3);
+        break;
       case '7d':
         startDate.setDate(now.getDate() - 7);
         break;

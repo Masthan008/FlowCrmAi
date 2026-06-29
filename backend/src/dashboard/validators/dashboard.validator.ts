@@ -6,7 +6,7 @@ import { ResponseHelper } from '../../helpers/response';
  */
 export const validateTimeframe = (req: Request, res: Response, next: NextFunction) => {
   const timeframe = (req.query.timeframe as string) || '30d';
-  const allowed = ['today', 'yesterday', '7d', '30d', 'quarter', 'year', 'custom'];
+  const allowed = ['today', 'yesterday', '3d', '7d', '30d', 'quarter', 'year', 'custom'];
 
   if (!allowed.includes(timeframe.toLowerCase())) {
     return ResponseHelper.sendError(

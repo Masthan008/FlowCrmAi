@@ -15,7 +15,7 @@ export const Card: React.FC<CardProps> = ({
       className={`glass-card ${hoverable ? 'glass-card-hover cursor-pointer' : ''} ${className}`}
       {...props}
     >
-      <div className="bg-radial-shine rounded-2xl p-6 h-full flex flex-col">
+      <div className="rounded-2xl p-6 h-full flex flex-col">
         {children}
       </div>
     </div>

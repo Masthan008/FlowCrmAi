@@ -9,6 +9,9 @@ import { DataTable } from '../components/ui/Table';
 import { useAuthStore } from '../store/authStore';
 import { useDashboardStore } from '../store/dashboardStore';
 import { Avatar } from '../components/ui/Avatar';
+import { motion } from 'framer-motion';
+import { exportToPDF, exportToCSV } from '../utils/export';
+import { useToast } from '../components/ui/ToastProvider';
 import {
   Users2,
   Briefcase,
@@ -39,6 +42,7 @@ import {
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuthStore();
+  const toast = useToast();
   const navigate = useNavigate();
   const {
     kpis,
@@ -60,6 +64,7 @@ export const Dashboard: React.FC = () => {
     fetchDashboardData,
     fetchCharts,
     setGlobalFilter,
+    setTimeframe,
     toggleWidget,
     resetWidgets
   } = useDashboardStore();
@@ -91,6 +96,8 @@ export const Dashboard: React.FC = () => {
   });
 
   const handleTimeframeChange = (tf: string) => {
+    setTimeframe(tf);
+    setGlobalFilter(tf);
     fetchCharts(tf);
   };
 
@@ -246,13 +253,34 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  // Export action handler placeholder
-  const handleExport = (type: string) => {
-    alert(`Export Dashboard to ${type} is initiated. File compiler trigger is scheduled for a future release.`);
+  const handleExport = async (type: string) => {
+    const id = 'dashboard-export-area';
+    let el = document.getElementById(id);
+    if (!el) {
+      el = document.querySelector('.grid.grid-cols-1.lg\\:grid-cols-3') as HTMLElement;
+    }
+    if (!el) { toast.error('Export Failed', 'Could not find dashboard content to export.'); return; }
+    try {
+      if (type === 'PDF') {
+        await exportToPDF(id, 'FlowCRM_Dashboard');
+        toast.success('Export Complete', 'Dashboard exported as PDF.');
+      } else {
+        exportToCSV([
+          { metric: 'Total Leads', value: kpis?.totalLeads || 0 },
+          { metric: 'Active Contacts', value: kpis?.activeContacts || 0 },
+          { metric: 'Open Deals', value: kpis?.openDeals || 0 },
+          { metric: 'Revenue This Month', value: kpis?.revenueThisMonth || 0 },
+          { metric: 'Pending Tasks', value: kpis?.pendingTasks || 0 },
+        ], 'FlowCRM_Dashboard_Summary');
+        toast.success('Export Complete', 'Dashboard summary exported as CSV.');
+      }
+    } catch {
+      toast.error('Export Failed', 'Could not export dashboard. Check console for details.');
+    }
   };
 
   return (
-    <div className="space-y-6 select-none">
+    <div id="dashboard-export-area" className="space-y-6 select-none">
       
       {/* 1. Global Toolbar: Filters, Search, Layout & Export controls */}
       <div className="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center bg-white/70 backdrop-blur-xl border border-slate-100 p-4 rounded-3xl shadow-glossy-sm">
@@ -266,20 +294,25 @@ export const Dashboard: React.FC = () => {
           <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wider">{currentDate}</p>
         </div>
 
-        {/* Dynamic global timeframe filters */}
+        {/* Unified analytics timeframe selector */}
         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
           <div className="flex items-center gap-1 bg-slate-50 border border-slate-200/60 p-1 rounded-xl">
-            {['today', 'yesterday', '7d', '30d', 'quarter', 'year'].map((f) => (
+            {[
+              { label: 'Daily', value: 'today' },
+              { label: 'Weekly', value: '7d' },
+              { label: '3 Days', value: '3d' },
+              { label: 'Monthly', value: '30d' },
+            ].map((f) => (
               <button
-                key={f}
-                onClick={() => setGlobalFilter(f)}
+                key={f.value}
+                onClick={() => handleTimeframeChange(f.value)}
                 className={`px-3 py-1.5 text-[9px] font-black uppercase rounded-lg transition-all ${
-                  globalFilter === f
+                  timeframe === f.value
                     ? 'bg-brand-550 text-white shadow-glossy-sm'
                     : 'text-slate-400 hover:text-slate-700 bg-transparent'
                 }`}
               >
-                {f}
+                {f.label}
               </button>
             ))}
           </div>
@@ -391,11 +424,20 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* Render Widgets Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
         
         {/* SECTION 1: Today's Business Overview */}
         {!widgetLayout.todayOverview?.hidden && (
-          <Card className={`lg:col-span-3 bg-white/70 border-slate-100 shadow-glossy-sm p-5 ${
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+            className="lg:col-span-3"
+          >
+          <Card className={`bg-white/70 border-slate-100 shadow-glossy-sm p-5 ${
             widgetLayout.todayOverview?.pinned ? 'ring-2 ring-brand-550/40 order-first' : ''
           }`}>
             {renderWidgetHeader('todayOverview', "Today's Business Overview", 'Operational pipeline velocities')}
@@ -432,33 +474,24 @@ export const Dashboard: React.FC = () => {
                 ))}
               </div>
             )}
-          </Card>
-        )}
-
+            </Card>
+            </motion.div>
+          )}
+        
         {/* SECTION 2: Business Performance Charts */}
         {!widgetLayout.charts?.hidden && (
-          <Card className={`lg:col-span-2 bg-white border-slate-100 shadow-glossy-sm p-5 ${
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+            className="lg:col-span-2"
+          >
+          <Card className={`bg-white border-slate-100 shadow-glossy-sm p-5 ${
             widgetLayout.charts?.pinned ? 'ring-2 ring-brand-550/40 order-first' : ''
           }`}>
             {renderWidgetHeader('charts', 'Business Performance Trend Charts', 'Timeframe aggregates tracking')}
             
             {!widgetLayout.charts?.collapsed && (
               <div className="space-y-4">
-                <div className="flex gap-2 justify-end mb-2">
-                  {['7d', '30d', '90d', '12m'].map((tf) => (
-                    <button
-                      key={tf}
-                      onClick={() => handleTimeframeChange(tf)}
-                      className={`px-2 py-1 text-[9px] font-black uppercase rounded-lg border transition-all ${
-                        timeframe === tf
-                          ? 'bg-brand-550 border-brand-550 text-white shadow-glossy-sm'
-                          : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
-                      }`}
-                    >
-                      {tf}
-                    </button>
-                  ))}
-                </div>
+                {timeframe && <div className="text-right text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-2">Period: {timeframe}</div>}
 
                 {charts.length === 0 || charts.every(c => c.revenue === 0) ? (
                   <div className="h-[250px] flex flex-col items-center justify-center text-center">
@@ -480,6 +513,7 @@ export const Dashboard: React.FC = () => {
               </div>
             )}
           </Card>
+          </motion.div>
         )}
 
         {/* SECTION 10 & 9 Goals & Health Column */}
@@ -801,7 +835,7 @@ export const Dashboard: React.FC = () => {
           </Card>
         )}
 
-      </div>
+      </motion.div>
     </div>
   );
 };

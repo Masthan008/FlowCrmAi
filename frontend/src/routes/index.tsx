@@ -38,6 +38,7 @@ import AccountSettings from '../pages/auth/AccountSettings';
 import MySessions from '../pages/auth/MySessions';
 
 // Guards
+import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import PublicRoute from '../components/auth/PublicRoute';
 
@@ -202,7 +203,9 @@ export const router = createBrowserRouter([
         path: 'settings',
         element: (
           <ProtectedRoute requiredPermission="settings:access">
-            <Settings />
+            <ErrorBoundary>
+              <Settings />
+            </ErrorBoundary>
           </ProtectedRoute>
         ),
       },

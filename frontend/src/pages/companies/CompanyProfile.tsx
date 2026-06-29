@@ -18,6 +18,15 @@ import {
   Share2, GitBranch, Map as MapIcon,
 } from 'lucide-react';
 import { useCompanyStore } from '../../store/companyStore';
+import LifecycleTab from './components/LifecycleTab';
+import HealthTab from './components/HealthTab';
+import RiskTab from './components/RiskTab';
+import ScoreTab from './components/ScoreTab';
+import SegmentsTab from './components/SegmentsTab';
+import TagsTab from './components/TagsTab';
+import WorkflowsTab from './components/WorkflowsTab';
+import RecommendationsTab from './components/RecommendationsTab';
+import FollowupsTab from './components/FollowupsTab';
 import { useToast } from '../../components/ui/ToastProvider';
 import { Button } from '../../components/ui/Button';
 import { Breadcrumb } from '../../components/ui/Breadcrumb';
@@ -43,6 +52,12 @@ export const CompanyProfile: React.FC = () => {
     fetchRevenue, fetchRevenueSummary, fetchRevenueDashboard, createRevenueEntry, deleteRevenueEntry,
     fetchBusinessNetwork, fetchBusinessNetworkGrouped, createBusinessNetworkEntry, updateBusinessNetworkEntry, deleteBusinessNetworkEntry,
     fetchJourney, createJourneyEntry, deleteJourneyEntry,
+    lifecycle, score, health, risk, segments, tags, companyTags,
+    workflows, recommendations, followups,
+    fetchLifecycle, fetchScore, fetchHealth, fetchRisk,
+    fetchSegments, fetchTags, fetchCompanyTags,
+    fetchWorkflows, fetchRecommendations, fetchFollowups,
+    fetchInsights, fetchAnalytics,
   } = useCompanyStore();
 
   const [selectedTab, setSelectedTab] = useState('overview');
@@ -140,6 +155,15 @@ export const CompanyProfile: React.FC = () => {
       case 'revenue': fetchRevenue(id); fetchRevenueSummary(id); fetchRevenueDashboard(id); break;
       case 'business-network': fetchBusinessNetwork(id); fetchBusinessNetworkGrouped(id); break;
       case 'journey': fetchJourney(id); break;
+      case 'lifecycle': fetchLifecycle(id); break;
+      case 'score': fetchScore(id); break;
+      case 'health': fetchHealth(id); break;
+      case 'risk': fetchRisk(id); break;
+      case 'segments': fetchSegments(); break;
+      case 'tags': fetchTags(); fetchCompanyTags(id); break;
+      case 'workflows': fetchWorkflows(); break;
+      case 'recommendations': fetchRecommendations(id); break;
+      case 'followups': fetchFollowups(id); break;
     }
   }, [id, selectedTab]);
 
@@ -509,6 +533,15 @@ export const CompanyProfile: React.FC = () => {
     { id: 'journey', label: 'Journey' },
     { id: 'hierarchy', label: 'Org Tree' },
     { id: 'history', label: 'History' },
+    { id: 'lifecycle', label: 'Lifecycle' },
+    { id: 'health', label: 'Health' },
+    { id: 'risk', label: 'Risk' },
+    { id: 'score', label: 'Score' },
+    { id: 'segments', label: 'Segments' },
+    { id: 'tags', label: 'Tags' },
+    { id: 'workflows', label: 'Workflows' },
+    { id: 'recommendations', label: 'Recommend' },
+    { id: 'followups', label: 'Follow-ups' },
   ];
 
   const overviewTabs = [
@@ -1286,6 +1319,33 @@ export const CompanyProfile: React.FC = () => {
                 )}
               </div>
             )}
+
+            {/* LIFECYCLE TAB */}
+            {selectedTab === 'lifecycle' && <LifecycleTab companyId={id!} />}
+
+            {/* HEALTH TAB */}
+            {selectedTab === 'health' && <HealthTab companyId={id!} />}
+
+            {/* RISK TAB */}
+            {selectedTab === 'risk' && <RiskTab companyId={id!} />}
+
+            {/* SCORE TAB */}
+            {selectedTab === 'score' && <ScoreTab companyId={id!} />}
+
+            {/* SEGMENTS TAB */}
+            {selectedTab === 'segments' && <SegmentsTab companyId={id!} />}
+
+            {/* TAGS TAB */}
+            {selectedTab === 'tags' && <TagsTab companyId={id!} />}
+
+            {/* WORKFLOWS TAB */}
+            {selectedTab === 'workflows' && <WorkflowsTab companyId={id!} />}
+
+            {/* RECOMMENDATIONS TAB */}
+            {selectedTab === 'recommendations' && <RecommendationsTab companyId={id!} />}
+
+            {/* FOLLOWUPS TAB */}
+            {selectedTab === 'followups' && <FollowupsTab companyId={id!} />}
           </div>
         </div>
       </div>

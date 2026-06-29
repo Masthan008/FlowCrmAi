@@ -7,6 +7,9 @@ import type {
   CompanyBranch, CompanyDepartment, CompanyHierarchyEntry, CompanyBusinessNetworkEntry,
   CompanyRevenueEntry, CompanyRevenueSummary, CompanyRevenueDashboard,
   CompanyCustomerJourneyEntry, CompanyBusinessNetworkGrouped,
+  CompanyLifecycle, CompanyStageHistory, CompanyScore, CompanyHealth, CompanyRisk,
+  CompanySegment, CompanyTag, CompanyTagMapping, CompanyWorkflow,
+  CompanyRecommendation, CompanyFollowup, BusinessInsights, CompanyAnalytics,
 } from '../types/company';
 
 const COMPANIES_URL = '/companies';
@@ -120,6 +123,55 @@ interface CompanyState {
   fetchJourney: (id: string) => Promise<void>;
   createJourneyEntry: (id: string, data: any) => Promise<void>;
   deleteJourneyEntry: (id: string, entryId: string) => Promise<void>;
+
+  // Phase 6: Enterprise Company Intelligence
+  lifecycle: CompanyLifecycle | null;
+  stageHistory: CompanyStageHistory[];
+  score: CompanyScore | null;
+  health: CompanyHealth | null;
+  risk: CompanyRisk | null;
+  segments: CompanySegment[];
+  tags: CompanyTag[];
+  companyTags: CompanyTagMapping[];
+  workflows: CompanyWorkflow[];
+  recommendations: CompanyRecommendation[];
+  followups: CompanyFollowup[];
+  insights: BusinessInsights | null;
+  analytics: CompanyAnalytics | null;
+
+  fetchLifecycle: (id: string) => Promise<void>;
+  updateLifecycle: (id: string, data: any) => Promise<void>;
+  fetchStageHistory: (id: string) => Promise<void>;
+  fetchScore: (id: string) => Promise<void>;
+  calculateScore: (id: string) => Promise<void>;
+  fetchHealth: (id: string) => Promise<void>;
+  calculateHealth: (id: string) => Promise<void>;
+  fetchRisk: (id: string) => Promise<void>;
+  calculateRisk: (id: string) => Promise<void>;
+  fetchSegments: (params?: any) => Promise<void>;
+  createSegment: (data: any) => Promise<void>;
+  updateSegment: (id: string, data: any) => Promise<void>;
+  deleteSegment: (id: string) => Promise<void>;
+  evaluateSegment: (id: string) => Promise<void>;
+  fetchTags: (params?: any) => Promise<void>;
+  createTag: (data: any) => Promise<void>;
+  updateTag: (id: string, data: any) => Promise<void>;
+  deleteTag: (id: string) => Promise<void>;
+  fetchCompanyTags: (id: string) => Promise<void>;
+  assignTags: (id: string, tagIds: string[]) => Promise<void>;
+  removeTag: (companyId: string, tagId: string) => Promise<void>;
+  fetchWorkflows: (params?: any) => Promise<void>;
+  createWorkflow: (data: any) => Promise<void>;
+  updateWorkflow: (id: string, data: any) => Promise<void>;
+  deleteWorkflow: (id: string) => Promise<void>;
+  fetchRecommendations: (id: string) => Promise<void>;
+  createRecommendation: (id: string, data: any) => Promise<void>;
+  fetchFollowups: (id: string, params?: any) => Promise<void>;
+  createFollowup: (id: string, data: any) => Promise<void>;
+  updateFollowup: (id: string, followupId: string, data: any) => Promise<void>;
+  deleteFollowup: (id: string, followupId: string) => Promise<void>;
+  fetchInsights: () => Promise<void>;
+  fetchAnalytics: (params?: any) => Promise<void>;
 }
 
 export const useCompanyStore = create<CompanyState>((set, get) => ({
@@ -153,6 +205,21 @@ export const useCompanyStore = create<CompanyState>((set, get) => ({
   businessNetwork: [],
   businessNetworkGrouped: {},
   journey: [],
+
+  // Phase 6: Intelligence
+  lifecycle: null,
+  stageHistory: [],
+  score: null,
+  health: null,
+  risk: null,
+  segments: [],
+  tags: [],
+  companyTags: [],
+  workflows: [],
+  recommendations: [],
+  followups: [],
+  insights: null,
+  analytics: null,
 
   fetchCompanies: async () => {
     set({ loading: true, error: null });
@@ -219,6 +286,9 @@ export const useCompanyStore = create<CompanyState>((set, get) => ({
     hierarchy: [], branches: [], departments: [], contacts: [], leads: [], deals: [],
     quotes: [], invoices: [], payments: [], revenue: [], revenueSummary: null,
     revenueDashboard: null, businessNetwork: [], businessNetworkGrouped: {}, journey: [],
+    lifecycle: null, stageHistory: [], score: null, health: null, risk: null,
+    segments: [], tags: [], companyTags: [], workflows: [], recommendations: [], followups: [],
+    insights: null, analytics: null,
   }),
   clearError: () => set({ error: null }),
 
@@ -405,5 +475,138 @@ export const useCompanyStore = create<CompanyState>((set, get) => ({
 
   deleteJourneyEntry: async (id, entryId) => {
     await api.delete(`${COMPANIES_URL}/${id}/customer-journey/${entryId}`); get().fetchJourney(id);
+  },
+
+  // Phase 6: Enterprise Company Intelligence
+  fetchLifecycle: async (id) => {
+    try { const res = await companyApi.getLifecycle(id); set({ lifecycle: res.data.data }); } catch (_) {}
+  },
+
+  updateLifecycle: async (id, data) => {
+    await companyApi.updateLifecycle(id, data); get().fetchLifecycle(id);
+  },
+
+  fetchStageHistory: async (id) => {
+    try { const res = await companyApi.getStageHistory(id); set({ stageHistory: res.data.data }); } catch (_) {}
+  },
+
+  fetchScore: async (id) => {
+    try { const res = await companyApi.getScore(id); set({ score: res.data.data }); } catch (_) {}
+  },
+
+  calculateScore: async (id) => {
+    await companyApi.calculateScore(id); get().fetchScore(id);
+  },
+
+  fetchHealth: async (id) => {
+    try { const res = await companyApi.getHealth(id); set({ health: res.data.data }); } catch (_) {}
+  },
+
+  calculateHealth: async (id) => {
+    await companyApi.calculateHealth(id); get().fetchHealth(id);
+  },
+
+  fetchRisk: async (id) => {
+    try { const res = await companyApi.getRisk(id); set({ risk: res.data.data }); } catch (_) {}
+  },
+
+  calculateRisk: async (id) => {
+    await companyApi.calculateRisk(id); get().fetchRisk(id);
+  },
+
+  fetchSegments: async (params) => {
+    try { const res = await companyApi.getSegments(params); set({ segments: res.data.data }); } catch (_) {}
+  },
+
+  createSegment: async (data) => {
+    await companyApi.createSegment(data); get().fetchSegments();
+  },
+
+  updateSegment: async (id, data) => {
+    await companyApi.updateSegment(id, data); get().fetchSegments();
+  },
+
+  deleteSegment: async (id) => {
+    await companyApi.deleteSegment(id); get().fetchSegments();
+  },
+
+  evaluateSegment: async (id) => {
+    await companyApi.evaluateSegment(id); get().fetchSegments();
+  },
+
+  fetchTags: async (params) => {
+    try { const res = await companyApi.getTags(params); set({ tags: res.data.data }); } catch (_) {}
+  },
+
+  createTag: async (data) => {
+    await companyApi.createTag(data); get().fetchTags();
+  },
+
+  updateTag: async (id, data) => {
+    await companyApi.updateTag(id, data); get().fetchTags();
+  },
+
+  deleteTag: async (id) => {
+    await companyApi.deleteTag(id); get().fetchTags();
+  },
+
+  fetchCompanyTags: async (id) => {
+    try { const res = await companyApi.getCompanyTags(id); set({ companyTags: res.data.data }); } catch (_) {}
+  },
+
+  assignTags: async (id, tagIds) => {
+    await companyApi.assignTags(id, { tagIds }); get().fetchCompanyTags(id);
+  },
+
+  removeTag: async (companyId, tagId) => {
+    await companyApi.removeTag(companyId, tagId); get().fetchCompanyTags(companyId);
+  },
+
+  fetchWorkflows: async (params) => {
+    try { const res = await companyApi.getWorkflows(params); set({ workflows: res.data.data }); } catch (_) {}
+  },
+
+  createWorkflow: async (data) => {
+    await companyApi.createWorkflow(data); get().fetchWorkflows();
+  },
+
+  updateWorkflow: async (id, data) => {
+    await companyApi.updateWorkflow(id, data); get().fetchWorkflows();
+  },
+
+  deleteWorkflow: async (id) => {
+    await companyApi.deleteWorkflow(id); get().fetchWorkflows();
+  },
+
+  fetchRecommendations: async (id) => {
+    try { const res = await companyApi.getRecommendations(id); set({ recommendations: res.data.data }); } catch (_) {}
+  },
+
+  createRecommendation: async (id, data) => {
+    await companyApi.createRecommendation(id, data); get().fetchRecommendations(id);
+  },
+
+  fetchFollowups: async (id, params) => {
+    try { const res = await companyApi.getFollowups(id, params); set({ followups: res.data.data }); } catch (_) {}
+  },
+
+  createFollowup: async (id, data) => {
+    await companyApi.createFollowup(id, data); get().fetchFollowups(id);
+  },
+
+  updateFollowup: async (id, followupId, data) => {
+    await companyApi.updateFollowup(id, followupId, data); get().fetchFollowups(id);
+  },
+
+  deleteFollowup: async (id, followupId) => {
+    await companyApi.deleteFollowup(id, followupId); get().fetchFollowups(id);
+  },
+
+  fetchInsights: async () => {
+    try { const res = await companyApi.getInsights(); set({ insights: res.data.data }); } catch (_) {}
+  },
+
+  fetchAnalytics: async (params) => {
+    try { const res = await companyApi.getAnalytics(params); set({ analytics: res.data.data }); } catch (_) {}
   },
 }));

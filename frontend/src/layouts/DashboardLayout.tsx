@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -32,6 +33,7 @@ import {
 } from 'lucide-react';
 import { useSettingsStore } from '../store/settingsStore';
 import { useAuthStore } from '../store/authStore';
+import { useThemeStore } from '../store/themeStore';
 import { useToast } from '../components/ui/ToastProvider';
 import { Avatar } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
@@ -49,16 +51,15 @@ export const DashboardLayout: React.FC = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
-  const [theme, setTheme] = useState(localStorage.getItem('flowcrm_theme') || 'white-glossy');
+  const { theme, setTheme } = useThemeStore();
 
   useEffect(() => {
-    const currentTheme = localStorage.getItem('flowcrm_theme') || 'white-glossy';
-    if (currentTheme === 'dark') {
+    if (theme === 'dark' || theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, []);
+  }, [theme]);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'white-glossy' : 'dark';
@@ -141,27 +142,39 @@ export const DashboardLayout: React.FC = () => {
 
       {/* Nav Menu */}
       <nav className="flex-grow space-y-1 overflow-y-auto pr-1">
-        {filteredMenuItems.map((item) => {
+        {filteredMenuItems.map((item, idx) => {
           const active = isActive(item.path);
           return (
-            <Link
+            <motion.div
               key={item.label}
-              to={item.path}
-              onClick={handleLinkClick}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                active
-                  ? 'bg-brand-50 text-brand-700 border-l-[3px] border-brand-550 pl-[9px]'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-              }`}
-              title={settings.sidebarCollapsed ? item.label : undefined}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.03, duration: 0.2 }}
+              whileHover={{ scale: 1.01, x: 2 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <div className={active ? 'text-brand-550' : 'text-slate-400'}>
-                {item.icon}
-              </div>
-              {!settings.sidebarCollapsed && (
-                <span className="truncate">{item.label}</span>
-              )}
-            </Link>
+              <Link
+                to={item.path}
+                onClick={handleLinkClick}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  active
+                    ? 'bg-brand-50 text-brand-700 border-l-[3px] border-brand-550 pl-[9px]'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+                }`}
+                title={settings.sidebarCollapsed ? item.label : undefined}
+              >
+                <motion.div
+                  animate={active ? { scale: [1, 1.15, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                  className={active ? 'text-brand-550' : 'text-slate-400'}
+                >
+                  {item.icon}
+                </motion.div>
+                {!settings.sidebarCollapsed && (
+                  <span className="truncate">{item.label}</span>
+                )}
+              </Link>
+            </motion.div>
           );
         })}
       </nav>
@@ -410,7 +423,14 @@ export const DashboardLayout: React.FC = () => {
 
         {/* Content Container */}
         <main className="flex-grow p-4 md:p-6 max-w-7xl w-full mx-auto">
-          <Outlet />
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
+            <Outlet />
+          </motion.div>
         </main>
       </div>
     </div>
