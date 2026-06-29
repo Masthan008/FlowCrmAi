@@ -159,7 +159,7 @@ const Settings: React.FC = () => {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { transition: { staggerChildren: 0.05 } },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
   };
 
   const itemVariants = {

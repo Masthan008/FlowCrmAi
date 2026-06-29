@@ -38,7 +38,7 @@ const priorityColors: Record<string, string> = {
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { transition: { staggerChildren: 0.04 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.04 } },
 };
 const itemVariants = {
   hidden: { opacity: 0, y: 12 },
