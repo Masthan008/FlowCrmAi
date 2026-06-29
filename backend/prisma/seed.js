@@ -1,8 +1,20 @@
-import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
-import { prisma, pool } from '../src/database/db';
+const dotenv = require('dotenv');
+const bcrypt = require('bcrypt');
 
 dotenv.config();
+
+let dbModule;
+try {
+  dbModule = require('../dist/database/db');
+} catch (e) {
+  try {
+    require('ts-node/register');
+    dbModule = require('../src/database/db');
+  } catch (err) {
+    dbModule = require('../src/database/db');
+  }
+}
+const { prisma, pool } = dbModule;
 
 async function main() {
   console.log('Seeding Database Roles and Permissions...');
@@ -112,7 +124,7 @@ async function main() {
     { name: 'tasks:export', module: 'tasks', action: 'export', description: 'Export task lists' },
   ];
 
-  const dbPermissions: any[] = [];
+  const dbPermissions = [];
   for (const perm of permissionsData) {
     const dbPerm = await prisma.permission.upsert({
       where: { name: perm.name },
@@ -137,7 +149,7 @@ async function main() {
     'Viewer',
   ];
 
-  const dbRoles: Record<string, any> = {};
+  const dbRoles = {};
   for (const roleName of roles) {
     const dbRole = await prisma.role.upsert({
       where: { name: roleName },
@@ -152,8 +164,7 @@ async function main() {
   console.log(`Upserted ${roles.length} roles.`);
 
   // 3. Link permissions to roles (RolePermissions)
-  // Helper to assign permissions to a role by name match
-  const assignPermissions = async (roleName: string, filterFn: (p: any) => boolean) => {
+  const assignPermissions = async (roleName, filterFn) => {
     const role = dbRoles[roleName];
     if (!role) return;
     const perms = dbPermissions.filter(filterFn);
@@ -170,7 +181,7 @@ async function main() {
   await assignPermissions('Super Admin', () => true);
   await assignPermissions('Admin', () => true);
 
-  // Sales Manager: full leads, contacts, companies, deals, tasks; view reports
+  // Sales Manager
   await assignPermissions('Sales Manager', (p) =>
     p.module === 'dashboard' ||
     (p.module === 'leads' && !p.action.startsWith('workflow') && !p.action.startsWith('score') && !p.action.startsWith('insights')) ||
@@ -182,7 +193,7 @@ async function main() {
     p.name === 'relationship:view' || p.name === 'communication:view' || p.name === 'health:view' || p.name === 'journey:view'
   );
 
-  // Sales Executive: leads create/edit/view, contacts create/edit/view, companies view, tasks
+  // Sales Executive
   await assignPermissions('Sales Executive', (p) =>
     p.module === 'dashboard' ||
     (p.module === 'leads' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'assign' || p.action === 'convert' || p.action === 'notes:create' || p.action === 'notes:edit' || p.action === 'activities:create' || p.action === 'activities:edit' || p.action === 'files:upload' || p.action === 'score-view')) ||
@@ -192,7 +203,7 @@ async function main() {
     (p.module === 'tasks' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'complete' || p.action === 'assign'))
   );
 
-  // Marketing: leads view/create, contacts view, dashboard
+  // Marketing
   await assignPermissions('Marketing', (p) =>
     p.module === 'dashboard' ||
     (p.module === 'leads' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'export' || p.action === 'insights-view')) ||
@@ -201,7 +212,7 @@ async function main() {
     p.module === 'reports'
   );
 
-  // Support: contacts view/edit, companies view, tasks
+  // Support
   await assignPermissions('Support', (p) =>
     p.module === 'dashboard' ||
     (p.module === 'contacts' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'notes:create' || p.action === 'notes:edit')) ||
@@ -209,7 +220,7 @@ async function main() {
     (p.module === 'tasks' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'complete'))
   );
 
-  // Finance: dashboard, reports, deals/companies view
+  // Finance
   await assignPermissions('Finance', (p) =>
     p.module === 'dashboard' ||
     (p.module === 'companies' && p.action === 'view') ||
@@ -217,13 +228,14 @@ async function main() {
     p.module === 'reports'
   );
 
-  // HR: users view, dashboard, settings
+  // HR
   await assignPermissions('HR', (p) =>
     p.module === 'dashboard' ||
     p.module === 'settings' ||
     (p.module === 'users' && p.action === 'view')
   );
 
+<<<<<<< HEAD:backend/prisma/seed.ts
   // Team Lead: lifecycle, tag, score, health, risk view, followup, recommendation
   await assignPermissions('Team Lead', (p) =>
     p.name === 'company:lifecycle:manage' ||
@@ -244,6 +256,10 @@ async function main() {
     p.name === 'company:score:view' ||
     p.name === 'company:recommendation:view'
   );
+=======
+  // Viewer
+  await assignPermissions('Viewer', (p) => p.action === 'view' || p.action === 'access');
+>>>>>>> 32f2f661d1a4dc3e4791f7639eb28c858b06eb9a:backend/prisma/seed.js
 
   console.log('Linked permissions to all 9 roles.');
 

@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-flowcrm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-flowcrm_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-flowcrm_db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${DB_HOST_PORT:-45432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-flowcrm} -d ${POSTGRES_DB:-flowcrm_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-flowcrm}:${POSTGRES_PASSWORD:-flowcrm_pass}@db:5432/${POSTGRES_DB:-flowcrm_db}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_access_secret_key_change_me_in_prod}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your_jwt_refresh_secret_key_change_me_in_prod}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:7080}
+      UPLOAD_PATH: ./uploads
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "${API_HOST_PORT:-5003}:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api/v1}
+    ports:
+      - "${WEB_HOST_PORT:-7080}:80"
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  uploads:

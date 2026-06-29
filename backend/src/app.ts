@@ -11,6 +11,9 @@ import apiV1Router from './routes/v1';
 
 const app = express();
 
+// Trust reverse proxy (Nginx)
+app.set('trust proxy', 1);
+
 // Security Middlewares
 app.use(helmet());
 app.use(cors({
