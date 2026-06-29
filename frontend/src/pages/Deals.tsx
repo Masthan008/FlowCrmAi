@@ -14,7 +14,7 @@ import {
   DollarSign, CalendarDays, Tag, TrendingUp, ArrowUpDown, X, Check,
   ChevronLeft, ChevronRight, Loader2, ShieldAlert, Eye,
   BarChart3, ArrowUp, ArrowDown, MoreVertical, Star,
-  Users, Building2, Phone, Mail, FileText,
+  Users, Building2, Phone, Mail, FileText, Kanban,
 } from 'lucide-react';
 
 const statusColors: Record<string, string> = {
@@ -518,6 +518,9 @@ export const Deals: React.FC = () => {
           <p className="text-sm text-slate-400 mt-0.5">Manage sales opportunities and pipeline revenue</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/deals/pipeline')} className="flex items-center gap-1.5 border-slate-200">
+            <Kanban size={14} className="text-brand-550" /> Pipeline Board
+          </Button>
           <Button variant="glass" size="sm" onClick={() => setShowFilterPanel(!showFilterPanel)}>
             <Filter size={14} className="mr-1.5" /> Filters
           </Button>

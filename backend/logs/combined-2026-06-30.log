@@ -1361,3 +1361,15 @@
 {"level":"info","message":"GET /api/v1/leads?limit=100 200 - - 544.924 ms","timestamp":"2026-06-30 04:09:10"}
 {"level":"info","message":"GET /api/v1/companies 200 244 - 384.850 ms","timestamp":"2026-06-30 04:09:10"}
 {"level":"info","message":"GET /api/v1/contacts?limit=100 200 - - 272.126 ms","timestamp":"2026-06-30 04:09:10"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 04:21:06"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 04:21:06"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 04:21:06"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 04:21:06"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 04:21:06"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 04:21:07"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 04:22:12"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 04:22:12"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 04:22:12"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 04:22:12"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 04:22:12"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 04:22:14"}

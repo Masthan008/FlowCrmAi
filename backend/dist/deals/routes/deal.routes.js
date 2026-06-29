@@ -9,7 +9,43 @@ const activityLogger_1 = require("../../middlewares/activityLogger");
 const deal_validator_1 = require("../validators/deal.validator");
 const router = (0, express_1.Router)();
 router.use(auth_1.requireAuth);
-router.get('/statistics', (0, permission_1.requirePermission)('deals:view'), deal_controller_1.dealController.getStatistics);
+// --- ENTERPRISE SALES PIPELINE INTELLIGENCE ---
+const dealPipeline_controller_1 = require("../controller/dealPipeline.controller");
+// Pipeline CRUD
+router.get('/pipeline', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.listPipelines);
+router.post('/pipeline', (0, permission_1.requirePermission)('deals:create'), dealPipeline_controller_1.dealPipelineController.createPipeline);
+router.get('/pipeline/:pipeId', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getPipeline);
+router.put('/pipeline/:pipeId', (0, permission_1.requirePermission)('deals:edit'), dealPipeline_controller_1.dealPipelineController.updatePipeline);
+router.delete('/pipeline/:pipeId', (0, permission_1.requirePermission)('deals:delete'), dealPipeline_controller_1.dealPipelineController.deletePipeline);
+router.post('/pipeline/:pipeId/duplicate', (0, permission_1.requirePermission)('deals:create'), dealPipeline_controller_1.dealPipelineController.duplicatePipeline);
+// Kanban Board
+router.get('/kanban', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getKanban);
+// Revenue Forecasting
+router.get('/forecast', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getForecast);
+// Sales Analytics
+router.get('/analytics', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getAnalytics);
+// Sales KPIs
+router.get('/kpis', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getKpis);
+// Funnel Analytics
+router.get('/funnel', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getFunnel);
+// Deal Aging
+router.get('/aging', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getAging);
+// Pipeline Health
+router.get('/pipeline-health', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getPipelineHealth);
+// Quotas
+router.get('/quotas', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getQuotas);
+router.post('/quotas', (0, permission_1.requirePermission)('deals:create'), dealPipeline_controller_1.dealPipelineController.createQuota);
+router.put('/quotas/:quotaId', (0, permission_1.requirePermission)('deals:edit'), dealPipeline_controller_1.dealPipelineController.updateQuota);
+router.delete('/quotas/:quotaId', (0, permission_1.requirePermission)('deals:delete'), dealPipeline_controller_1.dealPipelineController.deleteQuota);
+// Team Performance
+router.get('/performance', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getPerformance);
+// Saved Pipeline Views
+router.get('/pipeline-views', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getViews);
+router.post('/pipeline-views', (0, permission_1.requirePermission)('deals:create'), dealPipeline_controller_1.dealPipelineController.createView);
+router.delete('/pipeline-views/:viewId', (0, permission_1.requirePermission)('deals:delete'), dealPipeline_controller_1.dealPipelineController.deleteView);
+// Move Stage (drag & drop)
+router.patch('/:id/move-stage', (0, permission_1.requirePermission)('deals:edit'), dealPipeline_controller_1.dealPipelineController.moveStage);
+// --- EXISTING DEAL CRUD ROUTES ---
 router.get('/employees', (0, permission_1.requirePermission)('deals:view'), deal_controller_1.dealController.getEmployees);
 router.get('/', (0, permission_1.requirePermission)('deals:view'), (0, validate_1.validateRequest)(deal_validator_1.listDealsSchema), deal_controller_1.dealController.list);
 router.get('/:id', (0, permission_1.requirePermission)('deals:view'), (0, validate_1.validateRequest)(deal_validator_1.getDealByIdSchema), (0, activityLogger_1.logActivity)('deals', 'DEAL_VIEWED'), deal_controller_1.dealController.getById);

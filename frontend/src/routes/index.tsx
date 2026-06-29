@@ -13,6 +13,7 @@ import CompanyEdit from '../pages/companies/CompanyEdit';
 import CompanyProfile from '../pages/companies/CompanyProfile';
 import Deals from '../pages/Deals';
 import { DealWorkspace } from '../pages/deals/DealWorkspace';
+import { SalesPipeline } from '../pages/deals/SalesPipeline';
 import Activities from '../pages/Activities';
 import Calendar from '../pages/Calendar';
 import Tasks from '../pages/Tasks';
@@ -186,6 +187,16 @@ export const router = createBrowserRouter([
           <ProtectedRoute requiredPermission="deals:view">
             <ErrorBoundary>
               <Deals />
+            </ErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'deals/pipeline',
+        element: (
+          <ProtectedRoute requiredPermission="deals:view">
+            <ErrorBoundary>
+              <SalesPipeline />
             </ErrorBoundary>
           </ProtectedRoute>
         ),

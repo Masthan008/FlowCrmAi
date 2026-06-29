@@ -71,6 +71,46 @@ interface DealState {
   fetchHistory: (id: string, search?: string) => Promise<void>;
   fetchProducts: (id: string, search?: string) => Promise<void>;
   fetchQuotes: (id: string, search?: string) => Promise<void>;
+
+  // --- Pipeline Management & Analytics State ---
+  kanbanData: any[];
+  pipelineList: any[];
+  forecast: any;
+  analytics: any;
+  kpis: any;
+  funnel: any;
+  aging: any;
+  quotas: any[];
+  performance: any;
+  savedViews: any[];
+  pipelineHealth: any;
+  kanbanFilters: any;
+  activePipelineId: string | null;
+
+  // --- Pipeline Management & Analytics Actions ---
+  fetchPipelinesList: () => Promise<void>;
+  createPipeline: (data: any) => Promise<void>;
+  updatePipeline: (id: string, data: any) => Promise<void>;
+  deletePipeline: (id: string) => Promise<void>;
+  duplicatePipeline: (id: string) => Promise<void>;
+  fetchKanbanData: (pipelineId?: string, filters?: any) => Promise<void>;
+  moveStage: (id: string, toStageId: string) => Promise<void>;
+  fetchForecast: (pipelineId?: string) => Promise<void>;
+  fetchAnalytics: (pipelineId?: string) => Promise<void>;
+  fetchKpis: (pipelineId?: string) => Promise<void>;
+  fetchFunnel: (pipelineId?: string) => Promise<void>;
+  fetchAging: (pipelineId?: string) => Promise<void>;
+  fetchPipelineHealth: (pipelineId?: string) => Promise<void>;
+  fetchQuotas: (params?: any) => Promise<void>;
+  createQuota: (data: any) => Promise<void>;
+  updateQuota: (id: string, data: any) => Promise<void>;
+  deleteQuota: (id: string) => Promise<void>;
+  fetchPerformance: (pipelineId?: string) => Promise<void>;
+  fetchSavedViews: () => Promise<void>;
+  createSavedView: (data: any) => Promise<void>;
+  deleteSavedView: (id: string) => Promise<void>;
+  setActivePipelineId: (id: string | null) => void;
+  setKanbanFilters: (filters: any) => void;
 }
 
 export const useDealStore = create<DealState>((set, get) => ({
@@ -96,6 +136,21 @@ export const useDealStore = create<DealState>((set, get) => ({
   dealHistory: [],
   dealProducts: [],
   dealQuotes: [],
+
+  // --- Pipeline Management & Analytics State ---
+  kanbanData: [],
+  pipelineList: [],
+  forecast: null,
+  analytics: null,
+  kpis: null,
+  funnel: null,
+  aging: null,
+  quotas: [],
+  performance: null,
+  savedViews: [],
+  pipelineHealth: null,
+  kanbanFilters: {},
+  activePipelineId: null,
 
   fetchDeals: async () => {
     set({ loading: true, error: null });
@@ -518,6 +573,270 @@ export const useDealStore = create<DealState>((set, get) => ({
     } catch (err: any) {
       set({ error: err.response?.data?.message || 'Failed to fetch quotes', loading: false });
     }
+  },
+
+  // ─── Pipeline CRUD Actions ───
+  fetchPipelinesList: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getPipelines();
+      const list = res.data?.data || [];
+      set({ pipelineList: list, loading: false });
+      if (list.length > 0 && !get().activePipelineId) {
+        set({ activePipelineId: list[0].id });
+      }
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch pipelines', loading: false });
+    }
+  },
+
+  createPipeline: async (data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.createPipeline(data);
+      set({ loading: false });
+      get().fetchPipelinesList();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to create pipeline', loading: false });
+      throw err;
+    }
+  },
+
+  updatePipeline: async (id, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.updatePipeline(id, data);
+      set({ loading: false });
+      get().fetchPipelinesList();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update pipeline', loading: false });
+      throw err;
+    }
+  },
+
+  deletePipeline: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.deletePipeline(id);
+      set({ loading: false, activePipelineId: null });
+      get().fetchPipelinesList();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete pipeline', loading: false });
+      throw err;
+    }
+  },
+
+  duplicatePipeline: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.duplicatePipeline(id);
+      set({ loading: false });
+      get().fetchPipelinesList();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to duplicate pipeline', loading: false });
+      throw err;
+    }
+  },
+
+  // ─── Kanban Actions ───
+  fetchKanbanData: async (pipelineId, filters) => {
+    set({ loading: true, error: null });
+    try {
+      const activePipe = pipelineId || get().activePipelineId || undefined;
+      const res = await dealApi.getKanban(activePipe ? { pipelineId: activePipe, ...filters } : filters);
+      set({ kanbanData: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch Kanban data', loading: false });
+    }
+  },
+
+  moveStage: async (id, toStageId) => {
+    try {
+      // Optimistic update
+      const prevKanban = get().kanbanData;
+      const updatedKanban = prevKanban.map((deal) =>
+        deal.id === id ? { ...deal, stageId: toStageId } : deal
+      );
+      set({ kanbanData: updatedKanban });
+
+      await dealApi.moveStage(id, toStageId);
+      // Refresh timeline/history if necessary
+      get().fetchTimeline(id);
+    } catch (err: any) {
+      // Revert on failure
+      get().fetchKanbanData();
+      set({ error: err.response?.data?.message || 'Failed to move deal stage' });
+      throw err;
+    }
+  },
+
+  // ─── Intelligence Actions ───
+  fetchForecast: async (pipelineId) => {
+    set({ loading: true, error: null });
+    try {
+      const activePipe = pipelineId || get().activePipelineId || undefined;
+      const res = await dealApi.getForecast(activePipe ? { pipelineId: activePipe } : undefined);
+      set({ forecast: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch forecasting data', loading: false });
+    }
+  },
+
+  fetchAnalytics: async (pipelineId) => {
+    set({ loading: true, error: null });
+    try {
+      const activePipe = pipelineId || get().activePipelineId || undefined;
+      const res = await dealApi.getAnalytics(activePipe ? { pipelineId: activePipe } : undefined);
+      set({ analytics: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch analytics data', loading: false });
+    }
+  },
+
+  fetchKpis: async (pipelineId) => {
+    set({ loading: true, error: null });
+    try {
+      const activePipe = pipelineId || get().activePipelineId || undefined;
+      const res = await dealApi.getKpis(activePipe ? { pipelineId: activePipe } : undefined);
+      set({ kpis: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch KPIs', loading: false });
+    }
+  },
+
+  fetchFunnel: async (pipelineId) => {
+    set({ loading: true, error: null });
+    try {
+      const activePipe = pipelineId || get().activePipelineId || undefined;
+      const res = await dealApi.getFunnel(activePipe ? { pipelineId: activePipe } : undefined);
+      set({ funnel: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch funnel metrics', loading: false });
+    }
+  },
+
+  fetchAging: async (pipelineId) => {
+    set({ loading: true, error: null });
+    try {
+      const activePipe = pipelineId || get().activePipelineId || undefined;
+      const res = await dealApi.getAging(activePipe ? { pipelineId: activePipe } : undefined);
+      set({ aging: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch aging metrics', loading: false });
+    }
+  },
+
+  fetchPipelineHealth: async (pipelineId) => {
+    set({ loading: true, error: null });
+    try {
+      const activePipe = pipelineId || get().activePipelineId || undefined;
+      const res = await dealApi.getPipelineHealth(activePipe ? { pipelineId: activePipe } : undefined);
+      set({ pipelineHealth: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch pipeline health', loading: false });
+    }
+  },
+
+  // ─── Quota Actions ───
+  fetchQuotas: async (params) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getQuotas(params);
+      set({ quotas: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch quotas', loading: false });
+    }
+  },
+
+  createQuota: async (data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.createQuota(data);
+      set({ loading: false });
+      get().fetchQuotas();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to create quota', loading: false });
+      throw err;
+    }
+  },
+
+  updateQuota: async (id, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.updateQuota(id, data);
+      set({ loading: false });
+      get().fetchQuotas();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update quota', loading: false });
+      throw err;
+    }
+  },
+
+  deleteQuota: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.deleteQuota(id);
+      set({ loading: false });
+      get().fetchQuotas();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete quota', loading: false });
+      throw err;
+    }
+  },
+
+  // ─── Performance Actions ───
+  fetchPerformance: async (pipelineId) => {
+    set({ loading: true, error: null });
+    try {
+      const activePipe = pipelineId || get().activePipelineId || undefined;
+      const res = await dealApi.getPerformance(activePipe ? { pipelineId: activePipe } : undefined);
+      set({ performance: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch team performance', loading: false });
+    }
+  },
+
+  // ─── Saved View Actions ───
+  fetchSavedViews: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getPipelineViews();
+      set({ savedViews: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch pipeline views', loading: false });
+    }
+  },
+
+  createSavedView: async (data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.createPipelineView(data);
+      set({ loading: false });
+      get().fetchSavedViews();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to create pipeline view', loading: false });
+      throw err;
+    }
+  },
+
+  deleteSavedView: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.deletePipelineView(id);
+      set({ loading: false });
+      get().fetchSavedViews();
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete pipeline view', loading: false });
+      throw err;
+    }
+  },
+
+  setActivePipelineId: (id) => {
+    set({ activePipelineId: id });
+  },
+
+  setKanbanFilters: (filters) => {
+    set({ kanbanFilters: filters });
   },
 }));
 

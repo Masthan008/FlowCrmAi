@@ -526,6 +526,8 @@ model Employee {
   companyActivities CompanyActivity[]
   companyFollowups  CompanyFollowup[]
   dealActivities    DealActivity[]
+  dealQuotas        DealQuota[]
+  dealPipelineViews DealPipelineView[]
 
   @@map("employees")
 }
@@ -858,6 +860,10 @@ model Pipeline {
   id          String          @id @default(uuid()) @db.Uuid
   name        String
   description String?
+  type        String          @default("Sales") // Sales, Enterprise Sales, Renewals, Partner Sales, Government
+  isDefault   Boolean         @default(false)
+  isArchived  Boolean         @default(false)
+  color       String          @default("#6366f1")
 
   // Auditing
   createdBy   String?
@@ -871,18 +877,28 @@ model Pipeline {
   // Relations
   deals       Deal[]
   stages      PipelineStage[]
+  views       DealPipelineView[]
+  settings    DealPipelineSetting[]
+  forecasts   DealForecast[]
 
   @@map("pipelines")
 }
 
 // 19. PIPELINE STAGES
 model PipelineStage {
-  id          String    @id @default(uuid()) @db.Uuid
-  pipelineId  String    @db.Uuid
-  pipeline    Pipeline  @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
-  name        String
-  order       Int
-  probability Float     @default(0.0)
+  id              String    @id @default(uuid()) @db.Uuid
+  pipelineId      String    @db.Uuid
+  pipeline        Pipeline  @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  name            String
+  order           Int
+  probability     Float     @default(0.0)
+  color           String    @default("#94a3b8")
+  stageLimit      Int?      // Max deals in this stage
+  isCollapsed     Boolean   @default(false)
+  requiredFields  Json?     // JSON array of required field names
+  entryConditions Json?     // JSON conditions for entering this stage
+  exitConditions  Json?     // JSON conditions for exiting this stage
+  defaultTasks    Json?     // JSON array of auto-created tasks
 
   // Auditing
   createdBy   String?
@@ -895,6 +911,8 @@ model PipelineStage {
 
   // Relations
   deals       Deal[]
+  fromHistory DealStageHistory[] @relation("FromStage")
+  toHistory   DealStageHistory[] @relation("ToStage")
 
   @@map("pipeline_stages")
 }
@@ -955,6 +973,7 @@ model Deal {
   dealHistory     DealHistory[]
   dealProducts    DealProduct[]
   dealQuotes      DealQuote[]
+  stageHistory    DealStageHistory[]
 
   @@index([dealNumber])
   @@index([name])
@@ -3394,3 +3413,142 @@ model DealQuote {
   @@map("deal_quotes")
 }
 
+// 83. DEAL STAGE HISTORY
+model DealStageHistory {
+  id            String        @id @default(uuid()) @db.Uuid
+  dealId        String        @db.Uuid
+  deal          Deal          @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  fromStageId   String?       @db.Uuid
+  fromStage     PipelineStage? @relation("FromStage", fields: [fromStageId], references: [id], onDelete: SetNull)
+  toStageId     String        @db.Uuid
+  toStage       PipelineStage @relation("ToStage", fields: [toStageId], references: [id], onDelete: Restrict)
+  durationDays  Int           @default(0) // Days spent in fromStage
+  movedBy       String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([dealId])
+  @@index([fromStageId])
+  @@index([toStageId])
+  @@map("deal_stage_history")
+}
+
+// 84. DEAL FORECASTS
+model DealForecast {
+  id              String    @id @default(uuid()) @db.Uuid
+  pipelineId      String?   @db.Uuid
+  pipeline        Pipeline? @relation(fields: [pipelineId], references: [id], onDelete: SetNull)
+  period          String    // monthly, quarterly, annual
+  periodLabel     String    // e.g. "2026-Q2", "2026-06", "2026"
+  expectedRevenue Float     @default(0.0)
+  weightedRevenue Float     @default(0.0)
+  wonRevenue      Float     @default(0.0)
+  lostRevenue     Float     @default(0.0)
+  pipelineValue   Float     @default(0.0)
+  dealCount       Int       @default(0)
+  wonCount        Int       @default(0)
+  lostCount       Int       @default(0)
+  accuracy        Float     @default(0.0) // forecast vs actual accuracy %
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([pipelineId])
+  @@index([period])
+  @@index([periodLabel])
+  @@map("deal_forecasts")
+}
+
+// 85. DEAL QUOTAS
+model DealQuota {
+  id            String    @id @default(uuid()) @db.Uuid
+  employeeId    String?   @db.Uuid
+  employee      Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  type          String    @default("individual") // individual, team, department
+  teamName      String?
+  department    String?
+  period        String    // monthly, quarterly, yearly
+  periodLabel   String    // e.g. "2026-Q2", "2026-06", "2026"
+  target        Float     @default(0.0)
+  achieved      Float     @default(0.0)
+  remaining     Float     @default(0.0)
+  progress      Float     @default(0.0) // percentage
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([employeeId])
+  @@index([period])
+  @@index([type])
+  @@map("deal_quotas")
+}
+
+// 86. DEAL PIPELINE VIEWS
+model DealPipelineView {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  pipelineId  String?   @db.Uuid
+  pipeline    Pipeline? @relation(fields: [pipelineId], references: [id], onDelete: SetNull)
+  employeeId  String?   @db.Uuid
+  employee    Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  filters     Json?     // JSON filter configuration
+  isDefault   Boolean   @default(false)
+  isShared    Boolean   @default(false)
+  sortOrder   Int       @default(0)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([pipelineId])
+  @@index([employeeId])
+  @@map("deal_pipeline_views")
+}
+
+// 87. DEAL PIPELINE SETTINGS
+model DealPipelineSetting {
+  id          String    @id @default(uuid()) @db.Uuid
+  pipelineId  String    @db.Uuid
+  pipeline    Pipeline  @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  key         String
+  value       String?   @db.Text
+  jsonValue   Json?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@unique([pipelineId, key])
+  @@index([pipelineId])
+  @@map("deal_pipeline_settings")
+}

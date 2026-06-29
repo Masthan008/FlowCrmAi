@@ -19,7 +19,56 @@ const router = Router();
 
 router.use(requireAuth);
 
-router.get('/statistics', requirePermission('deals:view'), dealController.getStatistics);
+// --- ENTERPRISE SALES PIPELINE INTELLIGENCE ---
+import { dealPipelineController } from '../controller/dealPipeline.controller';
+
+// Pipeline CRUD
+router.get('/pipeline', requirePermission('deals:view'), dealPipelineController.listPipelines);
+router.post('/pipeline', requirePermission('deals:create'), dealPipelineController.createPipeline);
+router.get('/pipeline/:pipeId', requirePermission('deals:view'), dealPipelineController.getPipeline);
+router.put('/pipeline/:pipeId', requirePermission('deals:edit'), dealPipelineController.updatePipeline);
+router.delete('/pipeline/:pipeId', requirePermission('deals:delete'), dealPipelineController.deletePipeline);
+router.post('/pipeline/:pipeId/duplicate', requirePermission('deals:create'), dealPipelineController.duplicatePipeline);
+
+// Kanban Board
+router.get('/kanban', requirePermission('deals:view'), dealPipelineController.getKanban);
+
+// Revenue Forecasting
+router.get('/forecast', requirePermission('deals:view'), dealPipelineController.getForecast);
+
+// Sales Analytics
+router.get('/analytics', requirePermission('deals:view'), dealPipelineController.getAnalytics);
+
+// Sales KPIs
+router.get('/kpis', requirePermission('deals:view'), dealPipelineController.getKpis);
+
+// Funnel Analytics
+router.get('/funnel', requirePermission('deals:view'), dealPipelineController.getFunnel);
+
+// Deal Aging
+router.get('/aging', requirePermission('deals:view'), dealPipelineController.getAging);
+
+// Pipeline Health
+router.get('/pipeline-health', requirePermission('deals:view'), dealPipelineController.getPipelineHealth);
+
+// Quotas
+router.get('/quotas', requirePermission('deals:view'), dealPipelineController.getQuotas);
+router.post('/quotas', requirePermission('deals:create'), dealPipelineController.createQuota);
+router.put('/quotas/:quotaId', requirePermission('deals:edit'), dealPipelineController.updateQuota);
+router.delete('/quotas/:quotaId', requirePermission('deals:delete'), dealPipelineController.deleteQuota);
+
+// Team Performance
+router.get('/performance', requirePermission('deals:view'), dealPipelineController.getPerformance);
+
+// Saved Pipeline Views
+router.get('/pipeline-views', requirePermission('deals:view'), dealPipelineController.getViews);
+router.post('/pipeline-views', requirePermission('deals:create'), dealPipelineController.createView);
+router.delete('/pipeline-views/:viewId', requirePermission('deals:delete'), dealPipelineController.deleteView);
+
+// Move Stage (drag & drop)
+router.patch('/:id/move-stage', requirePermission('deals:edit'), dealPipelineController.moveStage);
+
+// --- EXISTING DEAL CRUD ROUTES ---
 
 router.get('/employees', requirePermission('deals:view'), dealController.getEmployees);
 
