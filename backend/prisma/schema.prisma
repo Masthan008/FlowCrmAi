@@ -528,6 +528,9 @@ model Employee {
   dealActivities    DealActivity[]
   dealQuotas        DealQuota[]
   dealPipelineViews DealPipelineView[]
+  dealComments      DealComment[]
+  dealTeamMembers   DealTeamMember[]
+  dealApprovals     DealApproval[]     @relation("DealApprover")
 
   @@map("employees")
 }
@@ -974,6 +977,12 @@ model Deal {
   dealProducts    DealProduct[]
   dealQuotes      DealQuote[]
   stageHistory    DealStageHistory[]
+  dealCompetitors DealCompetitor[]
+  dealComments    DealComment[]
+  dealTeamMembers DealTeamMember[]
+  dealApprovals   DealApproval[]
+  dealChecklists  DealChecklist[]
+  dealNegotiations DealNegotiation[]
 
   @@index([dealNumber])
   @@index([name])
@@ -3411,6 +3420,7 @@ model DealQuote {
 
   @@index([dealId])
   @@map("deal_quotes")
+  versions    DealQuoteVersion[]
 }
 
 // 83. DEAL STAGE HISTORY
@@ -3551,4 +3561,166 @@ model DealPipelineSetting {
   @@unique([pipelineId, key])
   @@index([pipelineId])
   @@map("deal_pipeline_settings")
+}
+
+// 88. DEAL COMPETITORS
+model DealCompetitor {
+  id             String    @id @default(uuid()) @db.Uuid
+  dealId         String    @db.Uuid
+  deal           Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  name           String
+  product        String?
+  pricing        Float?
+  strengths      String?   @db.Text
+  weaknesses     String?   @db.Text
+  status         String    @default("Active") // Active, Won, Lost
+  reasonWon      String?   @db.Text
+  reasonLost     String?   @db.Text
+  marketPosition String?
+  website        String?
+  notes          String?   @db.Text
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([dealId])
+  @@map("deal_competitors")
+}
+
+// 89. DEAL QUOTE VERSIONS
+model DealQuoteVersion {
+  id          String     @id @default(uuid()) @db.Uuid
+  dealQuoteId String     @db.Uuid
+  dealQuote   DealQuote  @relation(fields: [dealQuoteId], references: [id], onDelete: Cascade)
+  version     String
+  status      String     @default("draft")
+  amount      Float      @default(0.0)
+  expiryDate  DateTime?
+  changes     String?    @db.Text
+
+  // Auditing
+  createdBy   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([dealQuoteId])
+  @@map("deal_quote_versions")
+}
+
+// 90. DEAL COMMENTS
+model DealComment {
+  id          String        @id @default(uuid()) @db.Uuid
+  dealId      String        @db.Uuid
+  deal        Deal          @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  comment     String        @db.Text
+  employeeId  String?       @db.Uuid
+  employee    Employee?     @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  parentId    String?       @db.Uuid
+  parent      DealComment?  @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     DealComment[] @relation("CommentThread")
+  isPinned    Boolean       @default(false)
+  emoji       String?       // JSON reactions
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  @@index([dealId])
+  @@map("deal_comments")
+}
+
+// 91. DEAL TEAM MEMBERS
+model DealTeamMember {
+  id          String    @id @default(uuid()) @db.Uuid
+  dealId      String    @db.Uuid
+  deal        Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  employeeId  String    @db.Uuid
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  role        String    // Deal Owner, Sales Executive, Sales Manager, Technical Consultant, Finance, Legal, Support, Observer
+  permissions String[]  @default([])
+
+  // Auditing
+  createdBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([dealId])
+  @@map("deal_team_members")
+}
+
+// 92. DEAL APPROVALS
+model DealApproval {
+  id          String    @id @default(uuid()) @db.Uuid
+  dealId      String    @db.Uuid
+  deal        Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  type        String    // Quote, Discount, Pricing, Special Terms
+  status      String    @default("Pending") // Pending, Approved, Rejected, Returned
+  approverId  String?   @db.Uuid
+  approver    Employee? @relation("DealApprover", fields: [approverId], references: [id], onDelete: SetNull)
+  comments    String?   @db.Text
+  requestedAt DateTime  @default(now())
+  approvedAt  DateTime?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([dealId])
+  @@map("deal_approvals")
+}
+
+// 93. DEAL CHECKLISTS
+model DealChecklist {
+  id          String    @id @default(uuid()) @db.Uuid
+  dealId      String    @db.Uuid
+  deal        Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  name        String
+  isCompleted Boolean   @default(false)
+  order       Int       @default(0)
+  completedAt DateTime?
+  completedBy String?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([dealId])
+  @@map("deal_checklists")
+}
+
+// 94. DEAL NEGOTIATIONS
+model DealNegotiation {
+  id              String    @id @default(uuid()) @db.Uuid
+  dealId          String    @db.Uuid
+  deal            Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  round           Int       @default(1)
+  currentOffer    Float
+  counterOffer    Float?
+  discountPercent Float     @default(0.0)
+  requestedChanges String?  @db.Text
+  notes           String?   @db.Text
+  nextMeeting     DateTime?
+  status          String    @default("Active") // Active, Accepted, Rejected, Countered
+
+  // Auditing
+  createdBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([dealId])
+  @@map("deal_negotiations")
 }

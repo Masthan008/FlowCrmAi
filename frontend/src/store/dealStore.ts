@@ -111,6 +111,32 @@ interface DealState {
   deleteSavedView: (id: string) => Promise<void>;
   setActivePipelineId: (id: string | null) => void;
   setKanbanFilters: (filters: any) => void;
+
+  // --- Commercial Collaboration Workspace State ---
+  dealCompetitors: any[];
+  dealComments: any[];
+  dealChecklist: any[];
+  dealNegotiations: any[];
+  dealTeamMembers: any[];
+
+  // --- Commercial Collaboration Workspace Actions ---
+  fetchDealProducts: (dealId: string, search?: string) => Promise<void>;
+  addDealProduct: (dealId: string, data: any) => Promise<void>;
+  updateDealProductLine: (dealId: string, productId: string, data: any) => Promise<void>;
+  deleteDealProductLine: (dealId: string, productId: string) => Promise<void>;
+  fetchDealQuotes: (dealId: string, search?: string) => Promise<void>;
+  createDealQuote: (dealId: string, data: any) => Promise<void>;
+  updateDealQuote: (dealId: string, quoteId: string, data: any) => Promise<void>;
+  approveDealQuote: (dealId: string, quoteId: string) => Promise<void>;
+  rejectDealQuote: (dealId: string, quoteId: string) => Promise<void>;
+  fetchDealCompetitors: (dealId: string, search?: string) => Promise<void>;
+  createDealCompetitor: (dealId: string, data: any) => Promise<void>;
+  fetchCollaboration: (dealId: string) => Promise<void>;
+  createDealComment: (dealId: string, data: any) => Promise<void>;
+  fetchDealChecklist: (dealId: string) => Promise<void>;
+  updateDealChecklistItem: (dealId: string, itemId: string, isCompleted: boolean) => Promise<void>;
+  fetchDealNegotiations: (dealId: string) => Promise<void>;
+  createDealNegotiation: (dealId: string, data: any) => Promise<void>;
 }
 
 export const useDealStore = create<DealState>((set, get) => ({
@@ -136,6 +162,13 @@ export const useDealStore = create<DealState>((set, get) => ({
   dealHistory: [],
   dealProducts: [],
   dealQuotes: [],
+
+  // --- Commercial Collaboration Workspace State ---
+  dealCompetitors: [],
+  dealComments: [],
+  dealChecklist: [],
+  dealNegotiations: [],
+  dealTeamMembers: [],
 
   // --- Pipeline Management & Analytics State ---
   kanbanData: [],
@@ -837,6 +870,216 @@ export const useDealStore = create<DealState>((set, get) => ({
 
   setKanbanFilters: (filters) => {
     set({ kanbanFilters: filters });
+  },
+
+  // ─── Commercial Collaboration Actions ───
+  fetchDealProducts: async (dealId, search) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealProducts(dealId, search);
+      set({ dealProducts: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch deal products', loading: false });
+    }
+  },
+
+  addDealProduct: async (dealId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.addDealProduct(dealId, data);
+      set({ loading: false });
+      get().fetchDealProducts(dealId);
+      get().fetchTimeline(dealId);
+      get().fetchHistory(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to map product', loading: false });
+      throw err;
+    }
+  },
+
+  updateDealProductLine: async (dealId, productId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.updateDealProductLine(dealId, productId, data);
+      set({ loading: false });
+      get().fetchDealProducts(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update product line', loading: false });
+      throw err;
+    }
+  },
+
+  deleteDealProductLine: async (dealId, productId) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.deleteDealProductLine(dealId, productId);
+      set({ loading: false });
+      get().fetchDealProducts(dealId);
+      get().fetchTimeline(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to delete product line', loading: false });
+      throw err;
+    }
+  },
+
+  fetchDealQuotes: async (dealId, search) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealQuotes(dealId, search);
+      set({ dealQuotes: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch quotes', loading: false });
+    }
+  },
+
+  createDealQuote: async (dealId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.createDealQuote(dealId, data);
+      set({ loading: false });
+      get().fetchDealQuotes(dealId);
+      get().fetchTimeline(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to prepare quote', loading: false });
+      throw err;
+    }
+  },
+
+  updateDealQuote: async (dealId, quoteId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.updateDealQuote(dealId, quoteId, data);
+      set({ loading: false });
+      get().fetchDealQuotes(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update quote', loading: false });
+      throw err;
+    }
+  },
+
+  approveDealQuote: async (dealId, quoteId) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.approveDealQuote(dealId, quoteId);
+      set({ loading: false });
+      get().fetchDealQuotes(dealId);
+      get().fetchTimeline(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to approve quote', loading: false });
+      throw err;
+    }
+  },
+
+  rejectDealQuote: async (dealId, quoteId) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.rejectDealQuote(dealId, quoteId);
+      set({ loading: false });
+      get().fetchDealQuotes(dealId);
+      get().fetchTimeline(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to reject quote', loading: false });
+      throw err;
+    }
+  },
+
+  fetchDealCompetitors: async (dealId, search) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealCompetitors(dealId, search);
+      set({ dealCompetitors: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch competitors', loading: false });
+    }
+  },
+
+  createDealCompetitor: async (dealId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.createDealCompetitor(dealId, data);
+      set({ loading: false });
+      get().fetchDealCompetitors(dealId);
+      get().fetchTimeline(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to log competitor', loading: false });
+      throw err;
+    }
+  },
+
+  fetchCollaboration: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealCollaboration(dealId);
+      set({
+        dealComments: res.data?.data?.comments || [],
+        dealTeamMembers: res.data?.data?.team || [],
+        loading: false
+      });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch collaboration details', loading: false });
+    }
+  },
+
+  createDealComment: async (dealId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.createDealComment(dealId, data);
+      set({ loading: false });
+      get().fetchCollaboration(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to post comment', loading: false });
+      throw err;
+    }
+  },
+
+  fetchDealChecklist: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealChecklist(dealId);
+      set({ dealChecklist: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch checklist', loading: false });
+    }
+  },
+
+  updateDealChecklistItem: async (dealId, itemId, isCompleted) => {
+    try {
+      // Optimistic update
+      const prevChecklist = get().dealChecklist;
+      set({
+        dealChecklist: prevChecklist.map(item =>
+          item.id === itemId ? { ...item, isCompleted } : item
+        )
+      });
+      await dealApi.updateDealChecklistItem(dealId, itemId, isCompleted);
+      get().fetchTimeline(dealId);
+    } catch (err: any) {
+      get().fetchDealChecklist(dealId);
+      set({ error: err.response?.data?.message || 'Failed to update checklist item' });
+    }
+  },
+
+  fetchDealNegotiations: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealNegotiations(dealId);
+      set({ dealNegotiations: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch negotiations', loading: false });
+    }
+  },
+
+  createDealNegotiation: async (dealId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.createDealNegotiation(dealId, data);
+      set({ loading: false });
+      get().fetchDealNegotiations(dealId);
+      get().fetchTimeline(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to add negotiation round', loading: false });
+      throw err;
+    }
   },
 }));
 

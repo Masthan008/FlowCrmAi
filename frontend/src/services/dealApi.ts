@@ -59,4 +59,37 @@ export const dealApi = {
   getPipelineViews: (params?: Record<string, any>) => api.get(`${DEALS_URL}/pipeline-views`, { params }),
   createPipelineView: (data: any) => api.post(`${DEALS_URL}/pipeline-views`, data),
   deletePipelineView: (id: string) => api.delete(`${DEALS_URL}/pipeline-views/${id}`),
+
+  // --- Deal Workspace Products CRUD ---
+  getDealProducts: (dealId: string, search?: string) => api.get(`${DEALS_URL}/${dealId}/products`, { params: { search } }),
+  addDealProduct: (dealId: string, data: any) => api.post(`${DEALS_URL}/${dealId}/products`, data),
+  updateDealProduct: (productId: string, data: any) => api.put(`${DEALS_URL}/products/${productId}`, data), // wait, let's verify our route format:
+  // Route was registered as PUT /:id/products/:productId but wait, in our routes we did:
+  // router.put('/:id/products/:productId', dealWorkspaceController.updateProductLine);
+  // So it needs both :id and :productId. Let's make it:
+  updateDealProductLine: (dealId: string, productId: string, data: any) => api.put(`${DEALS_URL}/${dealId}/products/${productId}`, data),
+  deleteDealProductLine: (dealId: string, productId: string) => api.delete(`${DEALS_URL}/${dealId}/products/${productId}`),
+
+  // --- Deal Workspace Quotes ---
+  getDealQuotes: (dealId: string, search?: string) => api.get(`${DEALS_URL}/${dealId}/quotes`, { params: { search } }),
+  createDealQuote: (dealId: string, data: any) => api.post(`${DEALS_URL}/${dealId}/quotes`, data),
+  updateDealQuote: (dealId: string, quoteId: string, data: any) => api.put(`${DEALS_URL}/${dealId}/quotes/${quoteId}`, data),
+  approveDealQuote: (dealId: string, quoteId: string) => api.patch(`${DEALS_URL}/${dealId}/quotes/${quoteId}/approve`),
+  rejectDealQuote: (dealId: string, quoteId: string) => api.patch(`${DEALS_URL}/${dealId}/quotes/${quoteId}/reject`),
+
+  // --- Deal Workspace Competitors ---
+  getDealCompetitors: (dealId: string, search?: string) => api.get(`${DEALS_URL}/${dealId}/competitors`, { params: { search } }),
+  createDealCompetitor: (dealId: string, data: any) => api.post(`${DEALS_URL}/${dealId}/competitors`, data),
+
+  // --- Deal Workspace Collaboration & Comments ---
+  getDealCollaboration: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/collaboration`),
+  createDealComment: (dealId: string, data: any) => api.post(`${DEALS_URL}/${dealId}/comments`, data),
+
+  // --- Deal Workspace Checklist ---
+  getDealChecklist: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/checklist`),
+  updateDealChecklistItem: (dealId: string, itemId: string, isCompleted: boolean) => api.patch(`${DEALS_URL}/${dealId}/checklist/${itemId}`, { isCompleted }),
+
+  // --- Deal Workspace Negotiations ---
+  getDealNegotiations: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/negotiations`),
+  createDealNegotiation: (dealId: string, data: any) => api.post(`${DEALS_URL}/${dealId}/negotiations`, data),
 };

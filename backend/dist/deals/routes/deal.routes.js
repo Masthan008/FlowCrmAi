@@ -75,8 +75,23 @@ router.delete('/:id/activities/:activityId', (0, permission_1.requirePermission)
 router.get('/:id/files', (0, permission_1.requirePermission)('deals:view'), dealWorkspace_controller_1.dealWorkspaceController.getFiles);
 router.post('/:id/files', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.createFile);
 router.delete('/:id/files/:fileId', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.deleteFile);
-// History, Products, Quotes
+// History, Products, Quotes, Competitors, Collaboration, Checklist, Negotiations
 router.get('/:id/history', (0, permission_1.requirePermission)('deals:view'), dealWorkspace_controller_1.dealWorkspaceController.getHistory);
 router.get('/:id/products', (0, permission_1.requirePermission)('deals:view'), dealWorkspace_controller_1.dealWorkspaceController.getProducts);
+router.post('/:id/products', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.addProductLine);
+router.put('/:id/products/:productId', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.updateProductLine);
+router.delete('/:id/products/:productId', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.deleteProductLine);
 router.get('/:id/quotes', (0, permission_1.requirePermission)('deals:view'), dealWorkspace_controller_1.dealWorkspaceController.getQuotes);
+router.post('/:id/quotes', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.createQuote);
+router.put('/:id/quotes/:quoteId', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.updateQuote);
+router.patch('/:id/quotes/:quoteId/approve', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.approveQuote);
+router.patch('/:id/quotes/:quoteId/reject', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.rejectQuote);
+router.get('/:id/competitors', (0, permission_1.requirePermission)('deals:view'), dealWorkspace_controller_1.dealWorkspaceController.getCompetitors);
+router.post('/:id/competitors', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.createCompetitor);
+router.get('/:id/collaboration', (0, permission_1.requirePermission)('deals:view'), dealWorkspace_controller_1.dealWorkspaceController.getCollaboration);
+router.post('/:id/comments', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.createComment);
+router.get('/:id/checklist', (0, permission_1.requirePermission)('deals:view'), dealWorkspace_controller_1.dealWorkspaceController.getChecklist);
+router.patch('/:id/checklist/:itemId', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.updateChecklistItem);
+router.get('/:id/negotiations', (0, permission_1.requirePermission)('deals:view'), dealWorkspace_controller_1.dealWorkspaceController.getNegotiations);
+router.post('/:id/negotiations', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.createNegotiation);
 exports.default = router;

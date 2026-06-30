@@ -1373,3 +1373,345 @@
 {"level":"info","message":"Environment: development","timestamp":"2026-06-30 04:22:12"}
 {"level":"info","message":"=========================================","timestamp":"2026-06-30 04:22:12"}
 {"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 04:22:14"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 04:28:41"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 401 217 - 36.240 ms","timestamp":"2026-06-30 04:28:41"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 04:28:43"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 401 217 - 3.436 ms","timestamp":"2026-06-30 04:28:43"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 04:28:43"}
+{"level":"info","message":"GET /api/v1/deals/pipeline-views 401 217 - 1.869 ms","timestamp":"2026-06-30 04:28:43"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 04:28:43"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 401 217 - 4.509 ms","timestamp":"2026-06-30 04:28:43"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 04:28:43"}
+{"level":"info","message":"GET /api/v1/deals/pipeline-views 401 217 - 2.414 ms","timestamp":"2026-06-30 04:28:43"}
+{"level":"info","message":"POST /api/v1/auth/refresh 200 - - 3905.600 ms","timestamp":"2026-06-30 04:28:47"}
+{"level":"info","message":"GET /api/v1/deals/pipeline-views 200 26 - 144.787 ms","timestamp":"2026-06-30 04:28:48"}
+{"level":"info","message":"GET /api/v1/deals/pipeline-views 304 - - 99.344 ms","timestamp":"2026-06-30 04:28:48"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 200 26 - 1154.654 ms","timestamp":"2026-06-30 04:28:49"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 304 - - 407.251 ms","timestamp":"2026-06-30 04:28:49"}
+{"level":"info","message":"GET /api/v1/deals/pipeline-views 304 - - 1096.896 ms","timestamp":"2026-06-30 04:29:49"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 304 - - 1199.523 ms","timestamp":"2026-06-30 04:29:49"}
+{"level":"info","message":"GET /api/v1/deals/pipeline-views 304 - - 183.344 ms","timestamp":"2026-06-30 04:29:50"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 304 - - 202.059 ms","timestamp":"2026-06-30 04:29:50"}
+{"level":"info","message":"GET /api/v1/deals/statistics 400 216 - 4.428 ms","timestamp":"2026-06-30 04:30:22"}
+{"level":"info","message":"GET /api/v1/customers 200 264 - 1.163 ms","timestamp":"2026-06-30 04:30:22"}
+{"level":"info","message":"GET /api/v1/deals/statistics 400 216 - 2.696 ms","timestamp":"2026-06-30 04:30:22"}
+{"level":"info","message":"GET /api/v1/customers 200 264 - 1.162 ms","timestamp":"2026-06-30 04:30:22"}
+{"level":"info","message":"GET /api/v1/pipelines 200 264 - 1.313 ms","timestamp":"2026-06-30 04:30:22"}
+{"level":"info","message":"GET /api/v1/pipelines 200 264 - 1.549 ms","timestamp":"2026-06-30 04:30:22"}
+{"level":"info","message":"GET /api/v1/deals/employees 200 179 - 2388.784 ms","timestamp":"2026-06-30 04:30:24"}
+{"level":"info","message":"GET /api/v1/leads?limit=100 200 - - 2364.227 ms","timestamp":"2026-06-30 04:30:25"}
+{"level":"info","message":"GET /api/v1/companies 200 244 - 2959.039 ms","timestamp":"2026-06-30 04:30:25"}
+{"level":"info","message":"GET /api/v1/deals/employees 200 179 - 591.590 ms","timestamp":"2026-06-30 04:30:25"}
+{"level":"info","message":"GET /api/v1/contacts?limit=100 200 - - 2941.398 ms","timestamp":"2026-06-30 04:30:25"}
+{"level":"info","message":"GET /api/v1/leads?limit=100 200 - - 645.136 ms","timestamp":"2026-06-30 04:30:25"}
+{"level":"info","message":"GET /api/v1/deals?page=1&limit=20 200 240 - 3369.799 ms","timestamp":"2026-06-30 04:30:25"}
+{"level":"info","message":"GET /api/v1/companies 200 244 - 312.988 ms","timestamp":"2026-06-30 04:30:25"}
+{"level":"info","message":"GET /api/v1/contacts?limit=100 200 - - 290.351 ms","timestamp":"2026-06-30 04:30:25"}
+{"level":"info","message":"GET /api/v1/deals?page=1&limit=20 200 240 - 317.620 ms","timestamp":"2026-06-30 04:30:26"}
+{"level":"info","message":"GET /api/v1/deals/pipeline-views 304 - - 837.401 ms","timestamp":"2026-06-30 04:30:49"}
+{"level":"info","message":"GET /api/v1/deals/pipeline-views 304 - - 168.483 ms","timestamp":"2026-06-30 04:30:50"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 304 - - 1031.128 ms","timestamp":"2026-06-30 04:30:50"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 304 - - 322.292 ms","timestamp":"2026-06-30 04:30:50"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 837.487 ms","timestamp":"2026-06-30 04:31:02"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 4.842 ms","timestamp":"2026-06-30 04:31:02"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 1075.250 ms","timestamp":"2026-06-30 04:31:02"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 1101.598 ms","timestamp":"2026-06-30 04:31:02"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1072.505 ms","timestamp":"2026-06-30 04:31:02"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 2.334 ms","timestamp":"2026-06-30 04:31:02"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 4.209 ms","timestamp":"2026-06-30 04:31:02"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 1170.042 ms","timestamp":"2026-06-30 04:31:02"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 238.757 ms","timestamp":"2026-06-30 04:31:02"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 495.042 ms","timestamp":"2026-06-30 04:31:03"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 2.975 ms","timestamp":"2026-06-30 04:31:03"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 284.835 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 324.059 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 302.245 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 348.558 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 407.620 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 3.463 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 2.952 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 2.434 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 2.971 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 4.645 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 1.265 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 567.718 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 2.257 ms","timestamp":"2026-06-30 04:31:04"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 494.743 ms","timestamp":"2026-06-30 04:31:11"}
+{"level":"info","message":"GET /api/v1/leads/views 200 168 - 502.935 ms","timestamp":"2026-06-30 04:31:11"}
+{"level":"info","message":"GET /api/v1/leads/statuses 200 - - 502.143 ms","timestamp":"2026-06-30 04:31:11"}
+{"level":"info","message":"GET /api/v1/leads/sources 200 - - 498.853 ms","timestamp":"2026-06-30 04:31:11"}
+{"level":"info","message":"GET /api/v1/leads/views 200 168 - 577.371 ms","timestamp":"2026-06-30 04:31:11"}
+{"level":"info","message":"GET /api/v1/leads/statistics 200 296 - 1131.008 ms","timestamp":"2026-06-30 04:31:11"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 592.503 ms","timestamp":"2026-06-30 04:31:11"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 1134.047 ms","timestamp":"2026-06-30 04:31:12"}
+{"level":"info","message":"GET /api/v1/leads/sources 200 - - 692.247 ms","timestamp":"2026-06-30 04:31:12"}
+{"level":"info","message":"GET /api/v1/leads/statuses 200 - - 697.086 ms","timestamp":"2026-06-30 04:31:12"}
+{"level":"info","message":"GET /api/v1/leads/statistics 200 296 - 382.701 ms","timestamp":"2026-06-30 04:31:12"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 369.411 ms","timestamp":"2026-06-30 04:31:12"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 271.267 ms","timestamp":"2026-06-30 04:31:12"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 264.666 ms","timestamp":"2026-06-30 04:31:12"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 253.845 ms","timestamp":"2026-06-30 04:31:13"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 283.764 ms","timestamp":"2026-06-30 04:31:13"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 275.358 ms","timestamp":"2026-06-30 04:31:13"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 343.830 ms","timestamp":"2026-06-30 04:31:14"}
+{"level":"error","message":"Cannot destructure property 'responseMinutes' of 'req.body' as it is undefined.","method":"GET","requestId":"664bc5e3-7fee-4350-a625-9595cd7828f8","stack":"TypeError: Cannot destructure property 'responseMinutes' of 'req.body' as it is undefined.\n    at sla (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\leads\\controller\\lead.controller.ts:551:15)\n    at Layer.handleRequest (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at next (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\route.js:157:13)\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\permission.ts:59:5\n    at Layer.handleRequest (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at next (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\route.js:157:13)\n    at Route.dispatch (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\route.js:117:3)\n    at handle (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\index.js:435:11)\n    at Layer.handleRequest (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\index.js:295:15","statusCode":500,"timestamp":"2026-06-30 04:31:22","url":"/api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/sla?responseMinutes=45"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/sla?responseMinutes=45 500 216 - 38.074 ms","timestamp":"2026-06-30 04:31:22"}
+{"level":"error","message":"Cannot destructure property 'responseMinutes' of 'req.body' as it is undefined.","method":"GET","requestId":"8c043824-e4e9-4807-96b8-58f6c82576d0","stack":"TypeError: Cannot destructure property 'responseMinutes' of 'req.body' as it is undefined.\n    at sla (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\leads\\controller\\lead.controller.ts:551:15)\n    at Layer.handleRequest (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at next (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\route.js:157:13)\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\middlewares\\permission.ts:59:5\n    at Layer.handleRequest (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at next (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\route.js:157:13)\n    at Route.dispatch (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\route.js:117:3)\n    at handle (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\index.js:435:11)\n    at Layer.handleRequest (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\router\\index.js:295:15","statusCode":500,"timestamp":"2026-06-30 04:31:22","url":"/api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/sla?responseMinutes=45"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/sla?responseMinutes=45 500 216 - 8.762 ms","timestamp":"2026-06-30 04:31:22"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 150.802 ms","timestamp":"2026-06-30 04:31:22"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/follow-ups 200 172 - 253.460 ms","timestamp":"2026-06-30 04:31:22"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/follow-ups 200 172 - 175.923 ms","timestamp":"2026-06-30 04:31:22"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 2762.147 ms","timestamp":"2026-06-30 04:31:25"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/score 200 412 - 3397.421 ms","timestamp":"2026-06-30 04:31:25"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/health 200 531 - 3396.172 ms","timestamp":"2026-06-30 04:31:25"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/health 200 531 - 392.969 ms","timestamp":"2026-06-30 04:31:26"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/score 200 412 - 409.234 ms","timestamp":"2026-06-30 04:31:26"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/profile 200 - - 5675.696 ms","timestamp":"2026-06-30 04:31:27"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/profile 200 - - 722.924 ms","timestamp":"2026-06-30 04:31:28"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/profile 200 - - 715.987 ms","timestamp":"2026-06-30 04:31:29"}
+{"level":"info","message":"GET /api/v1/leads/8651a571-52f4-4385-9a51-704550981db3/profile 200 - - 771.689 ms","timestamp":"2026-06-30 04:31:30"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 18:40:08"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 18:40:08"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 18:40:08"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 18:40:08"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 18:40:08"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 18:40:10"}
+{"level":"info","message":"POST /api/v1/auth/register 201 299 - 6844.154 ms","timestamp":"2026-06-30 18:41:19"}
+{"level":"info","message":"POST /api/v1/auth/login 200 - - 17908.339 ms","timestamp":"2026-06-30 18:41:57"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 2102.041 ms","timestamp":"2026-06-30 18:42:00"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 3773.269 ms","timestamp":"2026-06-30 18:42:01"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 2853.701 ms","timestamp":"2026-06-30 18:42:01"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 285.186 ms","timestamp":"2026-06-30 18:42:02"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 3301.896 ms","timestamp":"2026-06-30 18:42:02"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 119.052 ms","timestamp":"2026-06-30 18:42:02"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 3662.289 ms","timestamp":"2026-06-30 18:42:02"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 1317.278 ms","timestamp":"2026-06-30 18:42:02"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1.385 ms","timestamp":"2026-06-30 18:42:04"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 10.733 ms","timestamp":"2026-06-30 18:42:04"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 2174.685 ms","timestamp":"2026-06-30 18:42:04"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1370.325 ms","timestamp":"2026-06-30 18:42:05"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 0.652 ms","timestamp":"2026-06-30 18:42:05"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1.199 ms","timestamp":"2026-06-30 18:42:05"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 2780.124 ms","timestamp":"2026-06-30 18:42:06"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 1.192 ms","timestamp":"2026-06-30 18:42:06"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 3143.474 ms","timestamp":"2026-06-30 18:42:07"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 1.413 ms","timestamp":"2026-06-30 18:42:07"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 3025.920 ms","timestamp":"2026-06-30 18:42:07"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 3986.442 ms","timestamp":"2026-06-30 18:42:07"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 1.093 ms","timestamp":"2026-06-30 18:42:07"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 0.937 ms","timestamp":"2026-06-30 18:42:07"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 5170.390 ms","timestamp":"2026-06-30 18:42:09"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 0.666 ms","timestamp":"2026-06-30 18:42:09"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 401 217 - 3.744 ms","timestamp":"2026-06-30 20:48:32"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 401 217 - 3.572 ms","timestamp":"2026-06-30 20:48:32"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 401 217 - 3.354 ms","timestamp":"2026-06-30 20:48:32"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 401 217 - 2.379 ms","timestamp":"2026-06-30 20:48:32"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 401 217 - 3.214 ms","timestamp":"2026-06-30 20:48:32"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 401 217 - 2.282 ms","timestamp":"2026-06-30 20:48:32"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 401 217 - 10.522 ms","timestamp":"2026-06-30 20:48:32"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 401 217 - 8.246 ms","timestamp":"2026-06-30 20:48:32"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 401 217 - 8.975 ms","timestamp":"2026-06-30 20:48:32"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 401 217 - 3.895 ms","timestamp":"2026-06-30 20:48:32"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:49:06"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 20:49:06"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 20:49:06"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 20:49:06"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:49:06"}
+{"level":"error","message":"Prisma Error: \nInvalid `prisma.$queryRaw()` invocation:\n\n\nRaw query failed. Code: `N/A`. Message: `Server has closed the connection.`","timestamp":"2026-06-30 20:49:15"}
+{"clientVersion":"7.8.0","code":"P2010","level":"error","message":"Prisma database connection healthcheck failed \nInvalid `prisma.$queryRaw()` invocation:\n\n\nRaw query failed. Code: `N/A`. Message: `Server has closed the connection.`","meta":{"driverAdapterError":{"cause":{"kind":"ConnectionClosed"},"name":"DriverAdapterError"}},"name":"PrismaClientKnownRequestError","stack":"PrismaClientKnownRequestError: \nInvalid `prisma.$queryRaw()` invocation:\n\n\nRaw query failed. Code: `N/A`. Message: `Server has closed the connection.`\n    at zr.handleRequestError (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:237:13)\n    at zr.handleAndLogRequestError (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:183:12)\n    at zr.request (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:152:12)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at a (C:\\valli\\FlowCRM AI Enterprise\\backend\\node_modules\\@prisma\\client\\src\\runtime\\getPrismaClient.ts:963:24)\n    at Object.checkConnection (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\database\\db.ts:51:7)\n    at Server.<anonymous> (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\server.ts:14:21)","timestamp":"2026-06-30 20:49:15"}
+{"level":"error","message":"CRITICAL: Failed to establish database connection during boot.","timestamp":"2026-06-30 20:49:15"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:49:42"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 20:49:42"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 20:49:42"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 20:49:42"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:49:42"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 20:49:45"}
+{"level":"error","message":"Invalid email or password","method":"POST","requestId":"ba6ebd83-f09a-4f4a-b590-c75a52571c8a","stack":"Error: Invalid email or password\n    at AuthService.login (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\services\\auth.service.ts:123:19)\n    at login (C:\\valli\\FlowCRM AI Enterprise\\backend\\src\\controllers\\auth.controller.ts:70:22)","statusCode":401,"timestamp":"2026-06-30 20:50:12","url":"/api/v1/auth/login"}
+{"level":"info","message":"POST /api/v1/auth/login 401 162 - 6246.790 ms","timestamp":"2026-06-30 20:50:12"}
+{"level":"info","message":"POST /api/v1/auth/forgot-password 200 269 - 3477.417 ms","timestamp":"2026-06-30 20:50:24"}
+{"level":"info","message":"POST /api/v1/auth/reset-password 200 185 - 3266.146 ms","timestamp":"2026-06-30 20:50:46"}
+{"level":"info","message":"POST /api/v1/auth/login 200 - - 4066.176 ms","timestamp":"2026-06-30 20:50:58"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1100.304 ms","timestamp":"2026-06-30 20:51:00"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 1629.706 ms","timestamp":"2026-06-30 20:51:00"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 279.956 ms","timestamp":"2026-06-30 20:51:00"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 1894.750 ms","timestamp":"2026-06-30 20:51:00"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 2076.774 ms","timestamp":"2026-06-30 20:51:00"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 1988.725 ms","timestamp":"2026-06-30 20:51:00"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 0.803 ms","timestamp":"2026-06-30 20:51:00"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 0.745 ms","timestamp":"2026-06-30 20:51:00"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 283.425 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 194.840 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 419.889 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.035 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 282.670 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 297.135 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 0.668 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 0.537 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 0.714 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 144.093 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 123.784 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 0.727 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.606 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 0.736 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 496.914 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.291 ms","timestamp":"2026-06-30 20:51:01"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 546.529 ms","timestamp":"2026-06-30 20:51:09"}
+{"level":"info","message":"GET /api/v1/leads/sources 200 - - 2006.798 ms","timestamp":"2026-06-30 20:51:09"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 3624.631 ms","timestamp":"2026-06-30 20:51:09"}
+{"level":"info","message":"GET /api/v1/leads/statuses 200 - - 1941.230 ms","timestamp":"2026-06-30 20:51:09"}
+{"level":"info","message":"GET /api/v1/leads/views 200 168 - 542.359 ms","timestamp":"2026-06-30 20:51:09"}
+{"level":"info","message":"GET /api/v1/leads/statistics 200 296 - 3191.736 ms","timestamp":"2026-06-30 20:51:10"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 323.286 ms","timestamp":"2026-06-30 20:51:10"}
+{"level":"info","message":"GET /api/v1/leads/sources 200 - - 272.924 ms","timestamp":"2026-06-30 20:51:10"}
+{"level":"info","message":"GET /api/v1/leads/views 200 168 - 276.495 ms","timestamp":"2026-06-30 20:51:10"}
+{"level":"info","message":"GET /api/v1/leads/statistics 200 296 - 369.803 ms","timestamp":"2026-06-30 20:51:10"}
+{"level":"info","message":"GET /api/v1/leads/statuses 200 - - 264.739 ms","timestamp":"2026-06-30 20:51:10"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 626.061 ms","timestamp":"2026-06-30 20:51:10"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 626.002 ms","timestamp":"2026-06-30 20:51:11"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 360.607 ms","timestamp":"2026-06-30 20:51:12"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 423.096 ms","timestamp":"2026-06-30 20:51:13"}
+{"level":"info","message":"GET /api/v1/contacts/statistics 200 299 - 666.346 ms","timestamp":"2026-06-30 20:51:13"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 1063.769 ms","timestamp":"2026-06-30 20:51:13"}
+{"level":"info","message":"GET /api/v1/leads/employees 200 179 - 440.664 ms","timestamp":"2026-06-30 20:51:13"}
+{"level":"info","message":"GET /api/v1/companies 200 244 - 962.384 ms","timestamp":"2026-06-30 20:51:13"}
+{"level":"info","message":"GET /api/v1/contacts?page=1&limit=20 200 - - 1118.623 ms","timestamp":"2026-06-30 20:51:13"}
+{"level":"info","message":"GET /api/v1/leads?limit=100 200 - - 988.213 ms","timestamp":"2026-06-30 20:51:13"}
+{"level":"info","message":"GET /api/v1/contacts/statistics 200 299 - 561.481 ms","timestamp":"2026-06-30 20:51:14"}
+{"level":"info","message":"GET /api/v1/companies 200 244 - 698.854 ms","timestamp":"2026-06-30 20:51:14"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 867.683 ms","timestamp":"2026-06-30 20:51:14"}
+{"level":"info","message":"GET /api/v1/contacts?page=1&limit=20 200 - - 688.761 ms","timestamp":"2026-06-30 20:51:14"}
+{"level":"info","message":"GET /api/v1/leads?limit=100 200 - - 543.703 ms","timestamp":"2026-06-30 20:51:14"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 385.743 ms","timestamp":"2026-06-30 20:51:14"}
+{"level":"info","message":"GET /api/v1/leads?page=1&limit=20 200 - - 478.681 ms","timestamp":"2026-06-30 20:51:15"}
+{"level":"info","message":"GET /api/v1/companies/statistics 200 278 - 182.674 ms","timestamp":"2026-06-30 20:51:16"}
+{"level":"info","message":"GET /api/v1/companies/employees 200 179 - 202.003 ms","timestamp":"2026-06-30 20:51:16"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 200 244 - 520.623 ms","timestamp":"2026-06-30 20:51:16"}
+{"level":"info","message":"GET /api/v1/companies/statistics 200 278 - 198.417 ms","timestamp":"2026-06-30 20:51:16"}
+{"level":"info","message":"GET /api/v1/companies/employees 200 179 - 133.989 ms","timestamp":"2026-06-30 20:51:16"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 200 244 - 201.876 ms","timestamp":"2026-06-30 20:51:17"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 200 244 - 299.061 ms","timestamp":"2026-06-30 20:51:17"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 200 244 - 304.190 ms","timestamp":"2026-06-30 20:51:17"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 200 244 - 303.391 ms","timestamp":"2026-06-30 20:51:17"}
+{"level":"info","message":"GET /api/v1/deals/statistics 400 216 - 173.566 ms","timestamp":"2026-06-30 20:51:18"}
+{"level":"info","message":"GET /api/v1/customers 200 264 - 7.735 ms","timestamp":"2026-06-30 20:51:19"}
+{"level":"info","message":"GET /api/v1/deals/statistics 400 216 - 2.938 ms","timestamp":"2026-06-30 20:51:19"}
+{"level":"info","message":"GET /api/v1/customers 200 264 - 0.680 ms","timestamp":"2026-06-30 20:51:19"}
+{"level":"info","message":"GET /api/v1/pipelines 200 264 - 4.770 ms","timestamp":"2026-06-30 20:51:20"}
+{"level":"info","message":"GET /api/v1/pipelines 200 264 - 0.871 ms","timestamp":"2026-06-30 20:51:20"}
+{"level":"info","message":"GET /api/v1/deals/employees 200 179 - 827.617 ms","timestamp":"2026-06-30 20:51:20"}
+{"level":"info","message":"GET /api/v1/deals?page=1&limit=20 200 240 - 1944.759 ms","timestamp":"2026-06-30 20:51:20"}
+{"level":"info","message":"GET /api/v1/companies 200 244 - 973.633 ms","timestamp":"2026-06-30 20:51:20"}
+{"level":"info","message":"GET /api/v1/deals/employees 200 179 - 351.815 ms","timestamp":"2026-06-30 20:51:21"}
+{"level":"info","message":"GET /api/v1/contacts?limit=100 200 - - 1069.067 ms","timestamp":"2026-06-30 20:51:21"}
+{"level":"info","message":"GET /api/v1/leads?limit=100 200 - - 894.216 ms","timestamp":"2026-06-30 20:51:21"}
+{"level":"info","message":"GET /api/v1/deals?page=1&limit=20 200 240 - 683.955 ms","timestamp":"2026-06-30 20:51:21"}
+{"level":"info","message":"GET /api/v1/companies 200 244 - 559.366 ms","timestamp":"2026-06-30 20:51:21"}
+{"level":"info","message":"GET /api/v1/contacts?limit=100 200 - - 331.083 ms","timestamp":"2026-06-30 20:51:21"}
+{"level":"info","message":"GET /api/v1/leads?limit=100 200 - - 480.873 ms","timestamp":"2026-06-30 20:51:21"}
+{"level":"info","message":"GET /api/v1/deals/pipeline-views 200 26 - 442.585 ms","timestamp":"2026-06-30 20:51:27"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 200 26 - 2021.188 ms","timestamp":"2026-06-30 20:51:27"}
+{"level":"info","message":"GET /api/v1/deals/pipeline-views 304 - - 240.432 ms","timestamp":"2026-06-30 20:51:27"}
+{"level":"info","message":"GET /api/v1/deals/pipeline 304 - - 417.904 ms","timestamp":"2026-06-30 20:51:28"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 0.755 ms","timestamp":"2026-06-30 20:51:32"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 1.655 ms","timestamp":"2026-06-30 20:51:32"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 1.145 ms","timestamp":"2026-06-30 20:51:32"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 5.351 ms","timestamp":"2026-06-30 20:51:32"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 2.077 ms","timestamp":"2026-06-30 20:51:32"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 2.469 ms","timestamp":"2026-06-30 20:51:32"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 366.749 ms","timestamp":"2026-06-30 20:51:33"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 459.489 ms","timestamp":"2026-06-30 20:51:33"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 1978.563 ms","timestamp":"2026-06-30 20:51:34"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1.131 ms","timestamp":"2026-06-30 20:51:34"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 13.151 ms","timestamp":"2026-06-30 20:51:35"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 120.600 ms","timestamp":"2026-06-30 20:51:35"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 100.252 ms","timestamp":"2026-06-30 20:51:35"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 19.448 ms","timestamp":"2026-06-30 20:51:35"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 10.231 ms","timestamp":"2026-06-30 20:51:35"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 3.507 ms","timestamp":"2026-06-30 20:51:35"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 1416.789 ms","timestamp":"2026-06-30 20:51:36"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 3.184 ms","timestamp":"2026-06-30 20:51:36"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 1.495 ms","timestamp":"2026-06-30 20:51:36"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 1.376 ms","timestamp":"2026-06-30 20:51:36"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 1.640 ms","timestamp":"2026-06-30 20:51:36"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.758 ms","timestamp":"2026-06-30 20:51:36"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.902 ms","timestamp":"2026-06-30 20:51:36"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.038 ms","timestamp":"2026-06-30 20:51:36"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:56:55"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 20:56:55"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 20:56:55"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 20:56:55"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:56:55"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 20:56:57"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:57:09"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 20:57:09"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 20:57:09"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 20:57:09"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:57:09"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 20:57:11"}
+{"level":"info","message":"GET /api/v1/companies/employees 200 179 - 2515.360 ms","timestamp":"2026-06-30 20:57:19"}
+{"level":"info","message":"GET /api/v1/companies/employees 200 179 - 262.977 ms","timestamp":"2026-06-30 20:57:20"}
+{"level":"info","message":"GET /api/v1/companies/statistics 200 278 - 4162.986 ms","timestamp":"2026-06-30 20:57:22"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 1061.327 ms","timestamp":"2026-06-30 20:57:22"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 1114.410 ms","timestamp":"2026-06-30 20:57:22"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 2.468 ms","timestamp":"2026-06-30 20:57:22"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 6.997 ms","timestamp":"2026-06-30 20:57:22"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 200 244 - 4237.081 ms","timestamp":"2026-06-30 20:57:23"}
+{"level":"info","message":"GET /api/v1/companies/statistics 200 278 - 321.006 ms","timestamp":"2026-06-30 20:57:23"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1429.018 ms","timestamp":"2026-06-30 20:57:23"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1.230 ms","timestamp":"2026-06-30 20:57:23"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 1627.982 ms","timestamp":"2026-06-30 20:57:23"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 1247.579 ms","timestamp":"2026-06-30 20:57:23"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 200 244 - 832.091 ms","timestamp":"2026-06-30 20:57:23"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 646.685 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 294.667 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 423.719 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 2.089 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 738.564 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 361.102 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 200 244 - 739.247 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 876.026 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1.008 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 1.180 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.452 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 0.566 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 0.915 ms","timestamp":"2026-06-30 20:57:24"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 722.591 ms","timestamp":"2026-06-30 20:57:25"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 200 244 - 419.512 ms","timestamp":"2026-06-30 20:57:25"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 10.963 ms","timestamp":"2026-06-30 20:57:25"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1258.201 ms","timestamp":"2026-06-30 20:57:25"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 3.186 ms","timestamp":"2026-06-30 20:57:25"}
+{"level":"info","message":"GET /api/v1/companies?page=1&limit=20 200 244 - 444.264 ms","timestamp":"2026-06-30 20:57:25"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:57:40"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 20:57:40"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 20:57:40"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 20:57:40"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:57:40"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 20:57:42"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:58:04"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 20:58:04"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 20:58:04"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 20:58:04"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:58:04"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 20:58:05"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:58:38"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 20:58:38"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 20:58:38"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 20:58:38"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:58:38"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 20:58:40"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:58:50"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-06-30 20:58:50"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-06-30 20:58:50"}
+{"level":"info","message":"Environment: development","timestamp":"2026-06-30 20:58:50"}
+{"level":"info","message":"=========================================","timestamp":"2026-06-30 20:58:50"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-06-30 20:58:53"}

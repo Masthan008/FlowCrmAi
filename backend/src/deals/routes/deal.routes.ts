@@ -161,9 +161,30 @@ router.get('/:id/files', requirePermission('deals:view'), dealWorkspaceControlle
 router.post('/:id/files', requirePermission('deals:edit'), dealWorkspaceController.createFile);
 router.delete('/:id/files/:fileId', requirePermission('deals:edit'), dealWorkspaceController.deleteFile);
 
-// History, Products, Quotes
+// History, Products, Quotes, Competitors, Collaboration, Checklist, Negotiations
 router.get('/:id/history', requirePermission('deals:view'), dealWorkspaceController.getHistory);
+
 router.get('/:id/products', requirePermission('deals:view'), dealWorkspaceController.getProducts);
+router.post('/:id/products', requirePermission('deals:edit'), dealWorkspaceController.addProductLine);
+router.put('/:id/products/:productId', requirePermission('deals:edit'), dealWorkspaceController.updateProductLine);
+router.delete('/:id/products/:productId', requirePermission('deals:edit'), dealWorkspaceController.deleteProductLine);
+
 router.get('/:id/quotes', requirePermission('deals:view'), dealWorkspaceController.getQuotes);
+router.post('/:id/quotes', requirePermission('deals:edit'), dealWorkspaceController.createQuote);
+router.put('/:id/quotes/:quoteId', requirePermission('deals:edit'), dealWorkspaceController.updateQuote);
+router.patch('/:id/quotes/:quoteId/approve', requirePermission('deals:edit'), dealWorkspaceController.approveQuote);
+router.patch('/:id/quotes/:quoteId/reject', requirePermission('deals:edit'), dealWorkspaceController.rejectQuote);
+
+router.get('/:id/competitors', requirePermission('deals:view'), dealWorkspaceController.getCompetitors);
+router.post('/:id/competitors', requirePermission('deals:edit'), dealWorkspaceController.createCompetitor);
+
+router.get('/:id/collaboration', requirePermission('deals:view'), dealWorkspaceController.getCollaboration);
+router.post('/:id/comments', requirePermission('deals:edit'), dealWorkspaceController.createComment);
+
+router.get('/:id/checklist', requirePermission('deals:view'), dealWorkspaceController.getChecklist);
+router.patch('/:id/checklist/:itemId', requirePermission('deals:edit'), dealWorkspaceController.updateChecklistItem);
+
+router.get('/:id/negotiations', requirePermission('deals:view'), dealWorkspaceController.getNegotiations);
+router.post('/:id/negotiations', requirePermission('deals:edit'), dealWorkspaceController.createNegotiation);
 
 export default router;

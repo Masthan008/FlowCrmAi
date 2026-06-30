@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.dealWorkspaceController = void 0;
 const dealWorkspace_service_1 = require("../service/dealWorkspace.service");
 const response_1 = require("../../helpers/response");
+const db_1 = require("../../database/db");
 exports.dealWorkspaceController = {
     getProfile: async (req, res, next) => {
         try {
@@ -159,10 +160,154 @@ exports.dealWorkspaceController = {
             next(error);
         }
     },
+    addProductLine: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.addProductLine(req.params.id, req.body, req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 201, 'Deal product created successfully.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    updateProductLine: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.updateProductLine(req.params.productId, req.body, req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Deal product updated successfully.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    deleteProductLine: async (req, res, next) => {
+        try {
+            await dealWorkspace_service_1.dealWorkspaceService.deleteProductLine(req.params.productId, req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Deal product line deleted.');
+        }
+        catch (error) {
+            next(error);
+        }
+    },
     getQuotes: async (req, res, next) => {
         try {
             const data = await dealWorkspace_service_1.dealWorkspaceService.getQuotes(req.params.id, req.query.search);
             response_1.ResponseHelper.sendSuccess(req, res, 200, 'Deal quotes loaded.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    createQuote: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.createQuote(req.params.id, req.body, req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 201, 'Deal quote prepared successfully.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    updateQuote: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.updateQuote(req.params.quoteId, req.body, req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Deal quote updated successfully.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    approveQuote: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.approveQuote(req.params.quoteId, req.user?.id || req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Quote approved successfully.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    rejectQuote: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.rejectQuote(req.params.quoteId, req.user?.id || req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Quote rejected successfully.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    getCompetitors: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.getCompetitors(req.params.id, req.query.search);
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Deal competitors loaded.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    createCompetitor: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.createCompetitor(req.params.id, req.body, req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 201, 'Competitor added successfully.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    getCollaboration: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.getCollaboration(req.params.id);
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Deal collaboration loaded.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    createComment: async (req, res, next) => {
+        try {
+            const employee = await db_1.prisma.employee.findFirst({
+                where: { userId: req.user?.id || undefined }
+            });
+            const data = await dealWorkspace_service_1.dealWorkspaceService.createComment(req.params.id, {
+                comment: req.body.comment,
+                employeeId: employee?.id || undefined,
+                parentId: req.body.parentId || undefined,
+                isPinned: req.body.isPinned || false,
+                emoji: req.body.emoji || null
+            }, req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 201, 'Comment added successfully.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    getChecklist: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.getChecklist(req.params.id);
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Deal checklist loaded.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    updateChecklistItem: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.updateChecklistItem(req.params.itemId, req.body.isCompleted, req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Checklist item updated.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    getNegotiations: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.getNegotiations(req.params.id);
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Deal negotiations loaded.', data);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
+    createNegotiation: async (req, res, next) => {
+        try {
+            const data = await dealWorkspace_service_1.dealWorkspaceService.createNegotiation(req.params.id, req.body, req.user?.email || 'system');
+            response_1.ResponseHelper.sendSuccess(req, res, 201, 'Negotiation round created.', data);
         }
         catch (error) {
             next(error);
