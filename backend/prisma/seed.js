@@ -11,7 +11,10 @@ try {
     require('ts-node/register');
     dbModule = require('../src/database/db');
   } catch (err) {
-    dbModule = require('../src/database/db');
+    console.error("❌ Failed to load database module from dist/ (JS) or src/ (TS):");
+    console.error("Primary Error (Dist):", e.message || e);
+    console.error("Fallback Error (TS):", err.message || err);
+    process.exit(1);
   }
 }
 const { prisma, pool } = dbModule;
