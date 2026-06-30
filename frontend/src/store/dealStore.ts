@@ -137,6 +137,33 @@ interface DealState {
   updateDealChecklistItem: (dealId: string, itemId: string, isCompleted: boolean) => Promise<void>;
   fetchDealNegotiations: (dealId: string) => Promise<void>;
   createDealNegotiation: (dealId: string, data: any) => Promise<void>;
+
+  // --- Deal Intelligence & Automation State ---
+  dealScore: any | null;
+  dealWinProbability: any | null;
+  dealHealth: any | null;
+  dealRisk: any | null;
+  dealRecommendations: any[];
+  dealSLA: any | null;
+  dealPlaybooks: any[];
+  dealFollowups: any[];
+  workflows: any[];
+  executiveInsights: any | null;
+
+  // --- Deal Intelligence & Automation Actions ---
+  fetchDealScore: (dealId: string) => Promise<void>;
+  fetchDealWinProbability: (dealId: string) => Promise<void>;
+  fetchDealHealth: (dealId: string) => Promise<void>;
+  fetchDealRisk: (dealId: string) => Promise<void>;
+  fetchDealRecommendations: (dealId: string) => Promise<void>;
+  fetchDealSLA: (dealId: string) => Promise<void>;
+  updateDealLifecycle: (dealId: string, data: any) => Promise<void>;
+  fetchDealPlaybooks: (dealId: string) => Promise<void>;
+  fetchDealFollowups: (dealId: string) => Promise<void>;
+  createDealFollowup: (dealId: string, data: any) => Promise<void>;
+  fetchWorkflows: (module?: string) => Promise<void>;
+  createWorkflow: (data: any) => Promise<void>;
+  fetchExecutiveInsights: () => Promise<void>;
 }
 
 export const useDealStore = create<DealState>((set, get) => ({
@@ -169,6 +196,18 @@ export const useDealStore = create<DealState>((set, get) => ({
   dealChecklist: [],
   dealNegotiations: [],
   dealTeamMembers: [],
+
+  // --- Deal Intelligence & Automation State ---
+  dealScore: null,
+  dealWinProbability: null,
+  dealHealth: null,
+  dealRisk: null,
+  dealRecommendations: [],
+  dealSLA: null,
+  dealPlaybooks: [],
+  dealFollowups: [],
+  workflows: [],
+  executiveInsights: null,
 
   // --- Pipeline Management & Analytics State ---
   kanbanData: [],
@@ -1079,6 +1118,144 @@ export const useDealStore = create<DealState>((set, get) => ({
     } catch (err: any) {
       set({ error: err.response?.data?.message || 'Failed to add negotiation round', loading: false });
       throw err;
+    }
+  },
+
+  // --- Deal Intelligence & Automation Actions ---
+  fetchDealScore: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealScore(dealId);
+      set({ dealScore: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch deal score', loading: false });
+    }
+  },
+
+  fetchDealWinProbability: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealWinProbability(dealId);
+      set({ dealWinProbability: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch win probability', loading: false });
+    }
+  },
+
+  fetchDealHealth: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealHealth(dealId);
+      set({ dealHealth: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch deal health', loading: false });
+    }
+  },
+
+  fetchDealRisk: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealRisk(dealId);
+      set({ dealRisk: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch risk status', loading: false });
+    }
+  },
+
+  fetchDealRecommendations: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealRecommendations(dealId);
+      set({ dealRecommendations: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch recommendations', loading: false });
+    }
+  },
+
+  fetchDealSLA: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealSLA(dealId);
+      set({ dealSLA: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch SLA details', loading: false });
+    }
+  },
+
+  updateDealLifecycle: async (dealId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.updateDealLifecycle(dealId, data);
+      set({ loading: false });
+      get().fetchDeal(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to update lifecycle stage duration', loading: false });
+      throw err;
+    }
+  },
+
+  fetchDealPlaybooks: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealPlaybooks(dealId);
+      set({ dealPlaybooks: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch playbooks list', loading: false });
+    }
+  },
+
+  fetchDealFollowups: async (dealId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getDealFollowups(dealId);
+      set({ dealFollowups: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch followup schedule', loading: false });
+    }
+  },
+
+  createDealFollowup: async (dealId, data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.createDealFollowup(dealId, data);
+      set({ loading: false });
+      get().fetchDealFollowups(dealId);
+      get().fetchTimeline(dealId);
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to log follow-up reminder', loading: false });
+      throw err;
+    }
+  },
+
+  fetchWorkflows: async (module) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getWorkflows(module);
+      set({ workflows: res.data?.data || [], loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to fetch CRM workflows list', loading: false });
+    }
+  },
+
+  createWorkflow: async (data) => {
+    set({ loading: true, error: null });
+    try {
+      await dealApi.createWorkflow(data);
+      set({ loading: false });
+      get().fetchWorkflows('Deal');
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to create active CRM workflow trigger', loading: false });
+      throw err;
+    }
+  },
+
+  fetchExecutiveInsights: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await dealApi.getExecutiveInsights();
+      set({ executiveInsights: res.data?.data || null, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || 'Failed to load sales executive reporting insights', loading: false });
     }
   },
 }));

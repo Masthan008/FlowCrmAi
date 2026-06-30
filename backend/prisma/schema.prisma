@@ -531,6 +531,7 @@ model Employee {
   dealComments      DealComment[]
   dealTeamMembers   DealTeamMember[]
   dealApprovals     DealApproval[]     @relation("DealApprover")
+  dealFollowups     DealFollowup[]
 
   @@map("employees")
 }
@@ -983,6 +984,15 @@ model Deal {
   dealApprovals   DealApproval[]
   dealChecklists  DealChecklist[]
   dealNegotiations DealNegotiation[]
+  lifecycle        DealLifecycle?
+  score            DealScore?
+  winProbability   DealWinProbability?
+  health           DealHealth?
+  risks            DealRisk[]
+  recommendations  DealRecommendation[]
+  sla              DealSLA?
+  playbooks        DealPlaybook[]
+  followups        DealFollowup[]
 
   @@index([dealNumber])
   @@index([name])
@@ -3723,4 +3733,270 @@ model DealNegotiation {
 
   @@index([dealId])
   @@map("deal_negotiations")
+}
+
+// 95. REUSABLE CRM WORKFLOW ENGINE
+model CRMWorkflow {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String
+  module      String           // Deal, Lead, Contact, Company, Task
+  trigger     String           // Deal Created, Stage Changed, Owner Changed, etc.
+  conditions  Json             // Conditions block like: { "revenue": { "gte": 50000 }, "stage": "Discovery" }
+  actions     Json             // Actions array like: [ { "type": "Assign User", "value": "uuid" } ]
+  isActive    Boolean          @default(true)
+  logs        CRMWorkflowLog[]
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+  version     Int              @default(1)
+
+  @@map("crm_workflows")
+}
+
+model CRMWorkflowLog {
+  id              String      @id @default(uuid()) @db.Uuid
+  workflowId      String      @db.Uuid
+  workflow        CRMWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  entityId        String      @db.Uuid // ID of Deal/Lead/Contact
+  trigger         String
+  conditionPassed Boolean
+  executionTime   Int         // duration in milliseconds
+  result          String?     @db.Text
+  error           String?     @db.Text
+  retryCount      Int         @default(0)
+  createdAt       DateTime    @default(now())
+
+  @@index([workflowId])
+  @@index([entityId])
+  @@map("crm_workflow_logs")
+}
+
+// 96. DEAL LIFECYCLE
+model DealLifecycle {
+  id                  String    @id @default(uuid()) @db.Uuid
+  dealId              String    @db.Uuid @unique
+  deal                Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  currentStage        String
+  recommendedNextStage String?
+  previousStage       String?
+  durationInStage     Int       @default(0) // Seconds
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("deal_lifecycles")
+}
+
+// 97. DEAL SCORING
+model DealScore {
+  id                  String    @id @default(uuid()) @db.Uuid
+  dealId              String    @db.Uuid @unique
+  deal                Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  score               Int       @default(0) // 0-100
+  category            String    // Excellent, Strong, Average, Weak, Critical
+  companyScore        Int       @default(0)
+  contactEngagement   Int       @default(0)
+  meetingCount        Int       @default(0)
+  activityCount       Int       @default(0)
+  taskCompletion      Int       @default(0)
+  dealValue           Float     @default(0.0)
+  pipelineStage       String?
+  quoteStatus         String?
+  decisionMakerAvail  Boolean   @default(false)
+  relationshipStrength String?  // High, Medium, Low
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("deal_scores")
+}
+
+// 98. WIN PROBABILITY
+model DealWinProbability {
+  id                  String    @id @default(uuid()) @db.Uuid
+  dealId              String    @db.Uuid @unique
+  deal                Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  probability         Int       @default(0) // 0-100
+  confidenceLevel     String    // High, Medium, Low
+  reasoningSummary    String?   @db.Text
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("deal_win_probabilities")
+}
+
+// 99. DEAL HEALTH
+model DealHealth {
+  id                  String    @id @default(uuid()) @db.Uuid
+  dealId              String    @db.Uuid @unique
+  deal                Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  overallHealth       String    // Excellent, Good, Average, Poor, Critical
+  communicationScore  Int       @default(0)
+  activityScore       Int       @default(0)
+  meetingsScore       Int       @default(0)
+  revenueScore        Int       @default(0)
+  tasksScore          Int       @default(0)
+  approvalsScore      Int       @default(0)
+  timelineProgress    Int       @default(0)
+  pipelineMovement    Int       @default(0)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("deal_healths")
+}
+
+// 100. RISK ANALYSIS
+model DealRisk {
+  id                  String    @id @default(uuid()) @db.Uuid
+  dealId              String    @db.Uuid
+  deal                Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  riskLevel           String    // Low, Medium, High, Critical
+  reasons             String[]  @default([])
+  recommendedAction   String?   @db.Text
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([dealId])
+  @@map("deal_risks")
+}
+
+// 101. SMART RECOMMENDATIONS
+model DealRecommendation {
+  id                  String    @id @default(uuid()) @db.Uuid
+  dealId              String    @db.Uuid
+  deal                Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  recommendation      String    // e.g. Schedule Follow-up, Book Meeting, etc.
+  reason              String?   @db.Text
+  isCompleted         Boolean   @default(false)
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([dealId])
+  @@map("deal_recommendations")
+}
+
+// 102. SLA MANAGEMENT
+model DealSLA {
+  id                     String    @id @default(uuid()) @db.Uuid
+  dealId                 String    @db.Uuid @unique
+  deal                   Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  firstResponseStatus    String    @default("Green") // Green, Yellow, Red
+  firstResponseTime      DateTime?
+  proposalResponseStatus String    @default("Green")
+  proposalResponseTime   DateTime?
+  followUpStatus         String    @default("Green")
+  followUpTime           DateTime?
+  negotiationStatus      String    @default("Green")
+  negotiationTime        DateTime?
+  approvalStatus         String    @default("Green")
+  approvalTime           DateTime?
+  expectedCloseDate      DateTime?
+  escalationTime         DateTime?
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("deal_slas")
+}
+
+// 103. SALES PLAYBOOK
+model DealPlaybook {
+  id                    String    @id @default(uuid()) @db.Uuid
+  dealId                String    @db.Uuid
+  deal                  Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  name                  String    // Enterprise Sales, SMB Sales, Renewal, Upsell, etc.
+  checklist             Json      // array of checklist items
+  recommendedActivities Json      // recommended steps
+  documentsRequired     String[]
+  milestones            String[]
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([dealId])
+  @@map("deal_playbooks")
+}
+
+// 104. AUTOMATED FOLLOW-UP ENGINE
+model DealFollowup {
+  id            String    @id @default(uuid()) @db.Uuid
+  dealId        String    @db.Uuid
+  deal          Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  channel       String    // Phone Call, Meeting, Email, WhatsApp, Demo, etc.
+  assignedToId  String?   @db.Uuid
+  assignedTo    Employee? @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  scheduledDate DateTime
+  priority      String    @default("Medium") // Low, Medium, High
+  reminderAlert Boolean   @default(false)
+  status        String    @default("Scheduled") // Scheduled, Completed, Missed
+  outcome       String?   @db.Text
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([dealId])
+  @@map("deal_followups")
 }

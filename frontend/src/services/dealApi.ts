@@ -92,4 +92,21 @@ export const dealApi = {
   // --- Deal Workspace Negotiations ---
   getDealNegotiations: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/negotiations`),
   createDealNegotiation: (dealId: string, data: any) => api.post(`${DEALS_URL}/${dealId}/negotiations`, data),
+
+  // --- Deal Intelligence & Automation ---
+  getDealScore: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/score`),
+  getDealWinProbability: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/win-probability`),
+  getDealHealth: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/health`),
+  getDealRisk: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/risk`),
+  getDealRecommendations: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/recommendations`),
+  getDealSLA: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/sla`),
+  updateDealLifecycle: (dealId: string, data: any) => api.patch(`${DEALS_URL}/${dealId}/lifecycle`, data),
+  getDealPlaybooks: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/playbooks`),
+  getDealFollowups: (dealId: string) => api.get(`${DEALS_URL}/${dealId}/followups`),
+  createDealFollowup: (dealId: string, data: any) => api.post(`${DEALS_URL}/${dealId}/followups`, data),
+
+  // --- CRM Workflows & Insights ---
+  getWorkflows: (module?: string) => api.get('/deal-workflows', { params: { module } }),
+  createWorkflow: (data: any) => api.post('/deal-workflows', data),
+  getExecutiveInsights: () => api.get(`${DEALS_URL}/executive-insights`),
 };

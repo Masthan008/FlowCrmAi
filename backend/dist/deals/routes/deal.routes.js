@@ -11,6 +11,7 @@ const router = (0, express_1.Router)();
 router.use(auth_1.requireAuth);
 // --- ENTERPRISE SALES PIPELINE INTELLIGENCE ---
 const dealPipeline_controller_1 = require("../controller/dealPipeline.controller");
+const dealAutomation_controller_1 = require("../controller/dealAutomation.controller");
 // Pipeline CRUD
 router.get('/pipeline', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.listPipelines);
 router.post('/pipeline', (0, permission_1.requirePermission)('deals:create'), dealPipeline_controller_1.dealPipelineController.createPipeline);
@@ -43,6 +44,11 @@ router.get('/performance', (0, permission_1.requirePermission)('deals:view'), de
 router.get('/pipeline-views', (0, permission_1.requirePermission)('deals:view'), dealPipeline_controller_1.dealPipelineController.getViews);
 router.post('/pipeline-views', (0, permission_1.requirePermission)('deals:create'), dealPipeline_controller_1.dealPipelineController.createView);
 router.delete('/pipeline-views/:viewId', (0, permission_1.requirePermission)('deals:delete'), dealPipeline_controller_1.dealPipelineController.deleteView);
+// --- ENTERPRISE AUTOMATION & INTELLIGENCE ---
+router.get('/executive-insights', (0, permission_1.requirePermission)('deals:insights:view'), dealAutomation_controller_1.dealAutomationController.getExecutiveInsights);
+router.get('/playbooks', (0, permission_1.requirePermission)('deals:playbook:manage'), dealAutomation_controller_1.dealAutomationController.getPlaybooks);
+router.get('/workflows', (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.getWorkflows);
+router.post('/workflows', (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.createWorkflow);
 // Move Stage (drag & drop)
 router.patch('/:id/move-stage', (0, permission_1.requirePermission)('deals:edit'), dealPipeline_controller_1.dealPipelineController.moveStage);
 // --- EXISTING DEAL CRUD ROUTES ---
@@ -94,4 +100,15 @@ router.get('/:id/checklist', (0, permission_1.requirePermission)('deals:view'), 
 router.patch('/:id/checklist/:itemId', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.updateChecklistItem);
 router.get('/:id/negotiations', (0, permission_1.requirePermission)('deals:view'), dealWorkspace_controller_1.dealWorkspaceController.getNegotiations);
 router.post('/:id/negotiations', (0, permission_1.requirePermission)('deals:edit'), dealWorkspace_controller_1.dealWorkspaceController.createNegotiation);
+// --- DEAL INTELLIGENCE & SCORING ENDPOINTS ---
+router.get('/:id/score', (0, permission_1.requirePermission)('deals:score:view'), dealAutomation_controller_1.dealAutomationController.getScore);
+router.get('/:id/win-probability', (0, permission_1.requirePermission)('deals:view'), dealAutomation_controller_1.dealAutomationController.getWinProbability);
+router.get('/:id/health', (0, permission_1.requirePermission)('deals:health:view'), dealAutomation_controller_1.dealAutomationController.getHealth);
+router.get('/:id/risk', (0, permission_1.requirePermission)('deals:risk:view'), dealAutomation_controller_1.dealAutomationController.getRisk);
+router.get('/:id/recommendations', (0, permission_1.requirePermission)('deals:view'), dealAutomation_controller_1.dealAutomationController.getRecommendations);
+router.get('/:id/sla', (0, permission_1.requirePermission)('deals:view'), dealAutomation_controller_1.dealAutomationController.getSLA);
+router.get('/:id/playbooks', (0, permission_1.requirePermission)('deals:view'), dealAutomation_controller_1.dealAutomationController.getPlaybooks);
+router.get('/:id/followups', (0, permission_1.requirePermission)('deals:view'), dealAutomation_controller_1.dealAutomationController.getFollowups);
+router.post('/:id/followups', (0, permission_1.requirePermission)('deals:edit'), dealAutomation_controller_1.dealAutomationController.createFollowup);
+router.patch('/:id/lifecycle', (0, permission_1.requirePermission)('deals:edit'), dealAutomation_controller_1.dealAutomationController.updateLifecycle);
 exports.default = router;

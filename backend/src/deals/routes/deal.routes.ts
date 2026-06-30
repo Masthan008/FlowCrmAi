@@ -21,6 +21,7 @@ router.use(requireAuth);
 
 // --- ENTERPRISE SALES PIPELINE INTELLIGENCE ---
 import { dealPipelineController } from '../controller/dealPipeline.controller';
+import { dealAutomationController } from '../controller/dealAutomation.controller';
 
 // Pipeline CRUD
 router.get('/pipeline', requirePermission('deals:view'), dealPipelineController.listPipelines);
@@ -64,6 +65,12 @@ router.get('/performance', requirePermission('deals:view'), dealPipelineControll
 router.get('/pipeline-views', requirePermission('deals:view'), dealPipelineController.getViews);
 router.post('/pipeline-views', requirePermission('deals:create'), dealPipelineController.createView);
 router.delete('/pipeline-views/:viewId', requirePermission('deals:delete'), dealPipelineController.deleteView);
+
+// --- ENTERPRISE AUTOMATION & INTELLIGENCE ---
+router.get('/executive-insights', requirePermission('deals:insights:view'), dealAutomationController.getExecutiveInsights);
+router.get('/playbooks', requirePermission('deals:playbook:manage'), dealAutomationController.getPlaybooks);
+router.get('/workflows', requirePermission('deals:workflows:manage'), dealAutomationController.getWorkflows);
+router.post('/workflows', requirePermission('deals:workflows:manage'), dealAutomationController.createWorkflow);
 
 // Move Stage (drag & drop)
 router.patch('/:id/move-stage', requirePermission('deals:edit'), dealPipelineController.moveStage);
@@ -186,5 +193,17 @@ router.patch('/:id/checklist/:itemId', requirePermission('deals:edit'), dealWork
 
 router.get('/:id/negotiations', requirePermission('deals:view'), dealWorkspaceController.getNegotiations);
 router.post('/:id/negotiations', requirePermission('deals:edit'), dealWorkspaceController.createNegotiation);
+
+// --- DEAL INTELLIGENCE & SCORING ENDPOINTS ---
+router.get('/:id/score', requirePermission('deals:score:view'), dealAutomationController.getScore);
+router.get('/:id/win-probability', requirePermission('deals:view'), dealAutomationController.getWinProbability);
+router.get('/:id/health', requirePermission('deals:health:view'), dealAutomationController.getHealth);
+router.get('/:id/risk', requirePermission('deals:risk:view'), dealAutomationController.getRisk);
+router.get('/:id/recommendations', requirePermission('deals:view'), dealAutomationController.getRecommendations);
+router.get('/:id/sla', requirePermission('deals:view'), dealAutomationController.getSLA);
+router.get('/:id/playbooks', requirePermission('deals:view'), dealAutomationController.getPlaybooks);
+router.get('/:id/followups', requirePermission('deals:view'), dealAutomationController.getFollowups);
+router.post('/:id/followups', requirePermission('deals:edit'), dealAutomationController.createFollowup);
+router.patch('/:id/lifecycle', requirePermission('deals:edit'), dealAutomationController.updateLifecycle);
 
 export default router;

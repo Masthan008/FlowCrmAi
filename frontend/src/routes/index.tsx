@@ -14,6 +14,9 @@ import CompanyProfile from '../pages/companies/CompanyProfile';
 import Deals from '../pages/Deals';
 import { DealWorkspace } from '../pages/deals/DealWorkspace';
 import { SalesPipeline } from '../pages/deals/SalesPipeline';
+import { ExecutiveInsights } from '../pages/deals/ExecutiveInsights';
+import { WorkflowBuilder } from '../pages/deals/WorkflowBuilder';
+import { PlaybookManager } from '../pages/deals/PlaybookManager';
 import Activities from '../pages/Activities';
 import Calendar from '../pages/Calendar';
 import Tasks from '../pages/Tasks';
@@ -197,6 +200,36 @@ export const router = createBrowserRouter([
           <ProtectedRoute requiredPermission="deals:view">
             <ErrorBoundary>
               <SalesPipeline />
+            </ErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'deals/insights',
+        element: (
+          <ProtectedRoute requiredPermission="deals:view">
+            <ErrorBoundary>
+              <ExecutiveInsights />
+            </ErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'deals/workflows',
+        element: (
+          <ProtectedRoute requiredPermission="deals:view">
+            <ErrorBoundary>
+              <WorkflowBuilder />
+            </ErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'deals/playbooks',
+        element: (
+          <ProtectedRoute requiredPermission="deals:view">
+            <ErrorBoundary>
+              <PlaybookManager />
             </ErrorBoundary>
           </ProtectedRoute>
         ),

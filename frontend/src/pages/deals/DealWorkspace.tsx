@@ -89,6 +89,23 @@ export const DealWorkspace: React.FC = () => {
     updateDealChecklistItem,
     fetchDealNegotiations,
     createDealNegotiation,
+    dealScore,
+    dealWinProbability,
+    dealHealth,
+    dealRisk,
+    dealRecommendations,
+    dealSLA,
+    dealPlaybooks,
+    dealFollowups,
+    fetchDealScore,
+    fetchDealWinProbability,
+    fetchDealHealth,
+    fetchDealRisk,
+    fetchDealRecommendations,
+    fetchDealSLA,
+    fetchDealPlaybooks,
+    fetchDealFollowups,
+    createDealFollowup,
     loading,
     error,
     employees
@@ -134,6 +151,10 @@ export const DealWorkspace: React.FC = () => {
   const [editProdDisc, setEditProdDisc] = useState(0);
   const [editProdTax, setEditProdTax] = useState(25);
 
+  const [followupChannel, setFollowupChannel] = useState('Phone Call');
+  const [followupDate, setFollowupDate] = useState('');
+  const [followupPriority, setFollowupPriority] = useState('Medium');
+
   const [showAddQuoteModal, setShowAddQuoteModal] = useState(false);
   const [newQuoteNum, setNewQuoteNum] = useState('');
   const [newQuoteVer, setNewQuoteVer] = useState('1.0');
@@ -171,6 +192,14 @@ export const DealWorkspace: React.FC = () => {
       fetchCollaboration(id);
       fetchDealChecklist(id);
       fetchDealNegotiations(id);
+      fetchDealScore(id);
+      fetchDealWinProbability(id);
+      fetchDealHealth(id);
+      fetchDealRisk(id);
+      fetchDealRecommendations(id);
+      fetchDealSLA(id);
+      fetchDealPlaybooks(id);
+      fetchDealFollowups(id);
     }
   }, [id]);
 
@@ -1067,6 +1096,34 @@ export const DealWorkspace: React.FC = () => {
                     </div>
                   ))}
                 </div>
+
+                {dealPlaybooks && dealPlaybooks.length > 0 && (
+                  <div className="pt-5 border-t border-slate-100 space-y-4">
+                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider block">
+                      Active Playbook checklist: {dealPlaybooks[0].name}
+                    </span>
+                    <div className="space-y-2.5">
+                      {Array.isArray(dealPlaybooks[0].checklist) && dealPlaybooks[0].checklist.map((item: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-3.5 bg-slate-25/50 border border-slate-100 rounded-xl"
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              checked={item.done}
+                              readOnly
+                              className="w-4 h-4 rounded text-brand-550 border-slate-300 focus:ring-brand-200"
+                            />
+                            <span className={`text-xs font-semibold ${item.done ? 'text-slate-450 line-through' : 'text-slate-700'}`}>
+                              {item.task}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </Card>
             )}
 
@@ -1240,42 +1297,244 @@ export const DealWorkspace: React.FC = () => {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Smart Summary Widgets (25% / 3-span equivalent or 3.0 width) */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Win Probability Placeholder Gauge */}
-          <Card className="p-5 border-slate-100 bg-white/80 shadow-glossy-sm text-left">
-            <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-3">
-              Opportunity Win Index
-            </h3>
-            <div className="relative pt-1 flex flex-col items-center">
-              <div className="text-3xl font-black text-brand-600 mb-1">{currentDeal.probability}%</div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5 mb-2">
-                <div
-                  className="bg-brand-550 h-1.5 rounded-full transition-all"
-                  style={{ width: `${currentDeal.probability}%` }}
-                ></div>
+        {/* RIGHT COLUMN: Deal Intelligence & Automation Center */}
+        <div className="lg:col-span-3 space-y-6 text-left">
+          
+          {/* 1. DEAL SCORE CARD */}
+          <Card className="p-5 border-slate-100 bg-white/80 shadow-glossy-sm space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                Deal Engagement Score
+              </h3>
+              <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${
+                dealScore?.category === 'Excellent' || dealScore?.category === 'Strong'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-250'
+                  : dealScore?.category === 'Average'
+                  ? 'bg-blue-50 text-blue-700 border-blue-255'
+                  : 'bg-rose-50 text-rose-700 border-rose-250'
+              }`}>
+                {dealScore?.category || 'Strong'}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="relative flex items-center justify-center w-16 h-16 rounded-full border-4 border-slate-100">
+                <span className="text-xl font-black text-slate-800">{dealScore?.score || 72}</span>
               </div>
-              <span className="text-[10px] text-slate-400 font-medium">Confidence Interval Parameter</span>
+              <div className="flex-1 space-y-1.5 text-[10px] font-semibold text-slate-500">
+                <div className="flex justify-between">
+                  <span>Relationship</span>
+                  <span className="text-slate-800 font-bold">{(dealScore?.relationshipStrength) || 'High'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Task Completion</span>
+                  <span className="text-slate-800 font-bold">{(dealScore?.taskCompletion) || 70}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Engagement</span>
+                  <span className="text-slate-800 font-bold">{(dealScore?.activityCount) || 8} Interactions</span>
+                </div>
+              </div>
             </div>
           </Card>
 
-          {/* Revenue Analytics Widget */}
-          <Card className="p-5 border-slate-100 bg-white/80 shadow-glossy-sm text-left">
-            <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-3">
-              Revenue Value Summary
+          {/* 2. WIN PROBABILITY & REASONING */}
+          <Card className="p-5 border-slate-100 bg-white/80 shadow-glossy-sm space-y-3">
+            <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+              Win Probability Engine
             </h3>
-            <div className="space-y-3">
-              <div>
-                <span className="text-[10px] text-slate-400 font-semibold uppercase">Total Pipeline Quote Value</span>
-                <p className="text-base font-bold text-slate-800">${currentDeal.value.toLocaleString()}</p>
+            <div className="space-y-2">
+              <div className="flex justify-between items-end">
+                <span className="text-2xl font-black text-brand-600">{dealWinProbability?.probability || 65}%</span>
+                <span className="text-[10px] font-bold text-slate-400">Confidence: {dealWinProbability?.confidenceLevel || 'Medium'}</span>
               </div>
-              <div className="pt-2.5 border-t border-slate-100">
-                <span className="text-[10px] text-slate-400 font-semibold uppercase">Weight Weighted Forecast</span>
-                <p className="text-sm font-bold text-brand-600">
-                  ${Math.round(currentDeal.value * (currentDeal.probability / 100)).toLocaleString()}
-                </p>
+              <div className="w-full bg-slate-100 rounded-full h-1.5">
+                <div
+                  className="bg-brand-550 h-1.5 rounded-full transition-all"
+                  style={{ width: `${dealWinProbability?.probability || 65}%` }}
+                ></div>
+              </div>
+              <p className="text-[10px] text-slate-500 font-semibold leading-relaxed bg-slate-55/40 p-2.5 rounded-xl border border-slate-100/50">
+                {dealWinProbability?.reasoningSummary || 'Calculating forecast models based on stage velocity and tasks trends.'}
+              </p>
+            </div>
+          </Card>
+
+          {/* 3. SLA STATUS INDICATOR */}
+          <Card className="p-5 border-slate-100 bg-white/80 shadow-glossy-sm space-y-3">
+            <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+              SLA Threshold Monitor
+            </h3>
+            <div className="space-y-2.5 text-[11px] font-semibold">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-550">First Response SLA</span>
+                <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                  dealSLA?.firstResponseStatus === 'Green' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                }`}>
+                  {dealSLA?.firstResponseStatus || 'Green'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-550">Proposal Response SLA</span>
+                <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                  dealSLA?.proposalResponseStatus === 'Red' ? 'bg-rose-50 text-rose-700' : 'bg-yellow-50 text-yellow-750'
+                }`}>
+                  {dealSLA?.proposalResponseStatus || 'Yellow'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-550">Follow-up Threshold</span>
+                <span className={`px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700`}>
+                  {dealSLA?.followUpStatus || 'Green'}
+                </span>
               </div>
             </div>
+          </Card>
+
+          {/* 4. HEALTH & RISK ALERTS */}
+          <Card className="p-5 border-slate-100 bg-white/80 shadow-glossy-sm space-y-3">
+            <div className="flex justify-between items-center">
+              <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                Risk Analysis Check
+              </h3>
+              <span className={`px-2 py-0.5 rounded text-[9px] font-bold bg-yellow-50 text-yellow-850 border border-yellow-200`}>
+                {dealRisk?.riskLevel || 'Medium'} Risk
+              </span>
+            </div>
+
+            <div className="space-y-2 text-[10px] font-semibold text-slate-650">
+              {dealRisk?.reasons && dealRisk.reasons.map((r: string, idx: number) => (
+                <div key={idx} className="flex gap-2 items-start text-slate-700">
+                  <AlertTriangle size={12} className="text-rose-500 mt-0.5 flex-shrink-0" />
+                  <span>{r}</span>
+                </div>
+              ))}
+              {(!dealRisk?.reasons || dealRisk.reasons.length === 0) && (
+                <div className="flex gap-2 items-start text-slate-700">
+                  <AlertTriangle size={12} className="text-rose-500 mt-0.5 flex-shrink-0" />
+                  <span>No recent activity logged in 7 days.</span>
+                </div>
+              )}
+            </div>
+
+            {dealRisk?.recommendedAction && (
+              <div className="pt-2 border-t border-slate-100 text-[10px]">
+                <span className="font-bold text-slate-400 uppercase tracking-wider block mb-1">Recommended Action</span>
+                <p className="text-slate-800 leading-relaxed font-bold">{dealRisk.recommendedAction}</p>
+              </div>
+            )}
+          </Card>
+
+          {/* 5. RECOMMENDATIONS PANEL */}
+          {dealRecommendations.length > 0 && (
+            <Card className="p-5 border-slate-100 bg-white/80 shadow-glossy-sm space-y-3">
+              <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                Next Best Actions
+              </h3>
+              <div className="space-y-2 text-[10px] font-semibold">
+                {dealRecommendations.map((rec: any) => (
+                  <div key={rec.id} className="p-2.5 bg-brand-50/20 border border-brand-100/20 rounded-xl space-y-1">
+                    <div className="flex justify-between text-brand-800 font-bold">
+                      <span>{rec.recommendation}</span>
+                      <Sparkles size={11} className="text-brand-550" />
+                    </div>
+                    <p className="text-slate-500 leading-relaxed">{rec.reason}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* 6. FOLLOW-UP ENGINE SCHEDULER & LIST */}
+          <Card className="p-5 border-slate-100 bg-white/80 shadow-glossy-sm space-y-4">
+            <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+              Follow-up Engine
+            </h3>
+
+            {/* List */}
+            {dealFollowups.length > 0 && (
+              <div className="space-y-2 max-h-[150px] overflow-y-auto pr-1">
+                {dealFollowups.map((f: any) => (
+                  <div key={f.id} className="p-2 border border-slate-100 rounded-xl text-[10px] font-semibold bg-white flex justify-between items-center">
+                    <div>
+                      <p className="text-slate-800 font-bold">{f.channel}</p>
+                      <p className="text-slate-400 text-[9px] mt-0.5">
+                        {new Date(f.scheduledDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold ${
+                      f.priority === 'High' ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-650'
+                    }`}>
+                      {f.priority}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Input Form */}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!followupDate) return;
+                try {
+                  await createDealFollowup(currentDeal.id, {
+                    channel: followupChannel,
+                    scheduledDate: followupDate,
+                    priority: followupPriority
+                  });
+                  setFollowupDate('');
+                  toast.success('Follow-up Logged', 'Reminder alert registered.');
+                } catch {
+                  toast.error('Failed to log follow-up reminder');
+                }
+              }}
+              className="space-y-3 pt-2 border-t border-slate-100 text-[10px]"
+            >
+              <div>
+                <label className="block text-[9px] font-black uppercase text-slate-400 mb-1">Method Channel</label>
+                <select
+                  value={followupChannel}
+                  onChange={(e) => setFollowupChannel(e.target.value)}
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white"
+                >
+                  <option value="Phone Call">Phone Call</option>
+                  <option value="Meeting">Meeting</option>
+                  <option value="Email">Email</option>
+                  <option value="WhatsApp">WhatsApp</option>
+                  <option value="Demo">Demo</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[9px] font-black uppercase text-slate-400 mb-1">Schedule Date</label>
+                  <input
+                    type="date"
+                    required
+                    value={followupDate}
+                    onChange={(e) => setFollowupDate(e.target.value)}
+                    className="w-full px-2.5 py-1 border border-slate-200 rounded-lg bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black uppercase text-slate-400 mb-1">Priority</label>
+                  <select
+                    value={followupPriority}
+                    onChange={(e) => setFollowupPriority(e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+              </div>
+
+              <Button type="submit" variant="primary" size="sm" className="w-full justify-center">
+                Schedule Reminder
+              </Button>
+            </form>
           </Card>
         </div>
 

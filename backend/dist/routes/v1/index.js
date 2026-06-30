@@ -15,6 +15,9 @@ const contact_routes_1 = __importDefault(require("../../contacts/routes/contact.
 const company_routes_1 = __importDefault(require("../../companies/routes/company.routes"));
 const companyIntelligence_routes_1 = __importDefault(require("../../companies/routes/companyIntelligence.routes"));
 const deal_routes_1 = __importDefault(require("../../deals/routes/deal.routes"));
+const dealAutomation_controller_1 = require("../../deals/controller/dealAutomation.controller");
+const auth_2 = require("../../middlewares/auth");
+const permission_1 = require("../../middlewares/permission");
 const router = (0, express_1.Router)();
 // Health check endpoint
 router.get('/health', async (req, res) => {
@@ -44,6 +47,8 @@ router.use('/contacts', contact_routes_1.default);
 router.use('/companies', company_routes_1.default);
 router.use('/companies', companyIntelligence_routes_1.default);
 router.use('/deals', deal_routes_1.default);
+router.get('/deal-workflows', auth_2.requireAuth, (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.getWorkflows);
+router.post('/deal-workflows', auth_2.requireAuth, (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.createWorkflow);
 // Generate placeholder routers for all remaining CRM infrastructure modules
 const placeholderModules = [
     'users',

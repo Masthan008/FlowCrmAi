@@ -10,6 +10,9 @@ import contactRouter from '../../contacts/routes/contact.routes';
 import companyRouter from '../../companies/routes/company.routes';
 import companyIntelligenceRouter from '../../companies/routes/companyIntelligence.routes';
 import dealRouter from '../../deals/routes/deal.routes';
+import { dealAutomationController } from '../../deals/controller/dealAutomation.controller';
+import { requireAuth } from '../../middlewares/auth';
+import { requirePermission } from '../../middlewares/permission';
 
 const router = Router();
 
@@ -42,6 +45,9 @@ router.use('/contacts', contactRouter);
 router.use('/companies', companyRouter);
 router.use('/companies', companyIntelligenceRouter);
 router.use('/deals', dealRouter);
+
+router.get('/deal-workflows', requireAuth, requirePermission('deals:workflows:manage'), dealAutomationController.getWorkflows);
+router.post('/deal-workflows', requireAuth, requirePermission('deals:workflows:manage'), dealAutomationController.createWorkflow);
 
 // Generate placeholder routers for all remaining CRM infrastructure modules
 const placeholderModules = [

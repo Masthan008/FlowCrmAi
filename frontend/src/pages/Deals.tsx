@@ -518,6 +518,15 @@ export const Deals: React.FC = () => {
           <p className="text-sm text-slate-400 mt-0.5">Manage sales opportunities and pipeline revenue</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/deals/insights')} className="flex items-center gap-1.5 border-slate-200">
+            <BarChart3 size={14} className="text-indigo-500" /> Executive Insights
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/deals/workflows')} className="flex items-center gap-1.5 border-slate-200">
+            <TrendingUp size={14} className="text-emerald-500" /> Workflows
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/deals/playbooks')} className="flex items-center gap-1.5 border-slate-200">
+            <Briefcase size={14} className="text-amber-500" /> Playbooks
+          </Button>
           <Button variant="outline" size="sm" onClick={() => navigate('/deals/pipeline')} className="flex items-center gap-1.5 border-slate-200">
             <Kanban size={14} className="text-brand-550" /> Pipeline Board
           </Button>
