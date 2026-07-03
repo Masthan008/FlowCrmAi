@@ -27,6 +27,7 @@ import TagsTab from './components/TagsTab';
 import WorkflowsTab from './components/WorkflowsTab';
 import RecommendationsTab from './components/RecommendationsTab';
 import FollowupsTab from './components/FollowupsTab';
+import CompanyKYCTab from './components/CompanyKYCTab';
 import { useToast } from '../../components/ui/ToastProvider';
 import { Button } from '../../components/ui/Button';
 import { Breadcrumb } from '../../components/ui/Breadcrumb';
@@ -516,6 +517,7 @@ export const CompanyProfile: React.FC = () => {
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
+    { id: 'kyc', label: 'KYC Hub' },
     { id: 'timeline', label: 'Timeline' },
     { id: 'activities', label: 'Activities' },
     { id: 'notes', label: 'Notes' },
@@ -1346,6 +1348,9 @@ export const CompanyProfile: React.FC = () => {
 
             {/* FOLLOWUPS TAB */}
             {selectedTab === 'followups' && <FollowupsTab companyId={id!} />}
+
+            {/* KYC COMPLIANCE HUB TAB */}
+            {selectedTab === 'kyc' && <CompanyKYCTab companyId={id!} />}
           </div>
         </div>
       </div>

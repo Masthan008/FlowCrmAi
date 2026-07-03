@@ -67,6 +67,11 @@ export const companyApi = {
   deleteFollowup: (id: string, followupId: string) => api.delete(`${COMPANIES_URL}/${id}/followups/${followupId}`),
   getInsights: () => api.get('/company-insights'),
   getAnalytics: (params?: any) => api.get('/company-analytics', { params }),
+
+  // CVR Registry & KYC Compliance
+  searchCVR: (query: string) => api.get(`${COMPANIES_URL}/cvr/lookup`, { params: { query } }),
+  getKYC: (id: string) => api.get(`${COMPANIES_URL}/${id}/kyc`),
+  updateKYC: (id: string, data: any) => api.post(`${COMPANIES_URL}/${id}/kyc`, data),
 };
 
 export default companyApi;

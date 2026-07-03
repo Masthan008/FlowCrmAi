@@ -82,7 +82,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Dashboard', icon: <LayoutDashboard size={18} />, path: '/' },
     { label: 'Leads', icon: <Users2 size={18} />, path: '/leads', requiredPermission: 'leads:view' },
     { label: 'Contacts', icon: <Contact2 size={18} />, path: '/contacts', requiredPermission: 'contacts:view' },
-    { label: 'Companies', icon: <Building2 size={18} />, path: '/companies', requiredPermission: 'companies:view' },
+    { label: 'Accounts (KYC/CVR)', icon: <Building2 size={18} />, path: '/companies', requiredPermission: 'companies:view' },
     { label: 'Deals', icon: <Briefcase size={18} />, path: '/deals', requiredPermission: 'deals:view' },
     { label: 'Activities', icon: <Activity size={18} />, path: '/activities' },
     { label: 'Calendar', icon: <Calendar size={18} />, path: '/calendar' },

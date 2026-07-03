@@ -12,6 +12,7 @@ import { businessNetworkController } from '../controller/businessNetwork.control
 import { revenueController } from '../controller/revenue.controller';
 import { customerJourneyController } from '../controller/customerJourney.controller';
 import { companyRelatedDataController } from '../controller/companyRelatedData.controller';
+import { companyKYCController } from '../controllers/companyKYC.controller';
 import { requireAuth } from '../../middlewares/auth';
 import { requirePermission } from '../../middlewares/permission';
 import { validateRequest } from '../../middlewares/validate';
@@ -43,9 +44,12 @@ router.use(requireAuth);
 
 router.get('/statistics', requirePermission('companies:view'), companyController.getStatistics);
 router.get('/employees', requirePermission('companies:view'), companyController.getEmployees);
+router.get('/cvr/lookup', requirePermission('companies:view'), companyKYCController.searchCVR);
 
 router.get('/', requirePermission('companies:view'), validateRequest(listCompaniesSchema), companyController.list);
 router.get('/:id', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), companyController.getById);
+router.get('/:id/kyc', requirePermission('companies:view'), companyKYCController.getKYC);
+router.post('/:id/kyc', requirePermission('companies:edit'), companyKYCController.updateKYC);
 router.post('/', requirePermission('companies:create'), validateRequest(createCompanySchema), logActivity('companies', 'COMPANY_CREATED'), companyController.create);
 router.put('/:id', requirePermission('companies:edit'), validateRequest(updateCompanySchema), logActivity('companies', 'COMPANY_UPDATED'), companyController.update);
 router.delete('/:id', requirePermission('companies:delete'), validateRequest(getCompanyByIdSchema), logActivity('companies', 'COMPANY_DELETED'), companyController.delete);

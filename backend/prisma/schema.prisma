@@ -244,6 +244,7 @@ model Company {
   parentCompanyId String?    @db.Uuid
   description     String?    @db.Text
   tags            String[]   @default([])
+  cvrVerified     Boolean    @default(false)
 
   // Communication Preferences
   preferredContactMethod String?  @default("email")
@@ -287,6 +288,7 @@ model Company {
   workflows        CompanyWorkflow[]
   recommendations CompanyRecommendation[]
   followups        CompanyFollowup[]
+  kyc              CompanyKYC?
 
   // Auditing
   createdBy   String?
@@ -4000,3 +4002,32 @@ model DealFollowup {
   @@index([dealId])
   @@map("deal_followups")
 }
+
+// 105. COMPANY KYC COMPLIANCE
+model CompanyKYC {
+  id               String    @id @default(uuid()) @db.Uuid
+  companyId        String    @db.Uuid @unique
+  company          Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  status           String    @default("Pending") // Pending, In Progress, Verified, Rejected, Expired
+  riskRating       String    @default("Low") // Low, Medium, High, Critical
+  verificationType String    @default("Standard") // Standard, Enhanced, Simplified
+  notes            String?   @db.Text
+  documents        Json      @default("[]") // [{ id, name, type, key, url, uploadedAt, status }]
+  checklist        Json      @default("[]") // [{ id, name, passed, checkedAt }]
+  verifiedAt       DateTime?
+  verifiedBy       String?
+  expiryDate       DateTime?
+  history          Json      @default("[]") // audit trail history
+
+  // Auditing
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("company_kycs")
+}
+

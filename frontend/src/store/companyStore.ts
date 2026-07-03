@@ -138,6 +138,8 @@ interface CompanyState {
   followups: CompanyFollowup[];
   insights: BusinessInsights | null;
   analytics: CompanyAnalytics | null;
+  kyc: any | null;
+  cvrSearchResults: any[];
 
   fetchLifecycle: (id: string) => Promise<void>;
   updateLifecycle: (id: string, data: any) => Promise<void>;
@@ -172,6 +174,9 @@ interface CompanyState {
   deleteFollowup: (id: string, followupId: string) => Promise<void>;
   fetchInsights: () => Promise<void>;
   fetchAnalytics: (params?: any) => Promise<void>;
+  fetchKYC: (companyId: string) => Promise<void>;
+  updateKYC: (companyId: string, data: any) => Promise<void>;
+  searchCVR: (query: string) => Promise<any[]>;
 }
 
 export const useCompanyStore = create<CompanyState>((set, get) => ({
@@ -616,5 +621,31 @@ export const useCompanyStore = create<CompanyState>((set, get) => ({
 
   fetchAnalytics: async (params) => {
     try { const res = await companyApi.getAnalytics(params); set({ analytics: res.data.data }); } catch (_) {}
+  },
+
+  fetchKYC: async (companyId: string) => {
+    try {
+      const res = await companyApi.getKYC(companyId);
+      set({ kyc: res.data.data });
+    } catch (_) {}
+  },
+
+  updateKYC: async (companyId: string, data: any) => {
+    try {
+      const res = await companyApi.updateKYC(companyId, data);
+      set({ kyc: res.data.data });
+      get().fetchCompany(companyId);
+    } catch (_) {}
+  },
+
+  searchCVR: async (query: string) => {
+    try {
+      const res = await companyApi.searchCVR(query);
+      const results = res.data.data || [];
+      set({ cvrSearchResults: results });
+      return results;
+    } catch (_) {
+      return [];
+    }
   },
 }));
