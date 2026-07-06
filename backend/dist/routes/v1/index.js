@@ -18,6 +18,10 @@ const deal_routes_1 = __importDefault(require("../../deals/routes/deal.routes"))
 const dealAutomation_controller_1 = require("../../deals/controller/dealAutomation.controller");
 const auth_2 = require("../../middlewares/auth");
 const permission_1 = require("../../middlewares/permission");
+const product_routes_1 = __importDefault(require("../../products/routes/product.routes"));
+const meeting_routes_1 = __importDefault(require("../../meetings/routes/meeting.routes"));
+const quote_routes_1 = __importDefault(require("../../quotes/routes/quote.routes"));
+const invoice_routes_1 = __importDefault(require("../../invoices/routes/invoice.routes"));
 const router = (0, express_1.Router)();
 // Health check endpoint
 router.get('/health', async (req, res) => {
@@ -47,6 +51,10 @@ router.use('/contacts', contact_routes_1.default);
 router.use('/companies', companyIntelligence_routes_1.default);
 router.use('/companies', company_routes_1.default);
 router.use('/deals', deal_routes_1.default);
+router.use('/products', product_routes_1.default);
+router.use('/meetings', meeting_routes_1.default);
+router.use('/quotes', quote_routes_1.default);
+router.use('/invoices', invoice_routes_1.default);
 router.get('/deal-workflows', auth_2.requireAuth, (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.getWorkflows);
 router.post('/deal-workflows', auth_2.requireAuth, (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.createWorkflow);
 // Generate placeholder routers for all remaining CRM infrastructure modules
@@ -57,10 +65,6 @@ const placeholderModules = [
     'customers',
     'activities',
     'calendar',
-    'meetings',
-    'products',
-    'quotes',
-    'invoices',
     'payments',
     'notifications',
     'reports',

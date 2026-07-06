@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const quote_controller_1 = require("../controller/quote.controller");
+const auth_1 = require("../../middlewares/auth");
+const permission_1 = require("../../middlewares/permission");
+const validate_1 = require("../../middlewares/validate");
+const quote_validator_1 = require("../validators/quote.validator");
+const router = (0, express_1.Router)();
+router.use(auth_1.requireAuth);
+router.get('/', (0, permission_1.requirePermission)('quotes:view'), quote_controller_1.quoteController.list);
+router.get('/:id', (0, permission_1.requirePermission)('quotes:view'), quote_controller_1.quoteController.getById);
+router.post('/', (0, permission_1.requirePermission)('quotes:create'), (0, validate_1.validateRequest)(quote_validator_1.createQuoteSchema), quote_controller_1.quoteController.create);
+router.put('/:id', (0, permission_1.requirePermission)('quotes:edit'), (0, validate_1.validateRequest)(quote_validator_1.updateQuoteSchema), quote_controller_1.quoteController.update);
+router.delete('/:id', (0, permission_1.requirePermission)('quotes:delete'), quote_controller_1.quoteController.delete);
+exports.default = router;

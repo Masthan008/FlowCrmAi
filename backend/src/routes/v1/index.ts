@@ -13,6 +13,10 @@ import dealRouter from '../../deals/routes/deal.routes';
 import { dealAutomationController } from '../../deals/controller/dealAutomation.controller';
 import { requireAuth } from '../../middlewares/auth';
 import { requirePermission } from '../../middlewares/permission';
+import productRouter from '../../products/routes/product.routes';
+import meetingRouter from '../../meetings/routes/meeting.routes';
+import quoteRouter from '../../quotes/routes/quote.routes';
+import invoiceRouter from '../../invoices/routes/invoice.routes';
 
 const router = Router();
 
@@ -46,6 +50,11 @@ router.use('/companies', companyIntelligenceRouter);
 router.use('/companies', companyRouter);
 router.use('/deals', dealRouter);
 
+router.use('/products', productRouter);
+router.use('/meetings', meetingRouter);
+router.use('/quotes', quoteRouter);
+router.use('/invoices', invoiceRouter);
+
 router.get('/deal-workflows', requireAuth, requirePermission('deals:workflows:manage'), dealAutomationController.getWorkflows);
 router.post('/deal-workflows', requireAuth, requirePermission('deals:workflows:manage'), dealAutomationController.createWorkflow);
 
@@ -57,10 +66,6 @@ const placeholderModules = [
   'customers',
   'activities',
   'calendar',
-  'meetings',
-  'products',
-  'quotes',
-  'invoices',
   'payments',
   'notifications',
   'reports',
