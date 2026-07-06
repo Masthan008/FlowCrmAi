@@ -86,12 +86,16 @@ flowcrm-ai-enterprise/
 - **Leads Management** -- Full CRUD, soft delete, sources/statuses master data, search/filter/sort, pagination, bulk operations (update, archive, restore), duplicate merge, CSV import/export, saved views, assignment (manual/round-robin/load-based), lead scoring, health/SLA tracking, workflow automation, approval flows, 360 workspace (notes, activities, files, timeline, history)
 - **Contacts Management** -- Full CRUD, soft delete, rich profile with multi-channel communication, relationship mapping, customer journey tracking, engagement scoring, business/health metrics, communication logs
 - **Tasks Management** -- Full CRUD, Kanban board, priorities, subtasks, checklists, comments, file attachments, time tracking, watchers, dependencies, recurrence, approval workflow, calendar view, productivity analytics
-- **Company Management** -- Full CRUD, soft delete, company hierarchy (unlimited parent/child/subsidiary levels), organization tree, branch management (Head Office, Regional Office, Franchise, Business Unit), department management (Sales, Marketing, Finance, HR, Support, IT, Operations, Legal, Custom), primary contacts directory, business network (Partners, Suppliers, Distributors, Resellers, Affiliates, Strategic Alliances), revenue dashboard (annual/monthly/quarterly revenue, pipeline value, outstanding/paid amounts, deal/invoice/payment metrics), customer journey timeline (Lead Created to Payment Received and beyond), 360° workspace (timeline, activities, notes, files, meetings, tasks, communications, audit history)
+- **Accounts (KYC & CVR Engine)** -- Core Account directories, parent-child hierarchies, Central Business Register (CVR) Scandinavian corporate lookup & imports, and Know Your Customer (KYC) compliance portals featuring verification checklist audits, risk profiles, document attachments, and history auditing.
 - **Company 360° Workspace** -- Timeline events, activity CRUD with type/priority/status, notes with pinning, file upload/download, meetings, tasks, communications, full audit history with field-level change tracking
+- **Meetings & Calendar Scheduler** -- Complete native backend CRUD, organizer/customer scheduler validations, and datetime alignment checks.
+- **Product Catalog** -- Categories listing and Product database CRUD featuring price restrictions and unique SKU checks.
+- **Quote Management** -- Summing engine calculating subtotals, tax rates, and discount deductions. Nested quote items transactional write operations.
+- **Invoice & Payments Engine** -- Dynamic balance recalculations and status adjustments (marking unpaid, partially paid, or paid based on completed payment logs).
 
 ### Placeholder / Coming Soon
 
-Users, Roles, Permissions, Customers, Deals, Activities, Calendar, Meetings, Products, Quotes, Invoices, Payments, Notifications, Reports, Analytics, Settings
+Users, Roles, Permissions, Customers, Deals, Activities, Calendar, Notifications, Reports, Analytics, Settings
 
 ## Architecture
 
@@ -142,6 +146,10 @@ Standardized JSON response format across all endpoints:
 - `GET|POST|PUT|DELETE /companies/:id/business-network/*` -- Business network management
 - `GET|POST|DELETE /companies/:id/customer-journey/*` -- Customer journey milestones
 - `GET /companies/:id/timeline`, `/activities`, `/notes`, `/files`, `/history` -- 360° workspace
+- `GET|POST|PUT|DELETE /products/*` -- Products catalog CRUD & categories list
+- `GET|POST|PUT|DELETE /meetings/*` -- Scheduled calendar meetings
+- `GET|POST|PUT|DELETE /quotes/*` -- Sales quote calculations and state CRUD
+- `GET|POST|PUT|DELETE /invoices/*` -- Billing invoices, payments logs, and balances recalculator
 
 ## Prerequisites
 
