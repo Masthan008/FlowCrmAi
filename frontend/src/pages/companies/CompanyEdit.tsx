@@ -5,7 +5,7 @@ import { useToast } from '../../components/ui/ToastProvider';
 import { Button } from '../../components/ui/Button';
 import { Breadcrumb } from '../../components/ui/Breadcrumb';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, AlertCircle, ArrowLeft as ArrowLeftIcon } from 'lucide-react';
 import { COMPANY_STATUSES, COMPANY_TYPES, COMPANY_PRIORITIES } from '../../types/company';
 
 export const CompanyEdit: React.FC = () => {
@@ -17,6 +17,7 @@ export const CompanyEdit: React.FC = () => {
   const [formData, setFormData] = useState<any>({});
   const [tagInput, setTagInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (id) {
@@ -33,6 +34,13 @@ export const CompanyEdit: React.FC = () => {
 
   const handleChange = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
+    if (formErrors[field]) {
+      setFormErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[field];
+        return copy;
+      });
+    }
   };
 
   const addTag = () => {
@@ -50,24 +58,104 @@ export const CompanyEdit: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
+
+    // Validate fields locally
+    const errors: Record<string, string> = {};
+    if (!formData.name || formData.name.trim() === '') {
+      errors.name = 'Company name is required';
+    }
+
+    const exactPhoneRegex = /^\d{10}$/;
+    const textOnlyRegex = /^[A-Za-z\s]*$/;
+    const timezoneRegex = /^(UTC|GMT|[A-Za-z_]+\/[A-Za-z_]+)$/;
+    const currencyRegex = /^[A-Z]{3}$/;
+    const langRegex = /^[a-z]{2}$/;
+
+    if (formData.industry && !textOnlyRegex.test(formData.industry)) {
+      errors.industry = 'Industry must contain only letters';
+    }
+    if (formData.subIndustry && !textOnlyRegex.test(formData.subIndustry)) {
+      errors.subIndustry = 'Sub Industry must contain only letters';
+    }
+    if (formData.businessCategory && !textOnlyRegex.test(formData.businessCategory)) {
+      errors.businessCategory = 'Business Category must contain only letters';
+    }
+    if (formData.ownershipType && !textOnlyRegex.test(formData.ownershipType)) {
+      errors.ownershipType = 'Ownership Type must contain only letters';
+    }
+    if (formData.primaryPhone && !exactPhoneRegex.test(formData.primaryPhone)) {
+      errors.primaryPhone = 'Primary Phone must be exactly 10 digits';
+    }
+    if (formData.secondaryPhone && !exactPhoneRegex.test(formData.secondaryPhone)) {
+      errors.secondaryPhone = 'Secondary Phone must be exactly 10 digits';
+    }
+    if (formData.whatsApp && !exactPhoneRegex.test(formData.whatsApp)) {
+      errors.whatsApp = 'WhatsApp must be exactly 10 digits';
+    }
+    if (formData.currency && !currencyRegex.test(formData.currency)) {
+      errors.currency = 'Currency must be 3-letter uppercase (e.g. USD)';
+    }
+    if (formData.timezone && !timezoneRegex.test(formData.timezone)) {
+      errors.timezone = 'Timezone must be valid (e.g. UTC, Europe/Copenhagen)';
+    }
+    if (formData.primaryLanguage && !langRegex.test(formData.primaryLanguage)) {
+      errors.primaryLanguage = 'Primary Language must be 2-letter lowercase (e.g. en, da)';
+    }
+
+    if (formData.website && formData.website !== '') {
+      try {
+        new URL(formData.website);
+      } catch {
+        errors.website = 'Invalid website URL (must start with http:// or https://)';
+      }
+    }
+
+    if (formData.logo && formData.logo !== '') {
+      try {
+        new URL(formData.logo);
+      } catch {
+        errors.logo = 'Invalid logo URL (must start with http:// or https://)';
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      toast.error('Validation Error', 'Please check for invalid inputs before saving.');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const payload = { ...formData };
-      delete payload.id;
-      delete payload.companyNumber;
-      delete payload.createdAt;
-      delete payload.updatedAt;
-      delete payload.deletedAt;
-      delete payload.version;
-      delete payload.createdBy;
-      delete payload.updatedBy;
-      delete payload.owner;
-      delete payload.parentCompany;
+      // Pick allowed keys to strip out unexpected relation properties
+      const allowedKeys = [
+        'name', 'legalName', 'displayName', 'logo', 'companyType', 'industry',
+        'subIndustry', 'businessCategory', 'website', 'primaryEmail', 'secondaryEmail',
+        'primaryPhone', 'secondaryPhone', 'whatsApp', 'gstNumber', 'taxNumber',
+        'registrationNumber', 'panNumber', 'foundedYear', 'annualRevenue', 'employeeCount',
+        'ownershipType', 'currency', 'timezone', 'primaryLanguage', 'country', 'state',
+        'city', 'postalCode', 'addressLine1', 'addressLine2', 'billingAddress',
+        'shippingAddress', 'status', 'priority', 'rating', 'ownerId', 'parentCompanyId',
+        'description', 'tags'
+      ];
+
+      const payload: any = {};
+      allowedKeys.forEach((key) => {
+        if (formData[key] !== undefined) {
+          payload[key] = formData[key] === '' ? null : formData[key];
+        }
+      });
 
       await updateCompany(id, payload);
       toast.success('Company Updated', 'Company record has been updated.');
       navigate(`/companies/${id}`);
     } catch (err: any) {
+      if (err?.response?.data?.errors) {
+        const backendErrors: Record<string, string> = {};
+        err.response.data.errors.forEach((e: any) => {
+          backendErrors[e.field] = e.message;
+        });
+        setFormErrors(backendErrors);
+      }
       toast.error('Update Failed', err?.response?.data?.message || 'Failed to update company.');
     } finally {
       setSubmitting(false);
@@ -98,7 +186,7 @@ export const CompanyEdit: React.FC = () => {
   const labelClass = 'text-[10px] font-bold text-slate-500 uppercase block mb-1';
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-4xl mx-auto text-left">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-2">
           <Breadcrumb items={[
@@ -120,14 +208,17 @@ export const CompanyEdit: React.FC = () => {
             <div className="space-y-1">
               <label className={labelClass}>Company Name *</label>
               <input value={formData.name || ''} onChange={(e) => handleChange('name', e.target.value)} className={inputClass} />
+              {formErrors.name && <p className="text-[10px] text-rose-500 font-medium">{formErrors.name}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Legal Name</label>
               <input value={formData.legalName || ''} onChange={(e) => handleChange('legalName', e.target.value)} className={inputClass} />
+              {formErrors.legalName && <p className="text-[10px] text-rose-500 font-medium">{formErrors.legalName}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Display Name</label>
               <input value={formData.displayName || ''} onChange={(e) => handleChange('displayName', e.target.value)} className={inputClass} />
+              {formErrors.displayName && <p className="text-[10px] text-rose-500 font-medium">{formErrors.displayName}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Company Type</label>
@@ -135,38 +226,52 @@ export const CompanyEdit: React.FC = () => {
                 <option value="">Select...</option>
                 {COMPANY_TYPES.map((t) => (<option key={t} value={t}>{t}</option>))}
               </select>
+              {formErrors.companyType && <p className="text-[10px] text-rose-500 font-medium">{formErrors.companyType}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Website</label>
               <input value={formData.website || ''} onChange={(e) => handleChange('website', e.target.value)} className={inputClass} />
+              {formErrors.website && <p className="text-[10px] text-rose-500 font-medium">{formErrors.website}</p>}
+            </div>
+            <div className="space-y-1">
+              <label className={labelClass}>Logo URL</label>
+              <input value={formData.logo || ''} onChange={(e) => handleChange('logo', e.target.value)} className={inputClass} />
+              {formErrors.logo && <p className="text-[10px] text-rose-500 font-medium">{formErrors.logo}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Industry</label>
               <input value={formData.industry || ''} onChange={(e) => handleChange('industry', e.target.value)} className={inputClass} />
+              {formErrors.industry && <p className="text-[10px] text-rose-500 font-medium">{formErrors.industry}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Sub Industry</label>
               <input value={formData.subIndustry || ''} onChange={(e) => handleChange('subIndustry', e.target.value)} className={inputClass} />
+              {formErrors.subIndustry && <p className="text-[10px] text-rose-500 font-medium">{formErrors.subIndustry}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Business Category</label>
               <input value={formData.businessCategory || ''} onChange={(e) => handleChange('businessCategory', e.target.value)} className={inputClass} />
+              {formErrors.businessCategory && <p className="text-[10px] text-rose-500 font-medium">{formErrors.businessCategory}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Founded Year</label>
               <input type="number" value={formData.foundedYear || ''} onChange={(e) => handleChange('foundedYear', e.target.value ? Number(e.target.value) : null)} className={inputClass} />
+              {formErrors.foundedYear && <p className="text-[10px] text-rose-500 font-medium">{formErrors.foundedYear}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Annual Revenue (USD)</label>
               <input type="number" value={formData.annualRevenue || ''} onChange={(e) => handleChange('annualRevenue', e.target.value ? Number(e.target.value) : null)} className={inputClass} />
+              {formErrors.annualRevenue && <p className="text-[10px] text-rose-500 font-medium">{formErrors.annualRevenue}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Employee Count</label>
               <input type="number" value={formData.employeeCount || ''} onChange={(e) => handleChange('employeeCount', e.target.value ? Number(e.target.value) : null)} className={inputClass} />
+              {formErrors.employeeCount && <p className="text-[10px] text-rose-500 font-medium">{formErrors.employeeCount}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Ownership Type</label>
               <input value={formData.ownershipType || ''} onChange={(e) => handleChange('ownershipType', e.target.value)} className={inputClass} />
+              {formErrors.ownershipType && <p className="text-[10px] text-rose-500 font-medium">{formErrors.ownershipType}</p>}
             </div>
           </div>
         </div>
@@ -177,22 +282,27 @@ export const CompanyEdit: React.FC = () => {
             <div className="space-y-1">
               <label className={labelClass}>Primary Email</label>
               <input value={formData.primaryEmail || ''} onChange={(e) => handleChange('primaryEmail', e.target.value)} className={inputClass} />
+              {formErrors.primaryEmail && <p className="text-[10px] text-rose-500 font-medium">{formErrors.primaryEmail}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Secondary Email</label>
               <input value={formData.secondaryEmail || ''} onChange={(e) => handleChange('secondaryEmail', e.target.value)} className={inputClass} />
+              {formErrors.secondaryEmail && <p className="text-[10px] text-rose-500 font-medium">{formErrors.secondaryEmail}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Primary Phone</label>
               <input value={formData.primaryPhone || ''} onChange={(e) => handleChange('primaryPhone', e.target.value)} className={inputClass} />
+              {formErrors.primaryPhone && <p className="text-[10px] text-rose-500 font-medium">{formErrors.primaryPhone}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Secondary Phone</label>
               <input value={formData.secondaryPhone || ''} onChange={(e) => handleChange('secondaryPhone', e.target.value)} className={inputClass} />
+              {formErrors.secondaryPhone && <p className="text-[10px] text-rose-500 font-medium">{formErrors.secondaryPhone}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>WhatsApp</label>
               <input value={formData.whatsApp || ''} onChange={(e) => handleChange('whatsApp', e.target.value)} className={inputClass} />
+              {formErrors.whatsApp && <p className="text-[10px] text-rose-500 font-medium">{formErrors.whatsApp}</p>}
             </div>
           </div>
         </div>
@@ -279,14 +389,17 @@ export const CompanyEdit: React.FC = () => {
             <div className="space-y-1">
               <label className={labelClass}>Currency</label>
               <input value={formData.currency || 'USD'} onChange={(e) => handleChange('currency', e.target.value)} className={inputClass} />
+              {formErrors.currency && <p className="text-[10px] text-rose-500 font-medium">{formErrors.currency}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Timezone</label>
               <input value={formData.timezone || 'UTC'} onChange={(e) => handleChange('timezone', e.target.value)} className={inputClass} />
+              {formErrors.timezone && <p className="text-[10px] text-rose-500 font-medium">{formErrors.timezone}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Language</label>
               <input value={formData.primaryLanguage || 'en'} onChange={(e) => handleChange('primaryLanguage', e.target.value)} className={inputClass} />
+              {formErrors.primaryLanguage && <p className="text-[10px] text-rose-500 font-medium">{formErrors.primaryLanguage}</p>}
             </div>
           </div>
           <div className="mt-4 space-y-1">

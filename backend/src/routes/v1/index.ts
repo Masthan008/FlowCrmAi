@@ -42,8 +42,8 @@ router.use('/dashboard', dashboardRouter);
 router.use('/leads', leadRouter);
 router.use('/tasks', taskRouter);
 router.use('/contacts', contactRouter);
-router.use('/companies', companyRouter);
 router.use('/companies', companyIntelligenceRouter);
+router.use('/companies', companyRouter);
 router.use('/deals', dealRouter);
 
 router.get('/deal-workflows', requireAuth, requirePermission('deals:workflows:manage'), dealAutomationController.getWorkflows);

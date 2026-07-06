@@ -13,32 +13,38 @@ import { Button } from '../../components/ui/Button';
 import { Breadcrumb } from '../../components/ui/Breadcrumb';
 import { COMPANY_STATUSES, COMPANY_TYPES, COMPANY_PRIORITIES } from '../../types/company';
 
+const exactPhoneRegex = /^\d{10}$/;
+const textOnlyRegex = /^[A-Za-z\s]*$/;
+const timezoneRegex = /^(UTC|GMT|[A-Za-z_]+\/[A-Za-z_]+)$/;
+const currencyRegex = /^[A-Z]{3}$/;
+const langRegex = /^[a-z]{2}$/;
+
 const companyFormSchema = z.object({
   name: z.string().min(1, 'Company name is required').max(200),
   legalName: z.string().max(200).optional().or(z.literal('')),
   displayName: z.string().max(200).optional().or(z.literal('')),
-  logo: z.string().optional().or(z.literal('')),
+  logo: z.string().url('Invalid logo URL').optional().or(z.literal('')),
   companyType: z.string().optional().or(z.literal('')),
-  industry: z.string().max(100).optional().or(z.literal('')),
-  subIndustry: z.string().max(100).optional().or(z.literal('')),
-  businessCategory: z.string().max(100).optional().or(z.literal('')),
-  website: z.string().optional().or(z.literal('')),
+  industry: z.string().regex(textOnlyRegex, 'Industry must contain only letters').max(100).optional().or(z.literal('')),
+  subIndustry: z.string().regex(textOnlyRegex, 'Sub Industry must contain only letters').max(100).optional().or(z.literal('')),
+  businessCategory: z.string().regex(textOnlyRegex, 'Business Category must contain only letters').max(100).optional().or(z.literal('')),
+  website: z.string().url('Invalid website URL').optional().or(z.literal('')),
   primaryEmail: z.string().email('Invalid email').optional().or(z.literal('')),
   secondaryEmail: z.string().email('Invalid email').optional().or(z.literal('')),
-  primaryPhone: z.string().optional().or(z.literal('')),
-  secondaryPhone: z.string().optional().or(z.literal('')),
-  whatsApp: z.string().optional().or(z.literal('')),
+  primaryPhone: z.string().regex(exactPhoneRegex, 'Phone number must be exactly 10 digits').optional().or(z.literal('')),
+  secondaryPhone: z.string().regex(exactPhoneRegex, 'Phone number must be exactly 10 digits').optional().or(z.literal('')),
+  whatsApp: z.string().regex(exactPhoneRegex, 'WhatsApp must be exactly 10 digits').optional().or(z.literal('')),
   gstNumber: z.string().optional().or(z.literal('')),
   taxNumber: z.string().optional().or(z.literal('')),
   registrationNumber: z.string().optional().or(z.literal('')),
   panNumber: z.string().optional().or(z.literal('')),
-  foundedYear: z.coerce.number().int().min(1800).max(2100).optional().nullable(),
-  annualRevenue: z.coerce.number().min(0).optional().nullable(),
-  employeeCount: z.coerce.number().int().min(0).optional().nullable(),
-  ownershipType: z.string().optional().or(z.literal('')),
-  currency: z.string().optional().or(z.literal('')),
-  timezone: z.string().optional().or(z.literal('')),
-  primaryLanguage: z.string().optional().or(z.literal('')),
+  foundedYear: z.coerce.number().int().min(1800, 'Founded year must be >= 1800').max(2100, 'Founded year must be <= 2100').optional().nullable(),
+  annualRevenue: z.coerce.number().min(0, 'Revenue cannot be negative').optional().nullable(),
+  employeeCount: z.coerce.number().int().min(0, 'Employees cannot be negative').optional().nullable(),
+  ownershipType: z.string().regex(textOnlyRegex, 'Ownership type must contain only letters').optional().or(z.literal('')),
+  currency: z.string().regex(currencyRegex, 'Currency must be 3-letter uppercase (e.g. USD)').optional().or(z.literal('')),
+  timezone: z.string().regex(timezoneRegex, 'Timezone must be valid (e.g. UTC, Europe/Copenhagen)').optional().or(z.literal('')),
+  primaryLanguage: z.string().regex(langRegex, 'Language must be 2-letter lowercase (e.g. en, da)').optional().or(z.literal('')),
   country: z.string().max(100).optional().or(z.literal('')),
   state: z.string().max(100).optional().or(z.literal('')),
   city: z.string().max(100).optional().or(z.literal('')),
@@ -188,10 +194,12 @@ export const CompanyAdd: React.FC = () => {
                   <div className="space-y-1">
                     <label className={labelClass}>Legal Name</label>
                     <input {...register('legalName')} placeholder="Legal registered name" className={inputClass} />
+                    {errors.legalName && <p className="text-[10px] text-rose-500 font-medium">{errors.legalName.message}</p>}
                   </div>
                   <div className="space-y-1">
                     <label className={labelClass}>Display Name</label>
                     <input {...register('displayName')} placeholder="Display name (optional)" className={inputClass} />
+                    {errors.displayName && <p className="text-[10px] text-rose-500 font-medium">{errors.displayName.message}</p>}
                   </div>
                   <div className="space-y-1">
                     <label className={labelClass}>Company Type</label>
@@ -199,14 +207,17 @@ export const CompanyAdd: React.FC = () => {
                       <option value="">Select type...</option>
                       {COMPANY_TYPES.map((t) => (<option key={t} value={t}>{t}</option>))}
                     </select>
+                    {errors.companyType && <p className="text-[10px] text-rose-500 font-medium">{errors.companyType.message}</p>}
                   </div>
                   <div className="space-y-1">
                     <label className={labelClass}>Website</label>
                     <input {...register('website')} placeholder="https://acme.com" className={inputClass} />
+                    {errors.website && <p className="text-[10px] text-rose-500 font-medium">{errors.website.message}</p>}
                   </div>
                   <div className="space-y-1">
                     <label className={labelClass}>Logo URL</label>
                     <input {...register('logo')} placeholder="https://logo.url/logo.png" className={inputClass} />
+                    {errors.logo && <p className="text-[10px] text-rose-500 font-medium">{errors.logo.message}</p>}
                   </div>
                 </div>
               </div>
@@ -222,30 +233,37 @@ export const CompanyAdd: React.FC = () => {
                 <div className="space-y-1">
                   <label className={labelClass}>Industry</label>
                   <input {...register('industry')} placeholder="e.g. Technology" className={inputClass} />
+                  {errors.industry && <p className="text-[10px] text-rose-500 font-medium">{errors.industry.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Sub Industry</label>
                   <input {...register('subIndustry')} placeholder="e.g. SaaS" className={inputClass} />
+                  {errors.subIndustry && <p className="text-[10px] text-rose-500 font-medium">{errors.subIndustry.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Business Category</label>
                   <input {...register('businessCategory')} placeholder="e.g. B2B" className={inputClass} />
+                  {errors.businessCategory && <p className="text-[10px] text-rose-500 font-medium">{errors.businessCategory.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Ownership Type</label>
                   <input {...register('ownershipType')} placeholder="e.g. Private" className={inputClass} />
+                  {errors.ownershipType && <p className="text-[10px] text-rose-500 font-medium">{errors.ownershipType.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Founded Year</label>
                   <input type="number" {...register('foundedYear')} placeholder="e.g. 2015" className={inputClass} />
+                  {errors.foundedYear && <p className="text-[10px] text-rose-500 font-medium">{errors.foundedYear.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Annual Revenue (USD)</label>
                   <input type="number" {...register('annualRevenue')} placeholder="e.g. 5000000" className={inputClass} />
+                  {errors.annualRevenue && <p className="text-[10px] text-rose-500 font-medium">{errors.annualRevenue.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Employee Count</label>
                   <input type="number" {...register('employeeCount')} placeholder="e.g. 250" className={inputClass} />
+                  {errors.employeeCount && <p className="text-[10px] text-rose-500 font-medium">{errors.employeeCount.message}</p>}
                 </div>
               </div>
             </div>
@@ -260,22 +278,27 @@ export const CompanyAdd: React.FC = () => {
                 <div className="space-y-1">
                   <label className={labelClass}>Primary Email</label>
                   <input {...register('primaryEmail')} placeholder="contact@company.com" className={inputClass} />
+                  {errors.primaryEmail && <p className="text-[10px] text-rose-500 font-medium">{errors.primaryEmail.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Secondary Email</label>
                   <input {...register('secondaryEmail')} placeholder="info@company.com" className={inputClass} />
+                  {errors.secondaryEmail && <p className="text-[10px] text-rose-500 font-medium">{errors.secondaryEmail.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Primary Phone</label>
-                  <input {...register('primaryPhone')} placeholder="+1 555 123 4567" className={inputClass} />
+                  <input {...register('primaryPhone')} placeholder="e.g. 9876543210" className={inputClass} />
+                  {errors.primaryPhone && <p className="text-[10px] text-rose-500 font-medium">{errors.primaryPhone.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Secondary Phone</label>
-                  <input {...register('secondaryPhone')} placeholder="+1 555 987 6543" className={inputClass} />
+                  <input {...register('secondaryPhone')} placeholder="e.g. 9876543210" className={inputClass} />
+                  {errors.secondaryPhone && <p className="text-[10px] text-rose-500 font-medium">{errors.secondaryPhone.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>WhatsApp</label>
-                  <input {...register('whatsApp')} placeholder="+1 555 555 5555" className={inputClass} />
+                  <input {...register('whatsApp')} placeholder="e.g. 9876543210" className={inputClass} />
+                  {errors.whatsApp && <p className="text-[10px] text-rose-500 font-medium">{errors.whatsApp.message}</p>}
                 </div>
               </div>
             </div>
@@ -374,14 +397,17 @@ export const CompanyAdd: React.FC = () => {
                 <div className="space-y-1">
                   <label className={labelClass}>Currency</label>
                   <input {...register('currency')} placeholder="USD" className={inputClass} />
+                  {errors.currency && <p className="text-[10px] text-rose-500 font-medium">{errors.currency.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Timezone</label>
                   <input {...register('timezone')} placeholder="UTC" className={inputClass} />
+                  {errors.timezone && <p className="text-[10px] text-rose-500 font-medium">{errors.timezone.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Primary Language</label>
                   <input {...register('primaryLanguage')} placeholder="en" className={inputClass} />
+                  {errors.primaryLanguage && <p className="text-[10px] text-rose-500 font-medium">{errors.primaryLanguage.message}</p>}
                 </div>
               </div>
               <div className="space-y-1">

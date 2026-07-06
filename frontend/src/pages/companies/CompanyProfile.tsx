@@ -85,9 +85,7 @@ export const CompanyProfile: React.FC = () => {
 
   // File state
   const [showFileUpload, setShowFileUpload] = useState(false);
-  const [uploadFileName, setUploadFileName] = useState('');
-  const [uploadFileType, setUploadFileType] = useState('application/pdf');
-  const [uploadFileSize, setUploadFileSize] = useState('1.2 MB');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileSearch, setFileSearch] = useState('');
 
   // Timeline & History search
@@ -167,6 +165,14 @@ export const CompanyProfile: React.FC = () => {
       case 'followups': fetchFollowups(id); break;
     }
   }, [id, selectedTab]);
+
+  const formatUrl = (url?: string) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    return `https://${url}`;
+  };
 
   const handleDelete = async () => {
     if (!currentCompany) return;
@@ -299,12 +305,17 @@ export const CompanyProfile: React.FC = () => {
 
   // File handlers
   const handleUploadFile = async () => {
-    if (!uploadFileName.trim() || !id) return;
+    if (!selectedFile || !id) return;
     try {
-      const sizeBytes = uploadFileSize === '1.2 MB' ? 1258291 : 314572;
-      await uploadFile(id, { name: uploadFileName, path: `/uploads/${uploadFileName}`, mimeType: uploadFileType, size: sizeBytes });
-      toast.success('File Uploaded', `${uploadFileName} uploaded successfully.`); setShowFileUpload(false); setUploadFileName('');
-    } catch { toast.error('Upload Error', 'Failed to upload file.'); }
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      await uploadFile(id, formData);
+      toast.success('File Uploaded', `${selectedFile.name} uploaded successfully.`);
+      setShowFileUpload(false);
+      setSelectedFile(null);
+    } catch {
+      toast.error('Upload Error', 'Failed to upload file.');
+    }
   };
 
   const handleDeleteFile = async (fileId: string, fileName: string) => {
@@ -597,9 +608,41 @@ export const CompanyProfile: React.FC = () => {
               {currentCompany.foundedYear && <div className="flex justify-between"><span className="font-bold text-slate-400 uppercase text-[9px] tracking-wide">Founded</span><span className="font-semibold">{currentCompany.foundedYear}</span></div>}
             </div>
             <div className="grid grid-cols-3 gap-2 select-none">
-              <a href={currentCompany.website ? `https://${currentCompany.website}` : '#'} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition-all gap-1"><Globe size={14} className="text-slate-650" /><span className="text-[8px] font-bold text-slate-500 uppercase">Website</span></a>
-              <a href={currentCompany.primaryEmail ? `mailto:${currentCompany.primaryEmail}` : '#'} className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition-all gap-1"><Mail size={14} className="text-slate-650" /><span className="text-[8px] font-bold text-slate-500 uppercase">Email</span></a>
-              <a href={currentCompany.primaryPhone ? `tel:${currentCompany.primaryPhone}` : '#'} className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition-all gap-1"><Phone size={14} className="text-slate-650" /><span className="text-[8px] font-bold text-slate-500 uppercase">Call</span></a>
+              {currentCompany.website ? (
+                <a href={formatUrl(currentCompany.website)} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition-all gap-1">
+                  <Globe size={14} className="text-slate-650" />
+                  <span className="text-[8px] font-bold text-slate-500 uppercase">Website</span>
+                </a>
+              ) : (
+                <span className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 opacity-50 cursor-not-allowed gap-1">
+                  <Globe size={14} className="text-slate-400" />
+                  <span className="text-[8px] font-bold text-slate-400 uppercase">Website</span>
+                </span>
+              )}
+
+              {currentCompany.primaryEmail ? (
+                <a href={`mailto:${currentCompany.primaryEmail}`} className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition-all gap-1">
+                  <Mail size={14} className="text-slate-650" />
+                  <span className="text-[8px] font-bold text-slate-500 uppercase">Email</span>
+                </a>
+              ) : (
+                <span className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 opacity-50 cursor-not-allowed gap-1">
+                  <Mail size={14} className="text-slate-400" />
+                  <span className="text-[8px] font-bold text-slate-400 uppercase">Email</span>
+                </span>
+              )}
+
+              {currentCompany.primaryPhone ? (
+                <a href={`tel:${currentCompany.primaryPhone}`} className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition-all gap-1">
+                  <Phone size={14} className="text-slate-650" />
+                  <span className="text-[8px] font-bold text-slate-500 uppercase">Call</span>
+                </a>
+              ) : (
+                <span className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-50 border border-slate-100 opacity-50 cursor-not-allowed gap-1">
+                  <Phone size={14} className="text-slate-400" />
+                  <span className="text-[8px] font-bold text-slate-400 uppercase">Call</span>
+                </span>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-2">
               <Button variant="secondary" size="sm" onClick={() => setShowAssignModal(true)} className="w-full justify-center text-xs"><UserCheck size={12} /> Assign</Button>
@@ -839,7 +882,7 @@ export const CompanyProfile: React.FC = () => {
                             <div className="min-w-0"><p className="text-[12px] font-bold text-slate-800 truncate">{file.name}</p><div className="flex items-center gap-3 mt-0.5"><span className="text-[9px] text-slate-400 font-medium">{formatFileSize(file.size)}</span><span className="text-[9px] text-slate-400 font-medium">{new Date(file.createdAt).toLocaleDateString()}</span></div></div>
                           </div>
                           <div className="flex items-center gap-1 flex-shrink-0">
-                            <a href={file.path} target="_blank" rel="noreferrer" className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600"><Download size={12} /></a>
+                            <a href={`http://localhost:5000/uploads/${file.path}`} target="_blank" rel="noopener noreferrer" className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600"><Download size={12} /></a>
                             <button onClick={() => handleDeleteFile(file.id, file.name)} className="p-1.5 hover:bg-rose-50 rounded-lg transition-colors text-slate-400 hover:text-rose-600"><Trash2 size={12} /></button>
                           </div>
                         </div>
@@ -957,7 +1000,10 @@ export const CompanyProfile: React.FC = () => {
             {selectedTab === 'contacts' && (
               <div className="space-y-5 animate-fade-in">
                 <div className="flex items-center justify-between"><h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><Users size={14} /> Contact Directory</h4>
-                  <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search contacts..." value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search contacts..." value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
+                    <Button onClick={() => navigate(`/contacts/new?companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Contact</Button>
+                  </div>
                 </div>
                 {filteredContacts.length === 0 ? (
                   <div className="p-12 text-center text-slate-450 border border-dashed border-slate-150 rounded-2xl select-none"><Users className="mx-auto opacity-30 mb-2 w-8 h-8 text-slate-400" /><p className="text-xs font-semibold">No contacts linked to this company</p></div>
@@ -991,7 +1037,10 @@ export const CompanyProfile: React.FC = () => {
             {selectedTab === 'leads' && (
               <div className="space-y-5 animate-fade-in">
                 <div className="flex items-center justify-between"><h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><Play size={14} /> Related Leads</h4>
-                  <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search leads..." value={leadSearch} onChange={(e) => setLeadSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search leads..." value={leadSearch} onChange={(e) => setLeadSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
+                    <Button onClick={() => navigate(`/leads/new?companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Lead</Button>
+                  </div>
                 </div>
                 {filteredLeads.length === 0 ? (
                   <div className="p-12 text-center text-slate-450 border border-dashed border-slate-150 rounded-2xl select-none"><Play className="mx-auto opacity-30 mb-2 w-8 h-8 text-slate-400" /><p className="text-xs font-semibold">No leads associated with this company</p></div>
@@ -1020,7 +1069,10 @@ export const CompanyProfile: React.FC = () => {
             {selectedTab === 'deals' && (
               <div className="space-y-5 animate-fade-in">
                 <div className="flex items-center justify-between"><h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><DollarSign size={14} /> Related Deals</h4>
-                  <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search deals..." value={dealSearch} onChange={(e) => setDealSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search deals..." value={dealSearch} onChange={(e) => setDealSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
+                    <Button onClick={() => navigate(`/deals/new?companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Deal</Button>
+                  </div>
                 </div>
                 {filteredDeals.length === 0 ? (
                   <div className="p-12 text-center text-slate-450 border border-dashed border-slate-150 rounded-2xl select-none"><DollarSign className="mx-auto opacity-30 mb-2 w-8 h-8 text-slate-400" /><p className="text-xs font-semibold">No deals associated with this company</p></div>
@@ -1047,7 +1099,9 @@ export const CompanyProfile: React.FC = () => {
             {/* QUOTES TAB */}
             {selectedTab === 'quotes' && (
               <div className="space-y-5 animate-fade-in">
-                <h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><FileText size={14} /> Related Quotes</h4>
+                <div className="flex items-center justify-between"><h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><FileText size={14} /> Related Quotes</h4>
+                  <Button onClick={() => navigate(`/quotes/new?companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Quote</Button>
+                </div>
                 {quotes.length === 0 ? (
                   <div className="p-12 text-center text-slate-450 border border-dashed border-slate-150 rounded-2xl select-none"><FileText className="mx-auto opacity-30 mb-2 w-8 h-8 text-slate-400" /><p className="text-xs font-semibold">No quotes for this company</p></div>
                 ) : (
@@ -1071,7 +1125,10 @@ export const CompanyProfile: React.FC = () => {
             {selectedTab === 'invoices' && (
               <div className="space-y-5 animate-fade-in">
                 <div className="flex items-center justify-between"><h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><CreditCard size={14} /> Related Invoices</h4>
-                  <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search invoices..." value={invoiceSearch} onChange={(e) => setInvoiceSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search invoices..." value={invoiceSearch} onChange={(e) => setInvoiceSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
+                    <Button onClick={() => navigate(`/invoices/new?companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Invoice</Button>
+                  </div>
                 </div>
                 {filteredInvoices.length === 0 ? (
                   <div className="p-12 text-center text-slate-450 border border-dashed border-slate-150 rounded-2xl select-none"><CreditCard className="mx-auto opacity-30 mb-2 w-8 h-8 text-slate-400" /><p className="text-xs font-semibold">No invoices for this company</p></div>
@@ -1378,15 +1435,34 @@ export const CompanyProfile: React.FC = () => {
       {showFileUpload && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl border border-slate-100 max-w-sm w-full p-6 shadow-glossy-lg">
-            <h3 className="font-bold text-slate-800 text-sm mb-1">Upload File</h3>
+            <h3 className="font-bold text-slate-800 text-sm mb-1 font-bold">Upload File</h3>
             <p className="text-[10px] text-slate-400 font-medium mb-4">Attach a document to this company.</p>
             <div className="space-y-3">
-              <div className="space-y-1"><label className="text-[10px] font-bold text-slate-500 uppercase">File Name</label><input type="text" value={uploadFileName} onChange={(e) => setUploadFileName(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white" placeholder="e.g., contract.pdf" /></div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1"><label className="text-[10px] font-bold text-slate-500 uppercase">Type</label><select value={uploadFileType} onChange={(e) => setUploadFileType(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white"><option value="application/pdf">PDF</option><option value="image/jpeg">Image</option><option value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">Excel</option><option value="text/csv">CSV</option><option value="application/zip">Archive</option></select></div>
-                <div className="space-y-1"><label className="text-[10px] font-bold text-slate-500 uppercase">Size</label><select value={uploadFileSize} onChange={(e) => setUploadFileSize(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white"><option value="1.2 MB">1.2 MB</option><option value="300 KB">300 KB</option></select></div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Select File</label>
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setSelectedFile(e.target.files[0]);
+                    }
+                  }}
+                  className="w-full text-xs font-semibold"
+                />
               </div>
-              <div className="flex gap-2 justify-end mt-4"><Button variant="secondary" size="sm" onClick={() => setShowFileUpload(false)} className="text-xs">Cancel</Button><Button variant="primary" size="sm" onClick={handleUploadFile} disabled={!uploadFileName.trim()} className="text-xs"><Upload size={12} /> Upload</Button></div>
+              {selectedFile && (
+                <div className="text-[10px] text-slate-500 font-bold bg-slate-50 p-2.5 rounded-xl border border-slate-100 mt-2 space-y-0.5">
+                  <p>Name: {selectedFile.name}</p>
+                  <p>Size: {(selectedFile.size / 1024).toFixed(1)} KB</p>
+                  <p>Type: {selectedFile.type || 'unknown'}</p>
+                </div>
+              )}
+              <div className="flex gap-2 justify-end mt-4">
+                <Button variant="secondary" size="sm" onClick={() => { setShowFileUpload(false); setSelectedFile(null); }} className="text-xs">Cancel</Button>
+                <Button variant="primary" size="sm" onClick={handleUploadFile} disabled={!selectedFile} className="text-xs">
+                  <Upload size={12} className="mr-1" /> Upload File
+                </Button>
+              </div>
             </div>
           </div>
         </div>
