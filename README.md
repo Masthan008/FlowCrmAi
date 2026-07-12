@@ -81,21 +81,36 @@ flowcrm-ai-enterprise/
 
 ### Fully Implemented
 
-- **Authentication & Authorization** -- Registration, login, JWT access/refresh token rotation with breach detection, role-based access (9 roles), granular permission system
-- **Dashboard** -- KPI cards, trend charts (revenue/leads/deals/conversion), recent activity, upcoming tasks, pipeline overview, team leaderboard, goals tracking, configurable widgets
-- **Leads Management** -- Full CRUD, soft delete, sources/statuses master data, search/filter/sort, pagination, bulk operations (update, archive, restore), duplicate merge, CSV import/export, saved views, assignment (manual/round-robin/load-based), lead scoring, health/SLA tracking, workflow automation, approval flows, 360 workspace (notes, activities, files, timeline, history)
-- **Contacts Management** -- Full CRUD, soft delete, rich profile with multi-channel communication, relationship mapping, customer journey tracking, engagement scoring, business/health metrics, communication logs
-- **Tasks Management** -- Full CRUD, Kanban board, priorities, subtasks, checklists, comments, file attachments, time tracking, watchers, dependencies, recurrence, approval workflow, calendar view, productivity analytics
+- **Authentication & Authorization** -- Registration, login, JWT access/refresh token rotation with breach detection, role-based access (9 roles), granular permission system.
+- **Dashboard** -- KPI cards, trend charts (revenue/leads/deals/conversion), recent activity, upcoming tasks, pipeline overview, team leaderboard, goals tracking, configurable widgets.
+- **Leads Management** -- Full CRUD, soft delete, sources/statuses master data, search/filter/sort, pagination, bulk operations (update, archive, restore), duplicate merge, CSV import/export, saved views, assignment (manual/round-robin/load-based), lead scoring, health/SLA tracking, workflow automation, approval flows, 360 workspace (notes, activities, files, timeline, history).
+- **Contacts Management** -- Full CRUD, soft delete, rich profile with multi-channel communication, relationship mapping, customer journey tracking, engagement scoring, business/health metrics, communication logs.
+- **Tasks Management** -- Full CRUD, Kanban board, priorities, subtasks, checklists, comments, file attachments, time tracking, watchers, dependencies, recurrence, approval workflow, calendar view, productivity analytics.
 - **Accounts (KYC & CVR Engine)** -- Core Account directories, parent-child hierarchies, Central Business Register (CVR) Scandinavian corporate lookup & imports, and Know Your Customer (KYC) compliance portals featuring verification checklist audits, risk profiles, document attachments, and history auditing.
-- **Company 360° Workspace** -- Timeline events, activity CRUD with type/priority/status, notes with pinning, file upload/download, meetings, tasks, communications, full audit history with field-level change tracking
+- **Company 360° Workspace** -- Timeline events, activity CRUD with type/priority/status, notes with pinning, file upload/download, meetings, tasks, communications, full audit history with field-level change tracking.
 - **Meetings & Calendar Scheduler** -- Complete native backend CRUD, organizer/customer scheduler validations, and datetime alignment checks.
 - **Product Catalog** -- Categories listing and Product database CRUD featuring price restrictions and unique SKU checks.
-- **Quote Management** -- Summing engine calculating subtotals, tax rates, and discount deductions. Nested quote items transactional write operations.
-- **Invoice & Payments Engine** -- Dynamic balance recalculations and status adjustments (marking unpaid, partially paid, or paid based on completed payment logs).
+- **Deals & Sales Pipelines** -- Deals CRUD, pipeline stages, Kanban board rendering, deal owner assignments, values, expected closing dates, and nested tags.
+- **Quotes Management** -- Sales quote engine calculating subtotals, tax rates, and discount deductions. Nested quote items transactional write operations.
+- **Invoices & Payments Engine** -- Dynamic balance recalculations, invoice tracking, payment log registering, and automated status adjustments (marking unpaid, partially paid, or paid based on completed payment logs).
+- **Enterprise Company Intelligence** -- Customer Journeys tracking, Segment definitions, Tags mappings, Workflows (triggers/conditions/actions), Recommendations (AI-driven next best actions), and Follow-up reminders.
 
 ### Placeholder / Coming Soon
 
-Users, Roles, Permissions, Customers, Deals, Activities, Calendar, Notifications, Reports, Analytics, Settings
+Users, Roles, Permissions, Customers, Calendar, Notifications, Reports, Analytics, Settings
+
+## Recent Updates & Bug Fixes
+
+Here are the key issues resolved in the latest release:
+
+1. **Date-Only Validator Compatibility**: Fixed `companyActivity.validator` and `companyIntelligence.validator` schemas to accept date-only strings (e.g. `2026-07-12`) instead of strictly requiring full ISO datetimes, resolving activity and follow-up logging failures.
+2. **Prisma List Fields Formatting**: Updated deals service array sanitizer to map undefined tags to `[]` instead of `null`, preventing Prisma database insert errors.
+3. **Address Form Validations**: Enforced text-only constraint for `country`, `state`, and `city` inputs, and digits-only constraint for `postalCode` (postal code) fields on both backend validators and frontend layouts.
+4. **Logo URL Validation**: Restricted logo URLs to valid image extensions (`.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.ico`) on both backend and frontend schemas.
+5. **Route Prefix & Ordering Alignments**: Added missing `/api/v1` and `/companies` prefixes to segments, tags, and workflows frontend services. Mounted static config endpoints above parameterized matches in contacts router to resolve route lookup collision.
+6. **Workspace Access & Permissions**: Aligned all company 360/intelligence endpoints with the standard seeded permission checks (`companies:view` and `companies:edit`) to avoid authorization roadblocks.
+7. **Rate Limiting Adjustments**: Increased threshold limits inside `rateLimiter.ts` to prevent request blocks during heavy user navigation or active automated testing.
+8. **Payments Registry Trace**: Replaced query parameters in `getPayments` to fetch payments by tracing `Customer` → `Invoice` → `Payment` database relations.
 
 ## Architecture
 
