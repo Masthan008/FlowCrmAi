@@ -1002,7 +1002,7 @@ export const CompanyProfile: React.FC = () => {
                 <div className="flex items-center justify-between"><h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><Users size={14} /> Contact Directory</h4>
                   <div className="flex items-center gap-2">
                     <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search contacts..." value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
-                    <Button onClick={() => navigate(`/contacts/new?companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Contact</Button>
+                    <Button onClick={() => navigate(`/contacts?new=true&companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Contact</Button>
                   </div>
                 </div>
                 {filteredContacts.length === 0 ? (
@@ -1039,7 +1039,7 @@ export const CompanyProfile: React.FC = () => {
                 <div className="flex items-center justify-between"><h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><Play size={14} /> Related Leads</h4>
                   <div className="flex items-center gap-2">
                     <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search leads..." value={leadSearch} onChange={(e) => setLeadSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
-                    <Button onClick={() => navigate(`/leads/new?companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Lead</Button>
+                    <Button onClick={() => navigate(`/leads/new?companyId=${id}&companyName=${encodeURIComponent(currentCompany.name)}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Lead</Button>
                   </div>
                 </div>
                 {filteredLeads.length === 0 ? (
@@ -1071,7 +1071,7 @@ export const CompanyProfile: React.FC = () => {
                 <div className="flex items-center justify-between"><h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><DollarSign size={14} /> Related Deals</h4>
                   <div className="flex items-center gap-2">
                     <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search deals..." value={dealSearch} onChange={(e) => setDealSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
-                    <Button onClick={() => navigate(`/deals/new?companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Deal</Button>
+                    <Button onClick={() => navigate(`/deals?new=true&companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Deal</Button>
                   </div>
                 </div>
                 {filteredDeals.length === 0 ? (
@@ -1100,7 +1100,7 @@ export const CompanyProfile: React.FC = () => {
             {selectedTab === 'quotes' && (
               <div className="space-y-5 animate-fade-in">
                 <div className="flex items-center justify-between"><h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><FileText size={14} /> Related Quotes</h4>
-                  <Button onClick={() => navigate(`/quotes/new?companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Quote</Button>
+                  <Button onClick={() => navigate(`/quotes?new=true&companyId=${id}&companyName=${encodeURIComponent(currentCompany.name)}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Quote</Button>
                 </div>
                 {quotes.length === 0 ? (
                   <div className="p-12 text-center text-slate-450 border border-dashed border-slate-150 rounded-2xl select-none"><FileText className="mx-auto opacity-30 mb-2 w-8 h-8 text-slate-400" /><p className="text-xs font-semibold">No quotes for this company</p></div>
@@ -1127,7 +1127,7 @@ export const CompanyProfile: React.FC = () => {
                 <div className="flex items-center justify-between"><h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-sm"><CreditCard size={14} /> Related Invoices</h4>
                   <div className="flex items-center gap-2">
                     <div className="relative"><Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search invoices..." value={invoiceSearch} onChange={(e) => setInvoiceSearch(e.target.value)} className="pl-8 pr-3 py-1.5 border border-slate-150 rounded-xl text-[11px] font-medium w-48 bg-slate-50/50" /></div>
-                    <Button onClick={() => navigate(`/invoices/new?companyId=${id}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Invoice</Button>
+                    <Button onClick={() => navigate(`/invoices?new=true&companyId=${id}&companyName=${encodeURIComponent(currentCompany.name)}`)} size="sm" className="bg-slate-800 text-white font-bold text-[10px] px-3 rounded-xl"><Plus size={12} /> Add Invoice</Button>
                   </div>
                 </div>
                 {filteredInvoices.length === 0 ? (

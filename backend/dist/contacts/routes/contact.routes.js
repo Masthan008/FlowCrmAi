@@ -18,6 +18,10 @@ const router = (0, express_1.Router)();
 router.use(auth_1.requireAuth);
 // Statistics route (must come before /:id)
 router.get('/statistics', (0, permission_1.requirePermission)('contacts:view'), contact_controller_1.contactController.getStatistics);
+// Global Tag & Segment Configurations (Without id)
+router.post('/contact-tags', (0, permission_1.requirePermission)('contacts:edit'), contactIntelligence_controller_1.contactIntelligenceController.createTag);
+router.get('/contact-segments', (0, permission_1.requirePermission)('contacts:segment:manage'), contactIntelligence_controller_1.contactIntelligenceController.getSegmentsList);
+router.post('/contact-workflows', (0, permission_1.requirePermission)('contacts:workflow:manage'), contactIntelligence_controller_1.contactIntelligenceController.createWorkflow);
 // Bulk updates
 router.patch('/status', (0, permission_1.requirePermission)('contacts:edit'), (0, validate_1.validateRequest)(contact_validator_1.bulkUpdateStatusSchema), (0, activityLogger_1.logActivity)('contacts', 'CONTACT_BULK_STATUS_UPDATED'), contact_controller_1.contactController.bulkUpdateStatus);
 router.patch('/owner', (0, permission_1.requirePermission)('contacts:assign'), (0, validate_1.validateRequest)(contact_validator_1.bulkUpdateOwnerSchema), (0, activityLogger_1.logActivity)('contacts', 'CONTACT_BULK_OWNER_UPDATED'), contact_controller_1.contactController.bulkUpdateOwner);
@@ -76,8 +80,5 @@ router.get('/:id/followups', (0, permission_1.requirePermission)('contacts:view'
 router.post('/:id/followups', (0, permission_1.requirePermission)('contacts:activities:create'), (0, activityLogger_1.logActivity)('contacts', 'CONTACT_FOLLOWUP_CREATED'), contactIntelligence_controller_1.contactIntelligenceController.createFollowup);
 // Ownership Reassignment
 router.patch('/:id/assign', (0, permission_1.requirePermission)('contacts:assign'), (0, activityLogger_1.logActivity)('contacts', 'CONTACT_OWNER_ASSIGNED'), contactIntelligence_controller_1.contactIntelligenceController.assignOwner);
-// Global Tag & Segment Configurations (Without id)
-router.post('/contact-tags', (0, permission_1.requirePermission)('contacts:edit'), contactIntelligence_controller_1.contactIntelligenceController.createTag);
-router.get('/contact-segments', (0, permission_1.requirePermission)('contacts:segment:manage'), contactIntelligence_controller_1.contactIntelligenceController.getSegmentsList);
-router.post('/contact-workflows', (0, permission_1.requirePermission)('contacts:workflow:manage'), contactIntelligence_controller_1.contactIntelligenceController.createWorkflow);
+// Moved configuration routes to the top to resolve shadowing conflicts
 exports.default = router;

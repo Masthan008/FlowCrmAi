@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
@@ -37,6 +38,21 @@ export const Invoices: React.FC = () => {
   const [company, setCompany] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [status, setStatus] = useState<'Draft' | 'Sent' | 'Paid' | 'Overdue' | 'Void'>('Draft');
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const isNew = searchParams.get('new') === 'true';
+    if (isNew) {
+      const coName = searchParams.get('companyName') || '';
+      setCompany(coName);
+      setShowAddModal(true);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('new');
+      newParams.delete('companyId');
+      newParams.delete('companyName');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleAddInvoice = (e: React.FormEvent) => {
     e.preventDefault();

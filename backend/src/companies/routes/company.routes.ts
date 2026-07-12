@@ -61,21 +61,21 @@ router.get('/:id/timeline', requirePermission('companies:view'), validateRequest
 
 // 360 Workspace: Activities
 router.get('/:id/activities', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), companyActivityController.list);
-router.post('/:id/activities', requirePermission('companies:activities:create'), validateRequest(createCompanyActivitySchema), logActivity('companies', 'ACTIVITY_CREATED'), companyActivityController.create);
-router.put('/:id/activities/:activityId', requirePermission('companies:activities:edit'), validateRequest(updateCompanyActivitySchema), logActivity('companies', 'ACTIVITY_UPDATED'), companyActivityController.update);
-router.delete('/:id/activities/:activityId', requirePermission('companies:activities:delete'), logActivity('companies', 'ACTIVITY_DELETED'), companyActivityController.delete);
+router.post('/:id/activities', requirePermission('companies:edit'), validateRequest(createCompanyActivitySchema), logActivity('companies', 'ACTIVITY_CREATED'), companyActivityController.create);
+router.put('/:id/activities/:activityId', requirePermission('companies:edit'), validateRequest(updateCompanyActivitySchema), logActivity('companies', 'ACTIVITY_UPDATED'), companyActivityController.update);
+router.delete('/:id/activities/:activityId', requirePermission('companies:edit'), logActivity('companies', 'ACTIVITY_DELETED'), companyActivityController.delete);
 
 // 360 Workspace: Notes
 router.get('/:id/notes', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), companyNoteController.list);
-router.post('/:id/notes', requirePermission('companies:notes:create'), validateRequest(createCompanyNoteSchema), logActivity('companies', 'NOTE_ADDED'), companyNoteController.create);
-router.put('/:id/notes/:noteId', requirePermission('companies:notes:edit'), validateRequest(updateCompanyNoteSchema), logActivity('companies', 'NOTE_UPDATED'), companyNoteController.update);
-router.delete('/:id/notes/:noteId', requirePermission('companies:notes:delete'), logActivity('companies', 'NOTE_DELETED'), companyNoteController.delete);
+router.post('/:id/notes', requirePermission('companies:edit'), validateRequest(createCompanyNoteSchema), logActivity('companies', 'NOTE_ADDED'), companyNoteController.create);
+router.put('/:id/notes/:noteId', requirePermission('companies:edit'), validateRequest(updateCompanyNoteSchema), logActivity('companies', 'NOTE_UPDATED'), companyNoteController.update);
+router.delete('/:id/notes/:noteId', requirePermission('companies:edit'), logActivity('companies', 'NOTE_DELETED'), companyNoteController.delete);
 
 // 360 Workspace: Files
 router.get('/:id/files', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), companyFileController.list);
 router.get('/:id/files/summary', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), companyFileController.getStorageSummary);
-router.post('/:id/files', requirePermission('companies:files:upload'), upload.single('file'), logActivity('companies', 'FILE_UPLOADED'), companyFileController.create);
-router.delete('/:id/files/:fileId', requirePermission('companies:files:delete'), logActivity('companies', 'FILE_DELETED'), companyFileController.delete);
+router.post('/:id/files', requirePermission('companies:edit'), upload.single('file'), logActivity('companies', 'FILE_UPLOADED'), companyFileController.create);
+router.delete('/:id/files/:fileId', requirePermission('companies:edit'), logActivity('companies', 'FILE_DELETED'), companyFileController.delete);
 
 // 360 Workspace: History
 router.get('/:id/history', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), companyHistoryController.list);

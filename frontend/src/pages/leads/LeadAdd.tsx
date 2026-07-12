@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Breadcrumb } from '../../components/ui/Breadcrumb';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -24,6 +24,10 @@ import type { LeadFormData } from '../../types/lead';
 
 const LeadAdd: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const queryCompanyId = searchParams.get('companyId') || '';
+  const queryCompanyName = searchParams.get('companyName') || '';
+
   const { sources, statuses, loading, error, fetchSources, fetchStatuses, createLead, clearError } =
     useLeadStore();
 
@@ -33,7 +37,7 @@ const LeadAdd: React.FC = () => {
     email: '',
     phone: '',
     alternatePhone: '',
-    companyName: '',
+    companyName: queryCompanyName,
     jobTitle: '',
     industry: '',
     website: '',
@@ -49,6 +53,7 @@ const LeadAdd: React.FC = () => {
     value: 0,
     expectedClosingDate: '',
     description: '',
+    companyId: queryCompanyId || null,
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -90,7 +95,11 @@ const LeadAdd: React.FC = () => {
 
     try {
       await createLead(formData);
-      navigate('/leads');
+      if (queryCompanyId) {
+        navigate(`/companies/${queryCompanyId}?tab=leads`);
+      } else {
+        navigate('/leads');
+      }
     } catch (err: any) {
       const serverErrors = err.response?.data?.errors;
       if (Array.isArray(serverErrors)) {

@@ -85,6 +85,7 @@ export interface LeadFormData {
   value?: number;
   expectedClosingDate?: string;
   description?: string;
+  companyId?: string | null;
 }
 
 /**

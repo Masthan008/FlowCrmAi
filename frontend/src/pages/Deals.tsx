@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useDealStore } from '../store/dealStore';
 import { useToast } from '../components/ui/ToastProvider';
@@ -94,6 +94,23 @@ export const Deals: React.FC = () => {
     fetchLeads();
     fetchPipelines();
   }, []);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const isNew = searchParams.get('new') === 'true';
+    if (isNew) {
+      const coId = searchParams.get('companyId') || '';
+      setFormData((prev: any) => ({
+        ...prev,
+        companyId: coId,
+      }));
+      setShowCreateModal(true);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('new');
+      newParams.delete('companyId');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

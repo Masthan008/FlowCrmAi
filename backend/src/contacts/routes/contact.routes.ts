@@ -32,6 +32,25 @@ router.get(
   contactController.getStatistics
 );
 
+// Global Tag & Segment Configurations (Without id)
+router.post(
+  '/contact-tags',
+  requirePermission('contacts:edit'),
+  contactIntelligenceController.createTag
+);
+
+router.get(
+  '/contact-segments',
+  requirePermission('contacts:segment:manage'),
+  contactIntelligenceController.getSegmentsList
+);
+
+router.post(
+  '/contact-workflows',
+  requirePermission('contacts:workflow:manage'),
+  contactIntelligenceController.createWorkflow
+);
+
 // Bulk updates
 router.patch(
   '/status',
@@ -316,23 +335,6 @@ router.patch(
   contactIntelligenceController.assignOwner
 );
 
-// Global Tag & Segment Configurations (Without id)
-router.post(
-  '/contact-tags',
-  requirePermission('contacts:edit'),
-  contactIntelligenceController.createTag
-);
-
-router.get(
-  '/contact-segments',
-  requirePermission('contacts:segment:manage'),
-  contactIntelligenceController.getSegmentsList
-);
-
-router.post(
-  '/contact-workflows',
-  requirePermission('contacts:workflow:manage'),
-  contactIntelligenceController.createWorkflow
-);
+// Moved configuration routes to the top to resolve shadowing conflicts
 
 export default router;

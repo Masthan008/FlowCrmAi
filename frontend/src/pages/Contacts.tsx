@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -146,6 +146,8 @@ export const Contacts: React.FC = () => {
     }
   });
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
   // Load initial data
   useEffect(() => {
     fetchContacts();
@@ -154,6 +156,27 @@ export const Contacts: React.FC = () => {
     fetchCompanies();
     fetchLeads();
   }, []);
+
+  useEffect(() => {
+    const isNew = searchParams.get('new') === 'true';
+    if (isNew) {
+      const coId = searchParams.get('companyId') || '';
+      reset({
+        firstName: '',
+        lastName: '',
+        status: 'Active',
+        preferredLanguage: 'en',
+        preferredContactMethod: 'Email',
+        timezone: 'UTC',
+        companyId: coId,
+      });
+      setShowAddEditModal(true);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('new');
+      newParams.delete('companyId');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, reset, setSearchParams]);
 
   // Sync quick filters tabs
   const handleTabChange = (tab: string) => {

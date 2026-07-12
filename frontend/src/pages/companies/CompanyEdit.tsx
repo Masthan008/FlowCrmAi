@@ -105,6 +105,19 @@ export const CompanyEdit: React.FC = () => {
       errors.primaryLanguage = 'Primary Language must be 2-letter lowercase (e.g. en, da)';
     }
 
+    if (formData.country && !textOnlyRegex.test(formData.country)) {
+      errors.country = 'Country must contain only letters';
+    }
+    if (formData.state && !textOnlyRegex.test(formData.state)) {
+      errors.state = 'State must contain only letters';
+    }
+    if (formData.city && !textOnlyRegex.test(formData.city)) {
+      errors.city = 'City must contain only letters';
+    }
+    if (formData.postalCode && !/^[0-9]+$/.test(formData.postalCode)) {
+      errors.postalCode = 'Postal Code must contain only numbers';
+    }
+
     if (formData.gstNumber && formData.gstNumber.trim() !== '') {
       if (!gstRegex.test(formData.gstNumber)) {
         errors.gstNumber = 'Invalid GST format (e.g. 22AAAAA0000A1Z5)';
@@ -363,18 +376,22 @@ export const CompanyEdit: React.FC = () => {
             <div className="space-y-1">
               <label className={labelClass}>Country</label>
               <input value={formData.country || ''} onChange={(e) => handleChange('country', e.target.value)} className={inputClass} />
+              {formErrors.country && <p className="text-[10px] text-rose-500 font-medium">{formErrors.country}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>State</label>
               <input value={formData.state || ''} onChange={(e) => handleChange('state', e.target.value)} className={inputClass} />
+              {formErrors.state && <p className="text-[10px] text-rose-500 font-medium">{formErrors.state}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>City</label>
               <input value={formData.city || ''} onChange={(e) => handleChange('city', e.target.value)} className={inputClass} />
+              {formErrors.city && <p className="text-[10px] text-rose-500 font-medium">{formErrors.city}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Postal Code</label>
               <input value={formData.postalCode || ''} onChange={(e) => handleChange('postalCode', e.target.value)} className={inputClass} />
+              {formErrors.postalCode && <p className="text-[10px] text-rose-500 font-medium">{formErrors.postalCode}</p>}
             </div>
             <div className="space-y-1 md:col-span-2">
               <label className={labelClass}>Address Line 1</label>
