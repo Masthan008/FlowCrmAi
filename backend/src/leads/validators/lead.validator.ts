@@ -167,9 +167,9 @@ export const listLeadsSchema = z.object({
  * Validation: Get by ID param
  */
 export const getLeadByIdSchema = z.object({
-  body: z.object({}).optional(),
+  body: z.any().optional(),
   params: z.object({
     id: z.string().uuid('Invalid lead ID'),
   }),
-  query: z.object({}).optional(),
+  query: z.any().optional(),
 });

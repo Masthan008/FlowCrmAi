@@ -310,7 +310,7 @@ export const WorkflowsTab: React.FC<WorkflowsTabProps> = ({ companyId }) => {
           <div className="flex flex-col space-y-1.5">
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Trigger Config (JSON)</label>
             <textarea
-              className="glass-input w-full text-sm text-slate-700 py-2.5 px-4 border border-slate-200/80 rounded-xl focus:border-brand-550 focus:ring-2 focus:ring-brand-100 font-mono text-xs resize-none"
+              className="w-full text-sm text-slate-800 bg-white py-2.5 px-4 border border-slate-200/80 rounded-xl focus:border-brand-550 focus:ring-2 focus:ring-brand-100 font-mono text-xs resize-none"
               rows={3}
               value={form.triggerConfig}
               onChange={(e) => setForm((prev) => ({ ...prev, triggerConfig: e.target.value }))}
@@ -372,7 +372,7 @@ export const WorkflowsTab: React.FC<WorkflowsTabProps> = ({ companyId }) => {
                   />
                   <div className="flex flex-col space-y-1.5">
                     <textarea
-                      className="glass-input w-full text-sm text-slate-700 py-2 px-3 border border-slate-200/80 rounded-xl focus:border-brand-550 focus:ring-2 focus:ring-brand-100 font-mono text-xs resize-none"
+                      className="w-full text-sm text-slate-800 bg-white py-2 px-3 border border-slate-200/80 rounded-xl focus:border-brand-550 focus:ring-2 focus:ring-brand-100 font-mono text-xs resize-none"
                       rows={2}
                       value={action.config}
                       onChange={(e) => updateAction(idx, 'config', e.target.value)}

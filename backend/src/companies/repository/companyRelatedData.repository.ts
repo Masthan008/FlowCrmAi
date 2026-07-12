@@ -108,13 +108,8 @@ export const companyRelatedDataRepository = {
   },
 
   async getPayments(companyId: string) {
-    const customers = await prisma.customer.findMany({
-      where: { companyId, deletedAt: null },
-      select: { id: true },
-    });
-    const customerIds = customers.map(c => c.id);
     const invoices = await prisma.invoice.findMany({
-      where: { customerId: { in: customerIds }, deletedAt: null },
+      where: { companyId, deletedAt: null },
       select: { id: true },
     });
     const invoiceIds = invoices.map(i => i.id);

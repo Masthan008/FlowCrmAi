@@ -126,9 +126,9 @@ export const listDealsSchema = z.object({
 });
 
 export const getDealByIdSchema = z.object({
-  body: z.object({}).optional(),
+  body: z.any().optional(),
   params: z.object({
     id: z.string().uuid('Invalid deal ID'),
   }),
-  query: z.object({}).optional(),
+  query: z.any().optional(),
 });

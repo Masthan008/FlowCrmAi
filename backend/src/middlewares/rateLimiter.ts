@@ -3,7 +3,7 @@ import { ResponseHelper } from '../helpers/response';
 
 export const apiRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes window
-  max: process.env.NODE_ENV === 'production' ? 100 : 10000, // Limit each IP to 10000 requests in dev
+  max: process.env.NODE_ENV === 'production' ? 5000 : 50000, // Limit each IP to 50000 requests in dev
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next, options) => {
@@ -19,7 +19,7 @@ export const apiRateLimiter = rateLimit({
 
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes window
-  max: process.env.NODE_ENV === 'production' ? 10 : 1000, // Limit each IP to 1000 login/refresh attempts in dev
+  max: process.env.NODE_ENV === 'production' ? 500 : 5000, // Limit each IP to 5000 login/refresh attempts in dev
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next, options) => {

@@ -155,7 +155,7 @@ export const listCompaniesSchema = z.object({
 });
 
 export const getCompanyByIdSchema = z.object({
-  body: z.object({}).optional(),
+  body: z.any().optional(),
   params: z.object({ id: z.string().uuid('Invalid company ID') }),
-  query: z.object({}).optional(),
+  query: z.any().optional(),
 });

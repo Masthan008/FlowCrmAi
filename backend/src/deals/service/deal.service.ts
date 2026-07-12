@@ -5,7 +5,11 @@ const cleanData = (data: Record<string, any>): Record<string, any> => {
   const cleaned: Record<string, any> = {};
   for (const [key, value] of Object.entries(data)) {
     if (value === '' || value === undefined) {
-      cleaned[key] = null;
+      if (key === 'tags') {
+        cleaned[key] = [];
+      } else {
+        cleaned[key] = null;
+      }
     } else {
       cleaned[key] = value;
     }

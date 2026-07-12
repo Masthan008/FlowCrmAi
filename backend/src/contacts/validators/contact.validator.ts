@@ -136,7 +136,9 @@ export const bulkUpdateOwnerSchema = z.object({
  * Validation: Single ID param check
  */
 export const getContactByIdSchema = z.object({
+  body: z.any().optional(),
   params: z.object({
     id: z.string().uuid('Invalid contact ID'),
   }),
+  query: z.any().optional(),
 });
