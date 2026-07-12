@@ -18,31 +18,34 @@ interface FollowupsTabProps {
 }
 
 const FOLLOWUP_TYPES = [
-  { value: 'call', label: 'Call' },
-  { value: 'email', label: 'Email' },
-  { value: 'meeting', label: 'Meeting' },
-  { value: 'demo', label: 'Demo' },
-  { value: 'proposal', label: 'Proposal' },
-  { value: 'follow_up', label: 'Follow Up' },
-  { value: 'review', label: 'Review' },
-  { value: 'other', label: 'Other' },
+  { value: 'Business Review', label: 'Business Review' },
+  { value: 'Renewal', label: 'Renewal' },
+  { value: 'Contract Discussion', label: 'Contract Discussion' },
+  { value: 'Quarterly Meeting', label: 'Quarterly Meeting' },
+  { value: 'Executive Meeting', label: 'Executive Meeting' },
+  { value: 'Sales Visit', label: 'Sales Visit' },
+  { value: 'Customer Success Review', label: 'Customer Success Review' },
+  { value: 'Escalation', label: 'Escalation' },
 ];
 
 const PRIORITY_OPTIONS = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'critical', label: 'Critical' },
+  { value: 'Low', label: 'Low' },
+  { value: 'Medium', label: 'Medium' },
+  { value: 'High', label: 'High' },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'cancelled', label: 'Cancelled' },
-  { value: 'overdue', label: 'Overdue' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Completed', label: 'Completed' },
+  { value: 'Cancelled', label: 'Cancelled' },
+  { value: 'Overdue', label: 'Overdue' },
 ];
 
 const STATUS_VARIANTS: Record<string, 'warning' | 'success' | 'error' | 'info' | 'neutral'> = {
+  Pending: 'warning',
+  Completed: 'success',
+  Cancelled: 'neutral',
+  Overdue: 'error',
   pending: 'warning',
   completed: 'success',
   cancelled: 'neutral',
@@ -50,7 +53,9 @@ const STATUS_VARIANTS: Record<string, 'warning' | 'success' | 'error' | 'info' |
 };
 
 const PRIORITY_BADGE: Record<string, 'error' | 'warning' | 'info' | 'neutral'> = {
-  critical: 'error',
+  High: 'warning',
+  Medium: 'info',
+  Low: 'neutral',
   high: 'warning',
   medium: 'info',
   low: 'neutral',
@@ -67,12 +72,12 @@ interface FollowupFormData {
 }
 
 const emptyForm: FollowupFormData = {
-  type: 'call',
+  type: 'Business Review',
   title: '',
   description: '',
   ownerId: '',
   dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-  priority: 'medium',
+  priority: 'Medium',
   reminderDate: '',
 };
 

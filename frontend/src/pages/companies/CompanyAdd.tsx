@@ -26,7 +26,11 @@ const companyFormSchema = z.object({
   name: z.string().min(1, 'Company name is required').max(200),
   legalName: z.string().max(200).optional().or(z.literal('')),
   displayName: z.string().max(200).optional().or(z.literal('')),
-  logo: z.string().url('Invalid logo URL').optional().or(z.literal('')),
+  logo: z.string().url('Invalid logo URL').refine(val => {
+    if (!val) return true;
+    const cleanUrl = val.split('?')[0].split('#')[0];
+    return /\.(png|jpg|jpeg|gif|svg|webp|ico)$/i.test(cleanUrl);
+  }, 'Logo must be a valid image URL ending with png, jpg, jpeg, gif, svg, webp, or ico').optional().or(z.literal('')),
   companyType: z.string().optional().or(z.literal('')),
   industry: z.string().regex(textOnlyRegex, 'Industry must contain only letters').max(100).optional().or(z.literal('')),
   subIndustry: z.string().regex(textOnlyRegex, 'Sub Industry must contain only letters').max(100).optional().or(z.literal('')),

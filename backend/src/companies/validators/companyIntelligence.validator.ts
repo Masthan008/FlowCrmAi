@@ -27,20 +27,20 @@ export const updateLifecycleSchema = z.object({
 
 export const getScoreSchema = z.object({
   params: z.object({ id: z.string().uuid('Invalid company ID') }),
-  query: z.object({}).optional(),
-  body: z.object({}).optional(),
+  query: z.any().optional(),
+  body: z.any().optional(),
 });
 
 export const getHealthSchema = z.object({
   params: z.object({ id: z.string().uuid('Invalid company ID') }),
-  query: z.object({}).optional(),
-  body: z.object({}).optional(),
+  query: z.any().optional(),
+  body: z.any().optional(),
 });
 
 export const getRiskSchema = z.object({
   params: z.object({ id: z.string().uuid('Invalid company ID') }),
-  query: z.object({}).optional(),
-  body: z.object({}).optional(),
+  query: z.any().optional(),
+  body: z.any().optional(),
 });
 
 const segmentRuleSchema = z.object({
@@ -142,10 +142,10 @@ export const createRecommendationSchema = z.object({
     description: z.string().max(1000).optional().or(z.literal('')),
     priority: z.enum(['Low', 'Medium', 'High', 'Critical']).optional(),
     confidence: z.number().min(0).max(100).optional(),
-    expiresAt: z.string().datetime().optional().or(z.literal('')),
+    expiresAt: z.string().optional().or(z.literal('')),
   }),
   params: z.object({ id: z.string().uuid('Invalid company ID') }),
-  query: z.object({}).optional(),
+  query: z.any().optional(),
 });
 
 export const createFollowupSchema = z.object({
@@ -154,11 +154,11 @@ export const createFollowupSchema = z.object({
     title: z.string().min(1, 'Title is required').max(200),
     description: z.string().max(1000).optional().or(z.literal('')),
     ownerId: z.string().uuid('Invalid owner ID').optional().or(z.literal('')),
-    dueDate: z.string().datetime({ message: 'Invalid due date format' }),
+    dueDate: z.string(),
     priority: z.enum(['Low', 'Medium', 'High']).optional(),
   }),
   params: z.object({ id: z.string().uuid('Invalid company ID') }),
-  query: z.object({}).optional(),
+  query: z.any().optional(),
 });
 
 export const updateFollowupSchema = z.object({
@@ -167,13 +167,13 @@ export const updateFollowupSchema = z.object({
     title: z.string().min(1).max(200).optional(),
     description: z.string().max(1000).optional().or(z.literal('')),
     ownerId: z.string().uuid('Invalid owner ID').optional().or(z.literal('')),
-    dueDate: z.string().datetime().optional(),
+    dueDate: z.string().optional(),
     priority: z.enum(['Low', 'Medium', 'High']).optional(),
     status: z.enum(['Pending', 'Completed', 'Cancelled', 'Overdue']).optional(),
     notes: z.string().max(2000).optional().or(z.literal('')),
   }),
   params: z.object({ id: z.string().uuid('Invalid company ID'), followupId: z.string().uuid('Invalid followup ID') }),
-  query: z.object({}).optional(),
+  query: z.any().optional(),
 });
 
 export const listQuerySchema = z.object({
@@ -183,7 +183,7 @@ export const listQuerySchema = z.object({
     status: z.string().optional(),
     type: z.string().optional(),
     priority: z.string().optional(),
-  }),
-  params: z.object({}).optional(),
-  body: z.object({}).optional(),
+  }).passthrough(),
+  params: z.any().optional(),
+  body: z.any().optional(),
 });

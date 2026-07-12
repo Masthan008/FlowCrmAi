@@ -150,6 +150,10 @@ export const CompanyEdit: React.FC = () => {
     if (formData.logo && formData.logo !== '') {
       try {
         new URL(formData.logo);
+        const cleanUrl = formData.logo.split('?')[0].split('#')[0];
+        if (!/\.(png|jpg|jpeg|gif|svg|webp|ico)$/i.test(cleanUrl)) {
+          errors.logo = 'Logo must be a valid image URL ending with png, jpg, jpeg, gif, svg, webp, or ico';
+        }
       } catch {
         errors.logo = 'Invalid logo URL (must start with http:// or https://)';
       }

@@ -14,7 +14,11 @@ export const createCompanySchema = z.object({
     name: z.string().min(1, 'Company name is required').max(200),
     legalName: z.string().max(200).optional().nullable().or(z.literal('')),
     displayName: z.string().max(200).optional().nullable().or(z.literal('')),
-    logo: z.string().url('Invalid logo URL').optional().nullable().or(z.literal('')),
+    logo: z.string().url('Invalid logo URL').refine(val => {
+      if (!val) return true;
+      const cleanUrl = val.split('?')[0].split('#')[0];
+      return /\.(png|jpg|jpeg|gif|svg|webp|ico)$/i.test(cleanUrl);
+    }, 'Logo must be a valid image URL ending with png, jpg, jpeg, gif, svg, webp, or ico').optional().nullable().or(z.literal('')),
     companyType: z.string().max(100).optional().nullable().or(z.literal('')),
     industry: z.string().regex(textOnlyRegex, 'Industry must contain only letters').max(100).optional().nullable().or(z.literal('')),
     subIndustry: z.string().regex(textOnlyRegex, 'Sub Industry must contain only letters').max(100).optional().nullable().or(z.literal('')),
@@ -61,7 +65,11 @@ export const updateCompanySchema = z.object({
     name: z.string().min(1, 'Company name is required').max(200).optional(),
     legalName: z.string().max(200).optional().nullable().or(z.literal('')),
     displayName: z.string().max(200).optional().nullable().or(z.literal('')),
-    logo: z.string().url('Invalid logo URL').optional().nullable().or(z.literal('')),
+    logo: z.string().url('Invalid logo URL').refine(val => {
+      if (!val) return true;
+      const cleanUrl = val.split('?')[0].split('#')[0];
+      return /\.(png|jpg|jpeg|gif|svg|webp|ico)$/i.test(cleanUrl);
+    }, 'Logo must be a valid image URL ending with png, jpg, jpeg, gif, svg, webp, or ico').optional().nullable().or(z.literal('')),
     companyType: z.string().max(100).optional().nullable().or(z.literal('')),
     industry: z.string().regex(textOnlyRegex, 'Industry must contain only letters').max(100).optional().nullable().or(z.literal('')),
     subIndustry: z.string().regex(textOnlyRegex, 'Sub Industry must contain only letters').max(100).optional().nullable().or(z.literal('')),
@@ -151,7 +159,7 @@ export const listCompaniesSchema = z.object({
     highRevenue: z.string().optional(),
     highPriority: z.string().optional(),
     archivedOnly: z.string().optional(),
-  }).optional(),
+  }).passthrough().optional(),
 });
 
 export const getCompanyByIdSchema = z.object({

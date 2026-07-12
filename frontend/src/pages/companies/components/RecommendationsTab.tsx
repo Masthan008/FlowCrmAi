@@ -20,25 +20,30 @@ interface RecommendationsTabProps {
 const RECOMMENDATION_TYPES = [
   { value: 'upsell', label: 'Upsell' },
   { value: 'cross_sell', label: 'Cross Sell' },
-  { value: 'engagement', label: 'Engagement' },
-  { value: 'retention', label: 'Retention' },
-  { value: 'risk_mitigation', label: 'Risk Mitigation' },
-  { value: 'growth', label: 'Growth' },
+  { value: 'renewal_reminder', label: 'Renewal Reminder' },
+  { value: 'contact_time', label: 'Contact Time' },
+  { value: 'risk_warning', label: 'Risk Warning' },
+  { value: 'follow_up', label: 'Follow Up' },
   { value: 'general', label: 'General' },
 ];
 
 const PRIORITY_OPTIONS = [
-  { value: 'critical', label: 'Critical' },
-  { value: 'high', label: 'High' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'low', label: 'Low' },
+  { value: 'Critical', label: 'Critical' },
+  { value: 'High', label: 'High' },
+  { value: 'Medium', label: 'Medium' },
+  { value: 'Low', label: 'Low' },
 ];
 
 const PRIORITY_ORDER: Record<string, number> = {
+  Critical: 0, High: 1, Medium: 2, Low: 3,
   critical: 0, high: 1, medium: 2, low: 3,
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
+  Critical: 'text-rose-600 bg-rose-50 border-rose-200',
+  High: 'text-orange-600 bg-orange-50 border-orange-200',
+  Medium: 'text-amber-600 bg-amber-50 border-amber-200',
+  Low: 'text-slate-600 bg-slate-50 border-slate-200',
   critical: 'text-rose-600 bg-rose-50 border-rose-200',
   high: 'text-orange-600 bg-orange-50 border-orange-200',
   medium: 'text-amber-600 bg-amber-50 border-amber-200',
@@ -53,7 +58,7 @@ export const RecommendationsTab: React.FC<RecommendationsTabProps> = ({ companyI
   const [newType, setNewType] = useState('general');
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
-  const [newPriority, setNewPriority] = useState('medium');
+  const [newPriority, setNewPriority] = useState('Medium');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -79,7 +84,7 @@ export const RecommendationsTab: React.FC<RecommendationsTabProps> = ({ companyI
     setNewTitle('');
     setNewDescription('');
     setNewType('general');
-    setNewPriority('medium');
+    setNewPriority('Medium');
   };
 
   const handleMarkRead = async (rec: CompanyRecommendation) => {

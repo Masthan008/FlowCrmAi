@@ -4,3 +4,21 @@
 {"level":"info","message":"Environment: development","timestamp":"2026-07-12 15:50:59"}
 {"level":"info","message":"=========================================","timestamp":"2026-07-12 15:50:59"}
 {"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-12 15:51:01"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-12 16:02:07"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-12 16:02:07"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-12 16:02:07"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-12 16:02:07"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-12 16:02:07"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-12 16:02:08"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-12 16:17:15"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-12 16:17:15"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-12 16:17:15"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-12 16:17:15"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-12 16:17:15"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-12 16:17:16"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-12 16:17:29"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-12 16:17:29"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-12 16:17:29"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-12 16:17:29"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-12 16:17:29"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-12 16:17:29"}
