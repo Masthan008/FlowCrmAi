@@ -57,6 +57,53 @@ export const DashboardLayout: React.FC = () => {
   const unreadNotifications = systemNotifications.filter(n => !n.read);
   const unreadCount = unreadNotifications.length;
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{
+    leads: any[];
+    contacts: any[];
+    deals: any[];
+    companies: any[];
+  }>({ leads: [], contacts: [], deals: [], companies: [] });
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults({ leads: [], contacts: [], deals: [], companies: [] });
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const response = await api.get('/global-search', {
+          params: { query: searchQuery }
+        });
+        if (response.data?.success) {
+          setSearchResults(response.data.data);
+        }
+      } catch (err) {
+        console.error('Global search error:', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   useEffect(() => {
     if (theme === 'dark' || theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       document.documentElement.classList.add('dark');
@@ -261,13 +308,142 @@ export const DashboardLayout: React.FC = () => {
           </div>
 
           {/* Center search bar */}
-          <div className="hidden lg:flex items-center relative max-w-sm w-full mx-8">
-            <Search className="absolute left-3.5 text-slate-455 w-4 h-4" />
+          <div ref={searchRef} className="hidden lg:flex items-center relative max-w-sm w-full mx-8">
+            <Search className="absolute left-3.5 text-slate-455 w-4 h-4 animate-pulse-subtle" />
             <input
               type="text"
-              placeholder="Search leads, deals, contacts..."
-              className="w-full pl-10 pr-4 py-1.5 text-xs border border-slate-150 rounded-xl bg-slate-50/50 focus:outline-none focus:bg-white focus:border-brand-550 focus:ring-4 focus:ring-brand-100/80 transition-all font-medium text-slate-600"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowDropdown(true);
+              }}
+              onFocus={() => setShowDropdown(true)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setShowDropdown(false);
+                }
+              }}
+              placeholder="Search leads, deals, contacts, accounts..."
+              className="w-full pl-10 pr-10 py-1.5 text-xs border border-slate-150 rounded-xl bg-slate-50/50 focus:outline-none focus:bg-white focus:border-brand-550 focus:ring-4 focus:ring-brand-100/80 transition-all font-medium text-slate-600 dark:bg-slate-800/40 dark:border-slate-700 dark:text-slate-200 dark:focus:bg-slate-900"
             />
+            {isSearching && (
+              <div className="absolute right-3.5 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-3 w-3 border-2 border-brand-550 border-t-transparent"></div>
+              </div>
+            )}
+
+            {/* Global Search Dropdown */}
+            {showDropdown && searchQuery.trim().length >= 2 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-150 dark:border-slate-800 rounded-2xl shadow-glossy-lg max-h-96 overflow-y-auto z-50 p-2 py-3">
+                {/* No results placeholder */}
+                {Object.values(searchResults).every((arr) => arr.length === 0) && !isSearching && (
+                  <div className="text-center py-6 text-slate-400 text-xs font-semibold">
+                    No results found for "{searchQuery}"
+                  </div>
+                )}
+
+                {/* Leads Category */}
+                {searchResults.leads && searchResults.leads.length > 0 && (
+                  <div className="mb-3">
+                    <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Leads</div>
+                    {searchResults.leads.map((lead) => (
+                      <Link
+                        key={lead.id}
+                        to={`/leads/${lead.id}`}
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        <User size={14} className="text-amber-500 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{lead.fullName}</p>
+                          <p className="text-[10px] text-slate-400 truncate">
+                            {lead.leadNumber} {lead.companyName ? `• ${lead.companyName}` : ''}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
+                {/* Contacts Category */}
+                {searchResults.contacts && searchResults.contacts.length > 0 && (
+                  <div className="mb-3">
+                    <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Contacts</div>
+                    {searchResults.contacts.map((contact) => (
+                      <Link
+                        key={contact.id}
+                        to={`/contacts/${contact.id}`}
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        <Contact2 size={14} className="text-indigo-500 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{contact.fullName}</p>
+                          <p className="text-[10px] text-slate-400 truncate">
+                            {contact.contactNumber} {contact.email ? `• ${contact.email}` : ''}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
+                {/* Deals Category */}
+                {searchResults.deals && searchResults.deals.length > 0 && (
+                  <div className="mb-3">
+                    <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Deals</div>
+                    {searchResults.deals.map((deal) => (
+                      <Link
+                        key={deal.id}
+                        to={`/deals/${deal.id}`}
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Briefcase size={14} className="text-emerald-500 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{deal.name}</p>
+                            <p className="text-[10px] text-slate-400 truncate">
+                              {deal.dealNumber} • ${deal.value.toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                          deal.status === 'Won' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30' :
+                          deal.status === 'Lost' ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/30' :
+                          'bg-slate-100 text-slate-650 dark:bg-slate-800 dark:text-slate-300'
+                        }`}>
+                          {deal.status}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
+                {/* Accounts Category */}
+                {searchResults.companies && searchResults.companies.length > 0 && (
+                  <div>
+                    <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Accounts</div>
+                    {searchResults.companies.map((company) => (
+                      <Link
+                        key={company.id}
+                        to={`/companies/${company.id}`}
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        <Building size={14} className="text-blue-500 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{company.name}</p>
+                          <p className="text-[10px] text-slate-400 truncate">
+                            {company.companyNumber} {company.primaryEmail ? `• ${company.primaryEmail}` : ''}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right Action Icons */}

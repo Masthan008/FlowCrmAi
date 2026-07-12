@@ -34,7 +34,7 @@ export class CompanyRepository extends BaseRepository<any> {
     });
   }
 
-  async paginateWithRelations(params: {
+  async findMany(params: {
     page?: number;
     limit?: number;
     search?: string;
@@ -63,7 +63,7 @@ export class CompanyRepository extends BaseRepository<any> {
     sortBy?: string;
     sortDir?: string;
   }) {
-    const {
+    let {
       page = 1, limit = 20, search, status, industry, country, state, owner,
       priority, rating, minRevenue, maxRevenue, minEmployees, maxEmployees,
       fromDate, toDate, myCompaniesOnly, customersOnly, partnersOnly,
@@ -82,7 +82,9 @@ export class CompanyRepository extends BaseRepository<any> {
     if (prospectsOnly) where.status = 'Prospect';
     if (archivedOnly) where.status = 'Archived';
     if (highRevenue) {
-      where.annualRevenue = { gte: 10000000 };
+      where.annualRevenue = { gte: 5000000 };
+      sortBy = 'annualRevenue';
+      sortDir = 'desc';
     }
     if (highPriority) {
       where.priority = 'High';
@@ -91,6 +93,8 @@ export class CompanyRepository extends BaseRepository<any> {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       where.createdAt = { gte: thirtyDaysAgo };
+      sortBy = 'createdAt';
+      sortDir = 'desc';
     }
 
     if (search) {
@@ -163,7 +167,7 @@ export class CompanyRepository extends BaseRepository<any> {
       prisma.company.count({ where: { ...baseWhere, status: 'Customer' } }),
       prisma.company.count({ where: { ...baseWhere, status: 'Partner' } }),
       prisma.company.count({ where: { ...baseWhere, status: 'Prospect' } }),
-      prisma.company.count({ where: { ...baseWhere, annualRevenue: { gte: 10000000 } } }),
+      prisma.company.count({ where: { ...baseWhere, annualRevenue: { gte: 5000000 } } }),
       prisma.company.count({ where: { ...baseWhere, status: { notIn: ['Inactive', 'Archived'] } } }),
       prisma.company.count({ where: { ...baseWhere, status: { in: ['Inactive', 'Archived'] } } }),
     ]);

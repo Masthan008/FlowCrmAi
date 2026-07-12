@@ -17,6 +17,7 @@ import productRouter from '../../products/routes/product.routes';
 import meetingRouter from '../../meetings/routes/meeting.routes';
 import quoteRouter from '../../quotes/routes/quote.routes';
 import invoiceRouter from '../../invoices/routes/invoice.routes';
+import { searchController } from '../../controllers/search.controller';
 
 const router = Router();
 
@@ -54,6 +55,8 @@ router.use('/products', productRouter);
 router.use('/meetings', meetingRouter);
 router.use('/quotes', quoteRouter);
 router.use('/invoices', invoiceRouter);
+
+router.get('/global-search', requireAuth, searchController.globalSearch);
 
 router.get('/deal-workflows', requireAuth, requirePermission('deals:workflows:manage'), dealAutomationController.getWorkflows);
 router.post('/deal-workflows', requireAuth, requirePermission('deals:workflows:manage'), dealAutomationController.createWorkflow);

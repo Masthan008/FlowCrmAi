@@ -5,6 +5,9 @@ const textOnlyRegex = /^[A-Za-z\s]*$/;
 const timezoneRegex = /^(UTC|GMT|[A-Za-z_]+\/[A-Za-z_]+)$/;
 const currencyRegex = /^[A-Z]{3}$/;
 const langRegex = /^[a-z]{2}$/;
+const gstRegex = /^[0-9]{2}[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}[0-9a-zA-Z]{1}[zZ]{1}[0-9a-zA-Z]{1}$/;
+const panRegex = /^[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}$/;
+const alphanumericRegex = /^[a-zA-Z0-9]+$/;
 
 export const createCompanySchema = z.object({
   body: z.object({
@@ -22,10 +25,10 @@ export const createCompanySchema = z.object({
     primaryPhone: z.string().regex(exactPhoneRegex, 'Primary Phone must be exactly 10 digits').optional().nullable().or(z.literal('')),
     secondaryPhone: z.string().regex(exactPhoneRegex, 'Secondary Phone must be exactly 10 digits').optional().nullable().or(z.literal('')),
     whatsApp: z.string().regex(exactPhoneRegex, 'WhatsApp must be exactly 10 digits').optional().nullable().or(z.literal('')),
-    gstNumber: z.string().max(50).optional().nullable().or(z.literal('')),
-    taxNumber: z.string().max(50).optional().nullable().or(z.literal('')),
-    registrationNumber: z.string().max(50).optional().nullable().or(z.literal('')),
-    panNumber: z.string().max(50).optional().nullable().or(z.literal('')),
+    gstNumber: z.string().max(50).refine(val => !val || gstRegex.test(val), 'Invalid GST format (e.g. 22AAAAA0000A1Z5)').optional().nullable(),
+    taxNumber: z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Tax Number must contain only alphanumeric characters').optional().nullable(),
+    registrationNumber: z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Registration Number must contain only alphanumeric characters').optional().nullable(),
+    panNumber: z.string().max(50).refine(val => !val || panRegex.test(val), 'Invalid PAN format (e.g. ABCDE1234F)').optional().nullable(),
     foundedYear: z.number().int().min(1800).max(2100).optional().nullable(),
     annualRevenue: z.number().min(0).optional().nullable(),
     employeeCount: z.number().int().min(0).optional().nullable(),
@@ -69,10 +72,10 @@ export const updateCompanySchema = z.object({
     primaryPhone: z.string().regex(exactPhoneRegex, 'Primary Phone must be exactly 10 digits').optional().nullable().or(z.literal('')),
     secondaryPhone: z.string().regex(exactPhoneRegex, 'Secondary Phone must be exactly 10 digits').optional().nullable().or(z.literal('')),
     whatsApp: z.string().regex(exactPhoneRegex, 'WhatsApp must be exactly 10 digits').optional().nullable().or(z.literal('')),
-    gstNumber: z.string().max(50).optional().nullable().or(z.literal('')),
-    taxNumber: z.string().max(50).optional().nullable().or(z.literal('')),
-    registrationNumber: z.string().max(50).optional().nullable().or(z.literal('')),
-    panNumber: z.string().max(50).optional().nullable().or(z.literal('')),
+    gstNumber: z.string().max(50).refine(val => !val || gstRegex.test(val), 'Invalid GST format (e.g. 22AAAAA0000A1Z5)').optional().nullable(),
+    taxNumber: z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Tax Number must contain only alphanumeric characters').optional().nullable(),
+    registrationNumber: z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Registration Number must contain only alphanumeric characters').optional().nullable(),
+    panNumber: z.string().max(50).refine(val => !val || panRegex.test(val), 'Invalid PAN format (e.g. ABCDE1234F)').optional().nullable(),
     foundedYear: z.number().int().min(1800).max(2100).optional().nullable(),
     annualRevenue: z.number().min(0).optional().nullable(),
     employeeCount: z.number().int().min(0).optional().nullable(),

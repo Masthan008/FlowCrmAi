@@ -22,6 +22,7 @@ const product_routes_1 = __importDefault(require("../../products/routes/product.
 const meeting_routes_1 = __importDefault(require("../../meetings/routes/meeting.routes"));
 const quote_routes_1 = __importDefault(require("../../quotes/routes/quote.routes"));
 const invoice_routes_1 = __importDefault(require("../../invoices/routes/invoice.routes"));
+const search_controller_1 = require("../../controllers/search.controller");
 const router = (0, express_1.Router)();
 // Health check endpoint
 router.get('/health', async (req, res) => {
@@ -55,6 +56,7 @@ router.use('/products', product_routes_1.default);
 router.use('/meetings', meeting_routes_1.default);
 router.use('/quotes', quote_routes_1.default);
 router.use('/invoices', invoice_routes_1.default);
+router.get('/global-search', auth_2.requireAuth, search_controller_1.searchController.globalSearch);
 router.get('/deal-workflows', auth_2.requireAuth, (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.getWorkflows);
 router.post('/deal-workflows', auth_2.requireAuth, (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.createWorkflow);
 // Generate placeholder routers for all remaining CRM infrastructure modules
