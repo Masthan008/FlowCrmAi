@@ -18,6 +18,9 @@ const textOnlyRegex = /^[A-Za-z\s]*$/;
 const timezoneRegex = /^(UTC|GMT|[A-Za-z_]+\/[A-Za-z_]+)$/;
 const currencyRegex = /^[A-Z]{3}$/;
 const langRegex = /^[a-z]{2}$/;
+const gstRegex = /^[0-9]{2}[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}[0-9a-zA-Z]{1}[zZ]{1}[0-9a-zA-Z]{1}$/;
+const panRegex = /^[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}$/;
+const alphanumericRegex = /^[a-zA-Z0-9]+$/;
 
 const companyFormSchema = z.object({
   name: z.string().min(1, 'Company name is required').max(200),
@@ -34,10 +37,10 @@ const companyFormSchema = z.object({
   primaryPhone: z.string().regex(exactPhoneRegex, 'Phone number must be exactly 10 digits').optional().or(z.literal('')),
   secondaryPhone: z.string().regex(exactPhoneRegex, 'Phone number must be exactly 10 digits').optional().or(z.literal('')),
   whatsApp: z.string().regex(exactPhoneRegex, 'WhatsApp must be exactly 10 digits').optional().or(z.literal('')),
-  gstNumber: z.string().optional().or(z.literal('')),
-  taxNumber: z.string().optional().or(z.literal('')),
-  registrationNumber: z.string().optional().or(z.literal('')),
-  panNumber: z.string().optional().or(z.literal('')),
+  gstNumber: z.string().refine(val => !val || gstRegex.test(val), 'Invalid GST format (e.g. 22AAAAA0000A1Z5)').optional().or(z.literal('')),
+  taxNumber: z.string().refine(val => !val || alphanumericRegex.test(val), 'Tax Number must contain only alphanumeric characters').optional().or(z.literal('')),
+  registrationNumber: z.string().refine(val => !val || alphanumericRegex.test(val), 'Registration Number must contain only alphanumeric characters').optional().or(z.literal('')),
+  panNumber: z.string().refine(val => !val || panRegex.test(val), 'Invalid PAN format (e.g. ABCDE1234F)').optional().or(z.literal('')),
   foundedYear: z.coerce.number().int().min(1800, 'Founded year must be >= 1800').max(2100, 'Founded year must be <= 2100').optional().nullable(),
   annualRevenue: z.coerce.number().min(0, 'Revenue cannot be negative').optional().nullable(),
   employeeCount: z.coerce.number().int().min(0, 'Employees cannot be negative').optional().nullable(),
@@ -313,18 +316,22 @@ export const CompanyAdd: React.FC = () => {
                 <div className="space-y-1">
                   <label className={labelClass}>GST Number</label>
                   <input {...register('gstNumber')} placeholder="e.g. GSTIN123456" className={inputClass} />
+                  {errors.gstNumber && <p className="text-[10px] text-rose-500 font-medium">{errors.gstNumber.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Tax Number</label>
                   <input {...register('taxNumber')} placeholder="e.g. TAX-ABC-123" className={inputClass} />
+                  {errors.taxNumber && <p className="text-[10px] text-rose-500 font-medium">{errors.taxNumber.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>Registration Number</label>
                   <input {...register('registrationNumber')} placeholder="e.g. REG-001234" className={inputClass} />
+                  {errors.registrationNumber && <p className="text-[10px] text-rose-500 font-medium">{errors.registrationNumber.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className={labelClass}>PAN Number</label>
                   <input {...register('panNumber')} placeholder="e.g. PAN-ABCDE1234F" className={inputClass} />
+                  {errors.panNumber && <p className="text-[10px] text-rose-500 font-medium">{errors.panNumber.message}</p>}
                 </div>
               </div>
             </div>

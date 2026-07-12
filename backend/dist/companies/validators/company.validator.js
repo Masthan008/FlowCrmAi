@@ -7,6 +7,9 @@ const textOnlyRegex = /^[A-Za-z\s]*$/;
 const timezoneRegex = /^(UTC|GMT|[A-Za-z_]+\/[A-Za-z_]+)$/;
 const currencyRegex = /^[A-Z]{3}$/;
 const langRegex = /^[a-z]{2}$/;
+const gstRegex = /^[0-9]{2}[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}[0-9a-zA-Z]{1}[zZ]{1}[0-9a-zA-Z]{1}$/;
+const panRegex = /^[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}$/;
+const alphanumericRegex = /^[a-zA-Z0-9]+$/;
 exports.createCompanySchema = zod_1.z.object({
     body: zod_1.z.object({
         name: zod_1.z.string().min(1, 'Company name is required').max(200),
@@ -23,10 +26,10 @@ exports.createCompanySchema = zod_1.z.object({
         primaryPhone: zod_1.z.string().regex(exactPhoneRegex, 'Primary Phone must be exactly 10 digits').optional().nullable().or(zod_1.z.literal('')),
         secondaryPhone: zod_1.z.string().regex(exactPhoneRegex, 'Secondary Phone must be exactly 10 digits').optional().nullable().or(zod_1.z.literal('')),
         whatsApp: zod_1.z.string().regex(exactPhoneRegex, 'WhatsApp must be exactly 10 digits').optional().nullable().or(zod_1.z.literal('')),
-        gstNumber: zod_1.z.string().max(50).optional().nullable().or(zod_1.z.literal('')),
-        taxNumber: zod_1.z.string().max(50).optional().nullable().or(zod_1.z.literal('')),
-        registrationNumber: zod_1.z.string().max(50).optional().nullable().or(zod_1.z.literal('')),
-        panNumber: zod_1.z.string().max(50).optional().nullable().or(zod_1.z.literal('')),
+        gstNumber: zod_1.z.string().max(50).refine(val => !val || gstRegex.test(val), 'Invalid GST format (e.g. 22AAAAA0000A1Z5)').optional().nullable(),
+        taxNumber: zod_1.z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Tax Number must contain only alphanumeric characters').optional().nullable(),
+        registrationNumber: zod_1.z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Registration Number must contain only alphanumeric characters').optional().nullable(),
+        panNumber: zod_1.z.string().max(50).refine(val => !val || panRegex.test(val), 'Invalid PAN format (e.g. ABCDE1234F)').optional().nullable(),
         foundedYear: zod_1.z.number().int().min(1800).max(2100).optional().nullable(),
         annualRevenue: zod_1.z.number().min(0).optional().nullable(),
         employeeCount: zod_1.z.number().int().min(0).optional().nullable(),
@@ -69,10 +72,10 @@ exports.updateCompanySchema = zod_1.z.object({
         primaryPhone: zod_1.z.string().regex(exactPhoneRegex, 'Primary Phone must be exactly 10 digits').optional().nullable().or(zod_1.z.literal('')),
         secondaryPhone: zod_1.z.string().regex(exactPhoneRegex, 'Secondary Phone must be exactly 10 digits').optional().nullable().or(zod_1.z.literal('')),
         whatsApp: zod_1.z.string().regex(exactPhoneRegex, 'WhatsApp must be exactly 10 digits').optional().nullable().or(zod_1.z.literal('')),
-        gstNumber: zod_1.z.string().max(50).optional().nullable().or(zod_1.z.literal('')),
-        taxNumber: zod_1.z.string().max(50).optional().nullable().or(zod_1.z.literal('')),
-        registrationNumber: zod_1.z.string().max(50).optional().nullable().or(zod_1.z.literal('')),
-        panNumber: zod_1.z.string().max(50).optional().nullable().or(zod_1.z.literal('')),
+        gstNumber: zod_1.z.string().max(50).refine(val => !val || gstRegex.test(val), 'Invalid GST format (e.g. 22AAAAA0000A1Z5)').optional().nullable(),
+        taxNumber: zod_1.z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Tax Number must contain only alphanumeric characters').optional().nullable(),
+        registrationNumber: zod_1.z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Registration Number must contain only alphanumeric characters').optional().nullable(),
+        panNumber: zod_1.z.string().max(50).refine(val => !val || panRegex.test(val), 'Invalid PAN format (e.g. ABCDE1234F)').optional().nullable(),
         foundedYear: zod_1.z.number().int().min(1800).max(2100).optional().nullable(),
         annualRevenue: zod_1.z.number().min(0).optional().nullable(),
         employeeCount: zod_1.z.number().int().min(0).optional().nullable(),

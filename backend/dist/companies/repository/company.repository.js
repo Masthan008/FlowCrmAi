@@ -32,7 +32,7 @@ class CompanyRepository extends base_repository_1.BaseRepository {
         });
     }
     async paginateWithRelations(params) {
-        const { page = 1, limit = 20, search, status, industry, country, state, owner, priority, rating, minRevenue, maxRevenue, minEmployees, maxEmployees, fromDate, toDate, myCompaniesOnly, customersOnly, partnersOnly, prospectsOnly, recentlyAdded, highRevenue, highPriority, archivedOnly, currentUserId, sortBy = 'createdAt', sortDir = 'desc', } = params;
+        let { page = 1, limit = 20, search, status, industry, country, state, owner, priority, rating, minRevenue, maxRevenue, minEmployees, maxEmployees, fromDate, toDate, myCompaniesOnly, customersOnly, partnersOnly, prospectsOnly, recentlyAdded, highRevenue, highPriority, archivedOnly, currentUserId, sortBy = 'createdAt', sortDir = 'desc', } = params;
         const skip = (page - 1) * limit;
         const where = { deletedAt: null };
         if (myCompaniesOnly && currentUserId) {
@@ -47,7 +47,9 @@ class CompanyRepository extends base_repository_1.BaseRepository {
         if (archivedOnly)
             where.status = 'Archived';
         if (highRevenue) {
-            where.annualRevenue = { gte: 10000000 };
+            where.annualRevenue = { gte: 5000000 };
+            sortBy = 'annualRevenue';
+            sortDir = 'desc';
         }
         if (highPriority) {
             where.priority = 'High';
@@ -56,6 +58,8 @@ class CompanyRepository extends base_repository_1.BaseRepository {
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
             where.createdAt = { gte: thirtyDaysAgo };
+            sortBy = 'createdAt';
+            sortDir = 'desc';
         }
         if (search) {
             where.OR = [
@@ -131,7 +135,7 @@ class CompanyRepository extends base_repository_1.BaseRepository {
             db_1.prisma.company.count({ where: { ...baseWhere, status: 'Customer' } }),
             db_1.prisma.company.count({ where: { ...baseWhere, status: 'Partner' } }),
             db_1.prisma.company.count({ where: { ...baseWhere, status: 'Prospect' } }),
-            db_1.prisma.company.count({ where: { ...baseWhere, annualRevenue: { gte: 10000000 } } }),
+            db_1.prisma.company.count({ where: { ...baseWhere, annualRevenue: { gte: 5000000 } } }),
             db_1.prisma.company.count({ where: { ...baseWhere, status: { notIn: ['Inactive', 'Archived'] } } }),
             db_1.prisma.company.count({ where: { ...baseWhere, status: { in: ['Inactive', 'Archived'] } } }),
         ]);

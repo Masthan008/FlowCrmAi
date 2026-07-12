@@ -70,6 +70,9 @@ export const CompanyEdit: React.FC = () => {
     const timezoneRegex = /^(UTC|GMT|[A-Za-z_]+\/[A-Za-z_]+)$/;
     const currencyRegex = /^[A-Z]{3}$/;
     const langRegex = /^[a-z]{2}$/;
+    const gstRegex = /^[0-9]{2}[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}[0-9a-zA-Z]{1}[zZ]{1}[0-9a-zA-Z]{1}$/;
+    const panRegex = /^[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}$/;
+    const alphanumericRegex = /^[a-zA-Z0-9]+$/;
 
     if (formData.industry && !textOnlyRegex.test(formData.industry)) {
       errors.industry = 'Industry must contain only letters';
@@ -100,6 +103,27 @@ export const CompanyEdit: React.FC = () => {
     }
     if (formData.primaryLanguage && !langRegex.test(formData.primaryLanguage)) {
       errors.primaryLanguage = 'Primary Language must be 2-letter lowercase (e.g. en, da)';
+    }
+
+    if (formData.gstNumber && formData.gstNumber.trim() !== '') {
+      if (!gstRegex.test(formData.gstNumber)) {
+        errors.gstNumber = 'Invalid GST format (e.g. 22AAAAA0000A1Z5)';
+      }
+    }
+    if (formData.taxNumber && formData.taxNumber.trim() !== '') {
+      if (!alphanumericRegex.test(formData.taxNumber)) {
+        errors.taxNumber = 'Tax Number must contain only alphanumeric characters';
+      }
+    }
+    if (formData.registrationNumber && formData.registrationNumber.trim() !== '') {
+      if (!alphanumericRegex.test(formData.registrationNumber)) {
+        errors.registrationNumber = 'Registration Number must contain only alphanumeric characters';
+      }
+    }
+    if (formData.panNumber && formData.panNumber.trim() !== '') {
+      if (!panRegex.test(formData.panNumber)) {
+        errors.panNumber = 'Invalid PAN format (e.g. ABCDE1234F)';
+      }
     }
 
     if (formData.website && formData.website !== '') {
@@ -313,18 +337,22 @@ export const CompanyEdit: React.FC = () => {
             <div className="space-y-1">
               <label className={labelClass}>GST Number</label>
               <input value={formData.gstNumber || ''} onChange={(e) => handleChange('gstNumber', e.target.value)} className={inputClass} />
+              {formErrors.gstNumber && <p className="text-[10px] text-rose-500 font-medium">{formErrors.gstNumber}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Tax Number</label>
               <input value={formData.taxNumber || ''} onChange={(e) => handleChange('taxNumber', e.target.value)} className={inputClass} />
+              {formErrors.taxNumber && <p className="text-[10px] text-rose-500 font-medium">{formErrors.taxNumber}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Registration Number</label>
               <input value={formData.registrationNumber || ''} onChange={(e) => handleChange('registrationNumber', e.target.value)} className={inputClass} />
+              {formErrors.registrationNumber && <p className="text-[10px] text-rose-500 font-medium">{formErrors.registrationNumber}</p>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>PAN Number</label>
               <input value={formData.panNumber || ''} onChange={(e) => handleChange('panNumber', e.target.value)} className={inputClass} />
+              {formErrors.panNumber && <p className="text-[10px] text-rose-500 font-medium">{formErrors.panNumber}</p>}
             </div>
           </div>
         </div>

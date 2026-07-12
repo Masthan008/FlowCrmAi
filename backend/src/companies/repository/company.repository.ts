@@ -34,7 +34,7 @@ export class CompanyRepository extends BaseRepository<any> {
     });
   }
 
-  async findMany(params: {
+  async paginateWithRelations(params: {
     page?: number;
     limit?: number;
     search?: string;
