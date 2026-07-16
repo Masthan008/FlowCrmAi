@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
-import { Activity, Plus, Search, Trash2, Clock, Phone, Mail, Calendar } from 'lucide-react';
+import { Activity, Plus, Search, Trash2, Clock, Phone, Mail, Calendar, Loader2 } from 'lucide-react';
 import { useToast } from '../components/ui/ToastProvider';
+import { api } from '../services/api';
 
 interface ActivityItem {
   id: string;
@@ -19,12 +20,9 @@ export const Activities: React.FC = () => {
   const breadcrumbs = [{ label: 'Activities' }];
   const toast = useToast();
 
-  const [activities, setActivities] = useState<ActivityItem[]>([
-    { id: '1', type: 'Call', title: 'Introductory Qualification Call', contactName: 'Alex Mercer', date: '2026-06-28', time: '10:00 AM', status: 'Planned' },
-    { id: '2', type: 'Meeting', title: 'Contract Negotiations Proposal', contactName: 'Sarah Connor', date: '2026-06-29', time: '02:30 PM', status: 'Planned' },
-    { id: '3', type: 'Email', title: 'Follow-up Pricing Agreement PDF', contactName: 'John Doe', date: '2026-06-27', time: '09:15 AM', status: 'Completed' },
-    { id: '4', type: 'WhatsApp', title: 'Address details checkpoint', contactName: 'Jane Smith', date: '2026-06-26', time: '11:00 AM', status: 'Completed' }
-  ]);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -32,39 +30,106 @@ export const Activities: React.FC = () => {
   // Form states
   const [title, setTitle] = useState('');
   const [type, setType] = useState<'Call' | 'Meeting' | 'Email' | 'WhatsApp'>('Call');
-  const [contactName, setContactName] = useState('');
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [time, setTime] = useState('10:00');
 
-  const handleAddActivity = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !contactName.trim() || !date) return;
+  const loadData = async () => {
+    try {
+      setLoading(true);
 
-    const newAct: ActivityItem = {
-      id: String(Date.now()),
-      type,
-      title,
-      contactName,
-      date,
-      time: time || '12:00 PM',
-      status: 'Planned'
-    };
+      // Load companies
+      const compRes = await api.get('/companies');
+      const comps = compRes.data.data?.items || [];
+      setCompanies(comps);
+      if (comps.length > 0) {
+        setSelectedCompanyId(comps[0].id);
+      }
 
-    setActivities([newAct, ...activities]);
-    toast.success('Activity Logged', `Planned activity "${title}" created successfully.`);
-    setShowAddModal(false);
+      // Load global activities
+      const actRes = await api.get('/activities');
+      const items = actRes.data.data?.items || actRes.data.data || [];
+      const mapped = items.map((a: any) => {
+        const dateObj = new Date(a.activityDate);
+        const hours = dateObj.getHours();
+        const mins = dateObj.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours % 12 || 12;
+        const displayMins = String(mins).padStart(2, '0');
+        const displayTime = `${displayHours}:${displayMins} ${ampm}`;
 
-    setTitle('');
-    setType('Call');
-    setContactName('');
-    setDate('');
-    setTime('');
+        return {
+          id: a.id,
+          type: a.type as any,
+          title: a.title,
+          contactName: a.company?.name || 'Standard Account',
+          date: a.activityDate.split('T')[0],
+          time: displayTime,
+          status: a.status as any,
+        };
+      });
+      setActivities(mapped);
+    } catch (err) {
+      console.error(err);
+      toast.error('Load Failed', 'Failed to fetch global activities.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (id: string, label: string) => {
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleAddActivity = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !date) return;
+
+    try {
+      let targetCompanyId = selectedCompanyId;
+      if (!targetCompanyId && companies.length > 0) {
+        targetCompanyId = companies[0].id;
+      }
+      if (!targetCompanyId) {
+        toast.error('No Company Linked', 'Please select or create a company account.');
+        return;
+      }
+
+      const activityDateTime = new Date(`${date}T${time || '10:00'}:00`);
+
+      await api.post('/activities', {
+        companyId: targetCompanyId,
+        type,
+        title,
+        activityDate: activityDateTime.toISOString(),
+        status: 'Planned',
+        priority: 'Medium',
+      });
+
+      toast.success('Activity Logged', `Planned activity "${title}" created successfully.`);
+      setShowAddModal(false);
+      setTitle('');
+      setType('Call');
+      setSelectedCompanyId(companies[0]?.id || '');
+      setDate('');
+      setTime('10:00');
+      loadData();
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Log Failed', err.response?.data?.message || 'Failed to register activity.');
+    }
+  };
+
+  const handleDelete = async (id: string, label: string) => {
     if (confirm(`Remove activity "${label}"?`)) {
-      setActivities(activities.filter(a => a.id !== id));
-      toast.success('Activity Deleted', 'Logged event removed.');
+      try {
+        await api.delete(`/activities/${id}`);
+        toast.success('Activity Deleted', 'Logged event removed.');
+        loadData();
+      } catch (err) {
+        console.error(err);
+        toast.error('Delete Failed', 'Failed to remove activity.');
+      }
     }
   };
 
@@ -99,76 +164,85 @@ export const Activities: React.FC = () => {
       </div>
 
       <div className="glass-card p-6 min-h-[400px] space-y-4">
-        {activities.length > 0 && (
-          <div className="flex max-w-sm relative">
-            <Search className="absolute left-3 top-2.5 text-slate-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search logged activities..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-1.5 border border-slate-200 bg-slate-50/50 rounded-xl text-xs"
-            />
-          </div>
-        )}
-
-        {filteredActivities.length === 0 ? (
-          <div className="flex items-center justify-center min-h-[300px]">
-            <EmptyState
-              title={activities.length === 0 ? "No Activities Logged" : "No Matches Found"}
-              description={activities.length === 0 ? "Schedule discovery calls, emails, and meetings with contacts." : "Adjust search filter inputs."}
-              icon={<Activity className="w-12 h-12 text-slate-300" />}
-              actionLabel={activities.length === 0 ? "New Activity" : undefined}
-              onAction={() => setShowAddModal(true)}
-            />
+        {loading ? (
+          <div className="flex flex-col items-center justify-center min-h-[300px] gap-2">
+            <Loader2 className="w-8 h-8 text-brand-550 animate-spin" />
+            <p className="text-xs text-slate-400 font-semibold">Loading logged activities...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto border border-slate-100 dark:border-slate-800 rounded-2xl">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase select-none">
-                  <th className="px-4 py-2.5">Channel</th>
-                  <th className="px-4 py-2.5">Activity Title</th>
-                  <th className="px-4 py-2.5">Contact Link</th>
-                  <th className="px-4 py-2.5">Date & Time</th>
-                  <th className="px-4 py-2.5">Status</th>
-                  <th className="px-4 py-2.5 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-655 font-medium">
-                {filteredActivities.map((a) => (
-                  <tr key={a.id} className="hover:bg-slate-50/30">
-                    <td className="px-4 py-3 flex items-center gap-1.5 font-bold">
-                      {getIcon(a.type)}
-                      <span className="text-[10px] text-slate-600 uppercase">{a.type}</span>
-                    </td>
-                    <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-200">{a.title}</td>
-                    <td className="px-4 py-3 text-slate-550 font-semibold">{a.contactName}</td>
-                    <td className="px-4 py-3 text-slate-450 font-semibold">
-                      {a.date} at {a.time}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 text-[9px] font-bold border rounded-full ${
-                        a.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                        a.status === 'Cancelled' ? 'bg-rose-50 text-rose-700 border-rose-100' :
-                        'bg-blue-50 text-blue-700 border-blue-100'
-                      }`}>
-                        {a.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => handleDelete(a.id, a.title)}
-                        className="p-1 hover:bg-rose-50 hover:text-rose-600 rounded-lg text-slate-400"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {activities.length > 0 && (
+              <div className="flex max-w-sm relative">
+                <Search className="absolute left-3 top-2.5 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search logged activities..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-1.5 border border-slate-200 bg-slate-50/50 rounded-xl text-xs"
+                />
+              </div>
+            )}
+
+            {filteredActivities.length === 0 ? (
+              <div className="flex items-center justify-center min-h-[300px]">
+                <EmptyState
+                  title={activities.length === 0 ? "No Activities Logged" : "No Matches Found"}
+                  description={activities.length === 0 ? "Schedule discovery calls, emails, and meetings with contacts." : "Adjust search filter inputs."}
+                  icon={<Activity className="w-12 h-12 text-slate-300" />}
+                  actionLabel={activities.length === 0 ? "New Activity" : undefined}
+                  onAction={() => setShowAddModal(true)}
+                />
+              </div>
+            ) : (
+              <div className="overflow-x-auto border border-slate-100 dark:border-slate-800 rounded-2xl">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase select-none">
+                      <th className="px-4 py-2.5">Channel</th>
+                      <th className="px-4 py-2.5">Activity Title</th>
+                      <th className="px-4 py-2.5">Contact Link</th>
+                      <th className="px-4 py-2.5">Date & Time</th>
+                      <th className="px-4 py-2.5">Status</th>
+                      <th className="px-4 py-2.5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-655 font-medium">
+                    {filteredActivities.map((a) => (
+                      <tr key={a.id} className="hover:bg-slate-50/30">
+                        <td className="px-4 py-3 flex items-center gap-1.5 font-bold">
+                          {getIcon(a.type)}
+                          <span className="text-[10px] text-slate-600 uppercase">{a.type}</span>
+                        </td>
+                        <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-200">{a.title}</td>
+                        <td className="px-4 py-3 text-slate-550 font-semibold">{a.contactName}</td>
+                        <td className="px-4 py-3 text-slate-450 font-semibold">
+                          {a.date} at {a.time}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 text-[9px] font-bold border rounded-full ${
+                            a.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                            a.status === 'Cancelled' ? 'bg-rose-50 text-rose-700 border-rose-100' :
+                            'bg-blue-50 text-blue-700 border-blue-100'
+                          }`}>
+                            {a.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => handleDelete(a.id, a.title)}
+                            className="p-1 hover:bg-rose-50 hover:text-rose-600 rounded-lg text-slate-400"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -208,15 +282,16 @@ export const Activities: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Linked Contact *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Alex Mercer"
-                    value={contactName}
-                    onChange={(e) => setContactName(e.target.value)}
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Linked Company Account *</label>
+                  <select
+                    value={selectedCompanyId}
+                    onChange={(e) => setSelectedCompanyId(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50"
-                  />
+                  >
+                    {companies.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -233,13 +308,13 @@ export const Activities: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Time Slot</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Time Slot *</label>
                   <input
-                    type="text"
-                    placeholder="e.g. 10:00 AM"
+                    type="time"
+                    required
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 font-semibold"
                   />
                 </div>
               </div>
@@ -255,7 +330,7 @@ export const Activities: React.FC = () => {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={!title.trim() || !contactName.trim() || !date}
+                  disabled={!title.trim() || !date}
                   className="bg-brand-550 text-white text-xs font-bold py-1.5 px-3 rounded-xl"
                 >
                   Create Plan

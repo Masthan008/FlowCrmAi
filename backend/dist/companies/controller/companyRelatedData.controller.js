@@ -85,4 +85,13 @@ exports.companyRelatedDataController = {
             next(error);
         }
     },
+    getCustomer: async (req, res, next) => {
+        try {
+            const customer = await companyRelatedData_service_1.companyRelatedDataService.getCustomer(req.params.id);
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Customer details resolved successfully.', customer);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
 };

@@ -33,4 +33,7 @@ exports.companyRelatedDataService = {
     getRevenueDashboard: async (companyId) => {
         return companyRelatedData_repository_1.companyRelatedDataRepository.getRevenueDashboard(companyId);
     },
+    getCustomer: async (companyId) => {
+        return companyRelatedData_repository_1.companyRelatedDataRepository.getCustomer(companyId);
+    },
 };

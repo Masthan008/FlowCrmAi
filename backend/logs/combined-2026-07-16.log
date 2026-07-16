@@ -191,3 +191,133 @@
 {"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 0.758 ms","timestamp":"2026-07-16 19:33:58"}
 {"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 545.415 ms","timestamp":"2026-07-16 19:33:58"}
 {"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.190 ms","timestamp":"2026-07-16 19:33:59"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:41:13"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-16 19:41:13"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-16 19:41:13"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-16 19:41:13"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:41:13"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-16 19:41:15"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:41:19"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-16 19:41:19"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-16 19:41:19"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-16 19:41:19"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:41:19"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-16 19:41:20"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:41:24"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-16 19:41:24"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-16 19:41:24"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-16 19:41:24"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:41:24"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-16 19:41:25"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:41:32"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-16 19:41:32"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-16 19:41:32"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-16 19:41:32"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:41:32"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-16 19:41:33"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:44:26"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-16 19:44:26"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-16 19:44:26"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-16 19:44:26"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:44:26"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-16 19:44:28"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 401 217 - 28.025 ms","timestamp":"2026-07-16 19:45:02"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 401 217 - 7.082 ms","timestamp":"2026-07-16 19:45:02"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 401 217 - 4.745 ms","timestamp":"2026-07-16 19:45:02"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 401 217 - 3.105 ms","timestamp":"2026-07-16 19:45:02"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 401 217 - 1.630 ms","timestamp":"2026-07-16 19:45:02"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 401 217 - 1.330 ms","timestamp":"2026-07-16 19:45:02"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 401 217 - 1.782 ms","timestamp":"2026-07-16 19:45:02"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 401 217 - 1.669 ms","timestamp":"2026-07-16 19:45:02"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 401 217 - 1.607 ms","timestamp":"2026-07-16 19:45:02"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 401 217 - 2.983 ms","timestamp":"2026-07-16 19:45:02"}
+{"level":"info","message":"POST /api/v1/auth/refresh 200 - - 3027.301 ms","timestamp":"2026-07-16 19:45:06"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 2378.985 ms","timestamp":"2026-07-16 19:45:08"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 2.849 ms","timestamp":"2026-07-16 19:45:08"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 2405.190 ms","timestamp":"2026-07-16 19:45:08"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 2497.668 ms","timestamp":"2026-07-16 19:45:08"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 1.034 ms","timestamp":"2026-07-16 19:45:08"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 2549.566 ms","timestamp":"2026-07-16 19:45:08"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 2573.323 ms","timestamp":"2026-07-16 19:45:08"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1.495 ms","timestamp":"2026-07-16 19:45:08"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 250.564 ms","timestamp":"2026-07-16 19:45:08"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 441.161 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.571 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 163.821 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 218.707 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 135.745 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 1.049 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 1.053 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 255.433 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 126.643 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.540 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 1.247 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.033 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 1.169 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 340.462 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 1.135 ms","timestamp":"2026-07-16 19:45:09"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:45:19"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-16 19:45:19"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-16 19:45:19"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-16 19:45:19"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:45:19"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-16 19:45:20"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:45:50"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-16 19:45:50"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-16 19:45:50"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-16 19:45:50"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:45:50"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-16 19:45:51"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:46:47"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-16 19:46:47"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-16 19:46:47"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-16 19:46:47"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:46:47"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-16 19:46:48"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:48:28"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-16 19:48:28"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-16 19:48:28"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-16 19:48:28"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:48:28"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-16 19:48:29"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:49:09"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-07-16 19:49:09"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-07-16 19:49:09"}
+{"level":"info","message":"Environment: development","timestamp":"2026-07-16 19:49:09"}
+{"level":"info","message":"=========================================","timestamp":"2026-07-16 19:49:09"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-07-16 19:49:10"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 905.167 ms","timestamp":"2026-07-16 19:50:08"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 913.185 ms","timestamp":"2026-07-16 19:50:08"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 1161.076 ms","timestamp":"2026-07-16 19:50:08"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1171.066 ms","timestamp":"2026-07-16 19:50:08"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 1241.958 ms","timestamp":"2026-07-16 19:50:08"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 1.343 ms","timestamp":"2026-07-16 19:50:08"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 198.211 ms","timestamp":"2026-07-16 19:50:09"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 281.760 ms","timestamp":"2026-07-16 19:50:09"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 262.096 ms","timestamp":"2026-07-16 19:50:09"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 384.095 ms","timestamp":"2026-07-16 19:50:09"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 352.062 ms","timestamp":"2026-07-16 19:50:09"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 461.409 ms","timestamp":"2026-07-16 19:50:09"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 0.673 ms","timestamp":"2026-07-16 19:50:15"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 0.508 ms","timestamp":"2026-07-16 19:50:15"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 0.377 ms","timestamp":"2026-07-16 19:50:15"}
+{"level":"info","message":"GET /api/v1/notifications 200 183 - 159.310 ms","timestamp":"2026-07-16 19:50:16"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 304.568 ms","timestamp":"2026-07-16 19:50:16"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 378.612 ms","timestamp":"2026-07-16 19:50:16"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 0.640 ms","timestamp":"2026-07-16 19:50:16"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 0.476 ms","timestamp":"2026-07-16 19:50:16"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 0.471 ms","timestamp":"2026-07-16 19:50:16"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 0.553 ms","timestamp":"2026-07-16 19:50:16"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.539 ms","timestamp":"2026-07-16 19:50:16"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 0.473 ms","timestamp":"2026-07-16 19:50:16"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 0.663 ms","timestamp":"2026-07-16 19:50:16"}

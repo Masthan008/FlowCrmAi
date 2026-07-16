@@ -148,4 +148,22 @@ exports.companyRelatedDataRepository = {
             paymentCount: payments.length,
         };
     },
+    async getCustomer(companyId) {
+        let customer = await db_1.prisma.customer.findFirst({
+            where: { companyId, deletedAt: null },
+        });
+        if (!customer) {
+            const company = await db_1.prisma.company.findFirst({
+                where: { id: companyId },
+            });
+            customer = await db_1.prisma.customer.create({
+                data: {
+                    companyId,
+                    name: company?.name || 'Company Customer',
+                    type: 'client',
+                },
+            });
+        }
+        return customer;
+    },
 };

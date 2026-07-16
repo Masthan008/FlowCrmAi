@@ -91,6 +91,8 @@ router.get('/:id/invoices', (0, permission_1.requirePermission)('companies:view'
 // Payments
 router.get('/:id/payments', (0, permission_1.requirePermission)('companies:view'), (0, validate_1.validateRequest)(company_validator_1.getCompanyByIdSchema), companyRelatedData_controller_1.companyRelatedDataController.getPayments);
 router.get('/:id/payments/summary', (0, permission_1.requirePermission)('companies:view'), (0, validate_1.validateRequest)(company_validator_1.getCompanyByIdSchema), companyRelatedData_controller_1.companyRelatedDataController.getPaymentsSummary);
+// Customer Resolve
+router.get('/:id/customer', (0, permission_1.requirePermission)('companies:view'), (0, validate_1.validateRequest)(company_validator_1.getCompanyByIdSchema), companyRelatedData_controller_1.companyRelatedDataController.getCustomer);
 // Revenue
 router.get('/:id/revenue', (0, permission_1.requirePermission)('companies:view'), (0, validate_1.validateRequest)(company_validator_1.getCompanyByIdSchema), revenue_controller_1.revenueController.list);
 router.get('/:id/revenue/summary', (0, permission_1.requirePermission)('companies:view'), (0, validate_1.validateRequest)(company_validator_1.getCompanyByIdSchema), revenue_controller_1.revenueController.getSummary);

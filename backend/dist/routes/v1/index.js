@@ -43,6 +43,10 @@ router.get('/health', async (req, res) => {
         requestId: req.requestId || 'unknown'
     });
 });
+const activities_routes_1 = __importDefault(require("./activities.routes"));
+const reports_routes_1 = __importDefault(require("./reports.routes"));
+const user_routes_1 = __importDefault(require("./user.routes"));
+const notifications_routes_1 = __importDefault(require("./notifications.routes"));
 // Custom routes
 router.use('/auth', auth_1.default);
 router.use('/dashboard', dashboard_routes_1.default);
@@ -52,6 +56,11 @@ router.use('/contacts', contact_routes_1.default);
 router.use('/companies', companyIntelligence_routes_1.default);
 router.use('/companies', company_routes_1.default);
 router.use('/deals', deal_routes_1.default);
+router.use('/activities', activities_routes_1.default);
+router.use('/reports', reports_routes_1.default);
+router.use('/analytics', reports_routes_1.default);
+router.use('/users', user_routes_1.default);
+router.use('/notifications', notifications_routes_1.default);
 router.use('/products', product_routes_1.default);
 router.use('/meetings', meeting_routes_1.default);
 router.use('/quotes', quote_routes_1.default);
@@ -61,16 +70,11 @@ router.get('/deal-workflows', auth_2.requireAuth, (0, permission_1.requirePermis
 router.post('/deal-workflows', auth_2.requireAuth, (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.createWorkflow);
 // Generate placeholder routers for all remaining CRM infrastructure modules
 const placeholderModules = [
-    'users',
     'roles',
     'permissions',
     'customers',
-    'activities',
     'calendar',
     'payments',
-    'notifications',
-    'reports',
-    'analytics',
     'settings',
     'pipelines'
 ];

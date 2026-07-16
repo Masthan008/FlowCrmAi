@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { api } from '../services/api';
 
 export interface ToastNotification {
   id: string;
@@ -22,38 +23,15 @@ interface NotificationState {
   systemNotifications: SystemNotification[];
   addNotification: (notification: Omit<ToastNotification, 'id'>) => void;
   dismissNotification: (id: string) => void;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
+  fetchSystemNotifications: () => Promise<void>;
+  markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
 }
 
-export const useNotificationStore = create<NotificationState>((set) => ({
+export const useNotificationStore = create<NotificationState>((set, get) => ({
   notifications: [],
-  systemNotifications: [
-    {
-      id: 'notif-1',
-      title: 'New lead assigned',
-      description: 'Bruce Wayne from Wayne Enterprises has been added.',
-      read: false,
-      type: 'lead',
-      timestamp: '2026-06-30T09:00:00Z',
-    },
-    {
-      id: 'notif-2',
-      title: 'Deal Proposal Qualified',
-      description: 'Cyberdyne Systems pipeline value updated.',
-      read: false,
-      type: 'deal',
-      timestamp: '2026-06-30T10:30:00Z',
-    },
-    {
-      id: 'notif-3',
-      title: 'Task Due Tomorrow',
-      description: 'Follow up with Sarah Connor regarding enterprise contract.',
-      read: false,
-      type: 'task',
-      timestamp: '2026-06-30T11:15:00Z',
-    }
-  ],
+  systemNotifications: [],
+
   addNotification: (notification) => {
     const id = Math.random().toString(36).substring(2, 9);
     set((state) => ({
@@ -69,18 +47,53 @@ export const useNotificationStore = create<NotificationState>((set) => ({
       }, duration);
     }
   },
+
   dismissNotification: (id) =>
     set((state) => ({
       notifications: state.notifications.filter((n) => n.id !== id),
     })),
-  markAsRead: (id) =>
-    set((state) => ({
-      systemNotifications: state.systemNotifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      ),
-    })),
-  markAllAsRead: () =>
-    set((state) => ({
-      systemNotifications: state.systemNotifications.map((n) => ({ ...n, read: true })),
-    })),
+
+  fetchSystemNotifications: async () => {
+    try {
+      const res = await api.get('/notifications');
+      const items = res.data.data || [];
+      const mapped = items.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        description: item.message,
+        read: !!item.readAt,
+        type: (item.type || 'general') as any,
+        timestamp: item.createdAt,
+      }));
+      set({ systemNotifications: mapped });
+    } catch (err) {
+      console.error('Failed to fetch system notifications:', err);
+    }
+  },
+
+  markAsRead: async (id) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      // Update local state
+      set((state) => ({
+        systemNotifications: state.systemNotifications.map((n) =>
+          n.id === id ? { ...n, read: true } : n
+        ),
+      }));
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err);
+    }
+  },
+
+  markAllAsRead: async () => {
+    try {
+      await api.put('/notifications/read-all');
+      // Update local state
+      set((state) => ({
+        systemNotifications: state.systemNotifications.map((n) => ({ ...n, read: true })),
+      }));
+    } catch (err) {
+      console.error('Failed to mark all notifications as read:', err);
+    }
+  },
 }));

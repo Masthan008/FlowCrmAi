@@ -8,7 +8,12 @@ import { useNotificationStore } from '../store/notificationStore';
 
 const Notifications: React.FC = () => {
   const breadcrumbs = [{ label: 'Notifications' }];
-  const { systemNotifications, markAsRead, markAllAsRead } = useNotificationStore();
+  const { systemNotifications, markAsRead, markAllAsRead, fetchSystemNotifications } = useNotificationStore();
+
+  React.useEffect(() => {
+    fetchSystemNotifications();
+  }, [fetchSystemNotifications]);
+
   const unreadCount = systemNotifications.filter(n => !n.read).length;
 
   return (

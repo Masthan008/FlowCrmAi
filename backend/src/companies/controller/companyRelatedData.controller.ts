@@ -65,4 +65,10 @@ export const companyRelatedDataController = {
       ResponseHelper.sendSuccess(req, res, 200, 'Payments summary retrieved successfully.', summary);
     } catch (error) { next(error); }
   },
+  getCustomer: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const customer = await companyRelatedDataService.getCustomer(req.params.id as string);
+      ResponseHelper.sendSuccess(req, res, 200, 'Customer details resolved successfully.', customer);
+    } catch (error) { next(error); }
+  },
 };

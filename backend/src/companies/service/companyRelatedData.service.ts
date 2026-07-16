@@ -40,4 +40,7 @@ export const companyRelatedDataService = {
   getRevenueDashboard: async (companyId: string) => {
     return companyRelatedDataRepository.getRevenueDashboard(companyId);
   },
+  getCustomer: async (companyId: string) => {
+    return companyRelatedDataRepository.getCustomer(companyId);
+  },
 };

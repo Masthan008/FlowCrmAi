@@ -41,6 +41,11 @@ router.get('/health', async (req, res) => {
   });
 });
 
+import activitiesRouter from './activities.routes';
+import reportsRouter from './reports.routes';
+import userRouter from './user.routes';
+import notificationsRouter from './notifications.routes';
+
 // Custom routes
 router.use('/auth', authRouter);
 router.use('/dashboard', dashboardRouter);
@@ -50,6 +55,11 @@ router.use('/contacts', contactRouter);
 router.use('/companies', companyIntelligenceRouter);
 router.use('/companies', companyRouter);
 router.use('/deals', dealRouter);
+router.use('/activities', activitiesRouter);
+router.use('/reports', reportsRouter);
+router.use('/analytics', reportsRouter);
+router.use('/users', userRouter);
+router.use('/notifications', notificationsRouter);
 
 router.use('/products', productRouter);
 router.use('/meetings', meetingRouter);
@@ -63,16 +73,11 @@ router.post('/deal-workflows', requireAuth, requirePermission('deals:workflows:m
 
 // Generate placeholder routers for all remaining CRM infrastructure modules
 const placeholderModules = [
-  'users',
   'roles',
   'permissions',
   'customers',
-  'activities',
   'calendar',
   'payments',
-  'notifications',
-  'reports',
-  'analytics',
   'settings',
   'pipelines'
 ];

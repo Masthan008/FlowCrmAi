@@ -122,6 +122,9 @@ router.get('/:id/invoices', requirePermission('companies:view'), validateRequest
 router.get('/:id/payments', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), companyRelatedDataController.getPayments);
 router.get('/:id/payments/summary', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), companyRelatedDataController.getPaymentsSummary);
 
+// Customer Resolve
+router.get('/:id/customer', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), companyRelatedDataController.getCustomer);
+
 // Revenue
 router.get('/:id/revenue', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), revenueController.list);
 router.get('/:id/revenue/summary', requirePermission('companies:view'), validateRequest(getCompanyByIdSchema), revenueController.getSummary);

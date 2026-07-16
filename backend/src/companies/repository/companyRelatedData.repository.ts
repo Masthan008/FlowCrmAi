@@ -157,4 +157,22 @@ export const companyRelatedDataRepository = {
       paymentCount: payments.length,
     };
   },
+  async getCustomer(companyId: string) {
+    let customer = await prisma.customer.findFirst({
+      where: { companyId, deletedAt: null },
+    });
+    if (!customer) {
+      const company = await prisma.company.findFirst({
+        where: { id: companyId },
+      });
+      customer = await prisma.customer.create({
+        data: {
+          companyId,
+          name: company?.name || 'Company Customer',
+          type: 'client',
+        },
+      });
+    }
+    return customer;
+  },
 };

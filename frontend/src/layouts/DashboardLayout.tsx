@@ -53,7 +53,7 @@ export const DashboardLayout: React.FC = () => {
   const [notifOpen, setNotifOpen] = useState(false);
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const { theme, setTheme } = useThemeStore();
-  const { systemNotifications, markAsRead } = useNotificationStore();
+  const { systemNotifications, markAsRead, fetchSystemNotifications } = useNotificationStore();
   const unreadNotifications = systemNotifications.filter(n => !n.read);
   const unreadCount = unreadNotifications.length;
 
@@ -103,6 +103,10 @@ export const DashboardLayout: React.FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    fetchSystemNotifications();
+  }, [fetchSystemNotifications]);
 
   useEffect(() => {
     if (theme === 'dark' || theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
