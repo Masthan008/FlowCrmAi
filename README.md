@@ -13,8 +13,12 @@
     <img src="https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white" alt="Express 5" />
     <img src="https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white" alt="Prisma 7" />
     <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL" />
+    <img src="https://img.shields.io/badge/React_Router-7-CA4245?logo=reactrouter&logoColor=white" alt="React Router 7" />
+    <img src="https://img.shields.io/badge/Zustand-5-443E38?logo=react&logoColor=white" alt="Zustand 5" />
     <img src="https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+    <img src="https://img.shields.io/badge/Zod-4-3E67B1?logo=zod&logoColor=white" alt="Zod 4" />
     <img src="https://img.shields.io/badge/Docker-20-2496ED?logo=docker&logoColor=white" alt="Docker" />
+    <img src="https://img.shields.io/badge/Jenkins-CI-D24939?logo=jenkins&logoColor=white" alt="Jenkins" />
     <img src="https://img.shields.io/badge/License-ISC-blue" alt="License ISC" />
   </p>
 
@@ -27,7 +31,8 @@
     <a href="#architecture">Architecture</a> •
     <a href="#docker-deployment">Deployment</a> •
     <a href="#api-overview">API</a> •
-    <a href="#project-structure">Structure</a>
+    <a href="#project-structure">Structure</a> •
+    <a href="#license">License</a>
   </h4>
 
   <br />
@@ -43,14 +48,14 @@ Built entirely with **TypeScript**, featuring a **React 19 + Vite 8** frontend w
 
 ## Features
 
-### Fully Implemented
+### Core CRM
 
 | Module | Description |
 |---|---|
 | **Authentication & Authorization** | JWT access/refresh token rotation with breach detection, 9 roles, granular permission system, session management, password reset |
 | **Dashboard** | KPI cards, trend charts (revenue, leads, deals, conversion), recent activity, upcoming tasks, pipeline overview, team leaderboard, goals tracking, configurable widgets |
 | **Leads Management** | CRUD, soft delete, sources/statuses, search/filter/sort, pagination, bulk operations, duplicate merge, CSV import/export, saved views, assignment (manual, round-robin, load-based), lead scoring, health/SLA tracking, workflow automation, approval flows, 360 workspace |
-| **Contacts Management** | CRUD, soft delete, rich multi-channel profiles, relationship mapping, customer journey tracking, engagement scoring, communication logs |
+| **Contacts Management** | CRUD, soft delete, rich multi-channel profiles, relationship mapping, customer journey tracking, engagement scoring, communication logs, lifecycle management |
 | **Tasks Management** | CRUD, Kanban board, priorities, subtasks, checklists, comments, file attachments, time tracking, watchers, dependencies, recurrence, approval workflow, calendar view, productivity analytics |
 | **Accounts (KYC & CVR Engine)** | Core directory, parent-child hierarchies, Central Business Register (CVR) Scandinavian corporate lookup & imports, KYC compliance portals with verification checklists, risk profiles, document management |
 | **Company 360° Workspace** | Timeline events, activity CRUD, notes with pinning, file upload/download, meetings, tasks, communications, full audit history with field-level change tracking |
@@ -61,11 +66,26 @@ Built entirely with **TypeScript**, featuring a **React 19 + Vite 8** frontend w
 | **Product Catalog** | Categories, product CRUD, price restrictions, unique SKU validation |
 | **Enterprise Intelligence** | Customer journeys, segment definitions, tags, workflows (triggers/conditions/actions), AI-driven next-best-action recommendations, follow-up reminders |
 
-### Placeholder / Coming Soon
+### Extended Enterprise Features
 
-Users, Roles, Permissions, Customers, Calendar, Notifications, Reports, Analytics, Settings
-
----
+| Module | Description | Backend | Frontend |
+|---|---|---|---|
+| **Marketing Campaigns** | Email/SMS/social campaign management, drip sequences, audience lists, campaign analytics | ✅ Full CRUD + launch/pause | ✅ List + analytics |
+| **Support Tickets / Cases** | Customer support ticketing with priorities, categories, assignment, comments, attachments, time tracking, CSAT | ✅ Full CRUD + actions | ✅ List + management |
+| **Knowledge Base** | Internal/external knowledge articles with categories, search, voting, publish workflow | ✅ Full CRUD + publish/archive | ✅ List + management |
+| **Contracts Management** | Contract lifecycle management, approval workflow, renewal tracking | ✅ Full CRUD + approve/renew/terminate | ✅ List + management |
+| **Orders Management** | Order processing pipeline from quote to fulfillment, line items, status tracking | ✅ Full CRUD + status | ✅ List + management |
+| **Projects Management** | Project planning, milestones, team assignment, budget tracking | ✅ Full CRUD + milestones/team | ✅ List + management |
+| **Subscriptions / Recurring Billing** | Subscription plans, recurring billing, pause/resume/cancel workflows | ✅ Full CRUD + pause/resume | ✅ List + management |
+| **Email Integration** | Email account sync (IMAP/Gmail/Outlook), inbox viewer, compose/send | ✅ Accounts + sync + send | ✅ Inbox |
+| **Web-to-Lead Forms** | Customizable public lead capture forms, field builder, auto-assignment, embed code | ✅ Full CRUD + public submit | ✅ List + builder |
+| **Customer Portal** | Self-service customer portal with user accounts, login, access permissions | ✅ Portal users + auth | ✅ User management |
+| **Live Chat** | Real-time website chat, visitor tracking, agent assignment, conversation rating | ✅ Conversations + messages | ✅ Chat list |
+| **Expense Tracking** | Employee expense management, categories, receipt upload, approval workflow | ✅ Full CRUD + approve/reimburse | ✅ List + management |
+| **Asset Management** | Hardware, software, license tracking; assignment, warranty, retirement | ✅ Full CRUD + assign/retire | ✅ List + management |
+| **GDPR & Data Privacy** | Consent management, data subject access requests (DSAR), erasure/portability | ✅ Consent logs + data requests | ✅ Privacy dashboard |
+| **NPS / Surveys** | Customer satisfaction surveys (NPS, CSAT, CES), customizable questions, analytics | ✅ Full CRUD + public submit | ✅ List + analytics |
+| **Commission Tracking** | Sales commission rules, automated payout calculation, approval workflow | ✅ Rules + payouts + calculate | ✅ Commission dashboard |
 
 ## Tech Stack
 
@@ -75,7 +95,7 @@ Users, Roles, Permissions, Customers, Calendar, Notifications, Reports, Analytic
 |---|---|
 | **Node.js** (TypeScript) | Runtime |
 | **Express 5.x** | REST API framework |
-| **PostgreSQL** + **Prisma 7.x** ORM | Database (71 models) |
+| **PostgreSQL** + **Prisma 7.x** ORM | Database (87+ models) |
 | **JWT** (access + refresh token rotation, bcrypt) | Authentication |
 | **Zod 4.x** | Request validation |
 | **Winston** + **Morgan** + **Daily Rotate File** | Logging |
@@ -90,7 +110,7 @@ Users, Roles, Permissions, Customers, Calendar, Notifications, Reports, Analytic
 | **React 19.x** | UI framework |
 | **Vite 8.x** | Build tool |
 | **React Router DOM 7.x** | Client-side routing |
-| **Zustand 5.x** (11 stores) | State management |
+| **Zustand 5.x** (11+ stores) | State management |
 | **Axios 1.x** (auth interceptors) | HTTP client |
 | **react-hook-form** + **Zod** | Form management |
 | **Recharts 3.x** | Charts & graphs |
@@ -248,7 +268,7 @@ All endpoints return a standardized JSON envelope:
 ### Database
 
 - **ORM:** Prisma 7.x with `@prisma/adapter-pg`
-- **Models:** 71 database models with full auditing
+- **Models:** 87+ database models with full auditing
 - **Soft Deletes:** Every table includes `deletedAt`, `deletedBy`, and `version` fields
 - **UUIDs:** All primary keys use UUID v4
 - **Timestamps:** Automatic `createdAt`, `updatedAt` on all models
@@ -304,6 +324,22 @@ Parameters: `DEPLOY_TARGET`, `BRANCH`, `ACTION` (deploy / down / restart / logs)
 | **Meetings** | Full calendar scheduling CRUD |
 | **Quotes** | Full CRUD with line items, tax & discount calculations |
 | **Invoices** | Full CRUD + payments logging + balance recalculation |
+| **Campaigns** | Full CRUD + launch/pause, analytics, audience lists, email templates |
+| **Tickets** | Full CRUD + status/priority/assignment, comments, attachments, time tracking, statistics |
+| **Knowledge Base** | Full CRUD + publish/archive, categories, voting, search |
+| **Contracts** | Full CRUD + approve/renew/terminate, lifecycle management |
+| **Orders** | Full CRUD + status tracking, line items, shipping |
+| **Projects** | Full CRUD + milestones, team assignments, budget tracking |
+| **Subscriptions** | Plans + subscriptions CRUD, pause/resume/cancel, recurring billing |
+| **Email** | Account management, IMAP sync, inbox, compose/send |
+| **Web Forms** | Full CRUD + public submission, embed codes, auto-assignment |
+| **Customer Portal** | Portal user management, authentication, self-service |
+| **Live Chat** | Conversations, messages, agent assignment, ratings |
+| **Expenses** | Full CRUD + categories, approve/reimburse/reject, statistics |
+| **Assets** | Full CRUD + types, assignment, warranty tracking, retirement |
+| **GDPR / Privacy** | Consent logs, data subject access requests (DSAR) |
+| **Surveys (NPS)** | Full CRUD + public submission, response analytics |
+| **Commissions** | Rules (percentage/fixed/tiered), payouts, calculation engine |
 
 ---
 
@@ -320,7 +356,7 @@ flowcrm-ai-enterprise/
 │   ├── Dockerfile                       # Multi-stage Node.js build
 │   ├── docker-entrypoint.sh             # Prisma push + seed on start
 │   ├── prisma/
-│   │   ├── schema.prisma                # 71 database models
+│   │   ├── schema.prisma                # 87+ database models
 │   │   └── seed.js                      # Default data seeder
 │   └── src/
 │       ├── server.ts                    # Entry point
@@ -333,6 +369,22 @@ flowcrm-ai-enterprise/
 │       ├── controllers/                 # HTTP handlers
 │       ├── services/                    # Business logic
 │       ├── repositories/                # Data access layer
+│       ├── campaigns/                   # Marketing campaigns
+│       ├── tickets/                     # Support tickets
+│       ├── knowledge/                   # Knowledge base
+│       ├── contracts/                   # Contracts management
+│       ├── orders/                      # Order management
+│       ├── projects/                    # Project management
+│       ├── subscriptions/               # Subscriptions & billing
+│       ├── email/                       # Email integration
+│       ├── webforms/                    # Web-to-lead forms
+│       ├── portal/                      # Customer portal
+│       ├── chat/                        # Live chat
+│       ├── expenses/                    # Expense tracking
+│       ├── assets/                      # Asset management
+│       ├── gdpr/                        # GDPR & privacy
+│       ├── surveys/                     # Surveys & NPS
+│       ├── commissions/                 # Commission tracking
 │       └── {domain}/                    # leads, contacts, tasks, companies,
 │                                        # deals, invoices, quotes, products,
 │                                        # meetings, dashboard
@@ -348,7 +400,7 @@ flowcrm-ai-enterprise/
         ├── components/
         │   ├── ui/                      # 19 reusable UI components
         │   └── auth/                    # Route guards
-        ├── pages/                       # 20+ page components
+        ├── pages/                       # 36+ page components
         ├── services/                    # API client layer
         ├── store/                       # 11 Zustand stores
         ├── types/                       # TypeScript interfaces

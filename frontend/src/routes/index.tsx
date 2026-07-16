@@ -32,6 +32,24 @@ import Team from '../pages/Team';
 import Notifications from '../pages/Notifications';
 import Settings from '../pages/Settings';
 
+// New Feature Pages
+import Campaigns from '../pages/Campaigns';
+import Tickets from '../pages/Tickets';
+import Knowledge from '../pages/Knowledge';
+import Contracts from '../pages/Contracts';
+import Orders from '../pages/Orders';
+import Projects from '../pages/Projects';
+import Subscriptions from '../pages/Subscriptions';
+import Email from '../pages/Email';
+import WebForms from '../pages/WebForms';
+import PortalUsers from '../pages/PortalUsers';
+import Chat from '../pages/Chat';
+import Expenses from '../pages/Expenses';
+import Assets from '../pages/Assets';
+import GDPR from '../pages/GDPR';
+import Surveys from '../pages/Surveys';
+import Commissions from '../pages/Commissions';
+
 // Authentication Pages
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
@@ -309,6 +327,115 @@ export const router = createBrowserRouter([
       { path: 'analytics', element: <Analytics /> },
       { path: 'team', element: <Team /> },
       { path: 'notifications', element: <Notifications /> },
+      
+      // New Feature Routes
+      { path: 'campaigns', element: <Campaigns /> },
+      {
+        path: 'tickets',
+        element: (
+          <ProtectedRoute requiredPermission="tickets:view">
+            <Tickets />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'knowledge',
+        element: (
+          <ProtectedRoute requiredPermission="knowledge:view">
+            <Knowledge />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'contracts',
+        element: (
+          <ProtectedRoute requiredPermission="contracts:view">
+            <Contracts />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'orders',
+        element: (
+          <ProtectedRoute requiredPermission="orders:view">
+            <Orders />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'projects',
+        element: (
+          <ProtectedRoute requiredPermission="projects:view">
+            <Projects />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'subscriptions',
+        element: (
+          <ProtectedRoute requiredPermission="subscriptions:view">
+            <Subscriptions />
+          </ProtectedRoute>
+        ),
+      },
+      { path: 'email', element: <Email /> },
+      {
+        path: 'webforms',
+        element: (
+          <ProtectedRoute requiredPermission="webforms:view">
+            <WebForms />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'portal',
+        element: (
+          <ProtectedRoute requiredPermission="portal:view">
+            <PortalUsers />
+          </ProtectedRoute>
+        ),
+      },
+      { path: 'chat', element: <Chat /> },
+      {
+        path: 'expenses',
+        element: (
+          <ProtectedRoute requiredPermission="expenses:view">
+            <Expenses />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'assets',
+        element: (
+          <ProtectedRoute requiredPermission="assets:view">
+            <Assets />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'gdpr',
+        element: (
+          <ProtectedRoute requiredPermission="gdpr:view">
+            <GDPR />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'surveys',
+        element: (
+          <ProtectedRoute requiredPermission="surveys:view">
+            <Surveys />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'commissions',
+        element: (
+          <ProtectedRoute requiredPermission="commissions:view">
+            <Commissions />
+          </ProtectedRoute>
+        ),
+      },
       
       // Personal profiles and settings endpoints
       { path: 'profile', element: <Profile /> },

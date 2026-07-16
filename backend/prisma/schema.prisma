@@ -122,6 +122,12 @@ model User {
   savedViews     SavedView[]
   importLogs     LeadImportLog[]
   exportLogs     LeadExportLog[]
+  ticketComments TicketComment[]
+  ticketAttachments TicketAttachment[]
+  knowledgeArticles KnowledgeArticle[]
+  emailAccounts   EmailAccount[]
+  approvedExpenses Expense[]
+  approvedContracts Contract[]
 
   @@index([email])
   @@index([phone])
@@ -289,6 +295,14 @@ model Company {
   recommendations CompanyRecommendation[]
   followups        CompanyFollowup[]
   kyc              CompanyKYC?
+  tickets          Ticket[]
+  contracts        Contract[]
+  orders           Order[]
+  projects         Project[]
+  consentLogs      ConsentLog[]
+  dataRequests     DataRequest[]
+  assets           Asset[]
+  chatConversations ChatConversation[]
 
   // Auditing
   createdBy   String?
@@ -534,6 +548,17 @@ model Employee {
   dealTeamMembers   DealTeamMember[]
   dealApprovals     DealApproval[]     @relation("DealApprover")
   dealFollowups     DealFollowup[]
+  campaigns         Campaign[]
+  tickets           Ticket[]
+  ticketTimeLogs    TicketTimeLog[]
+  contracts         Contract[]
+  projects          Project[]
+  projectTeamMembers ProjectTeamMember[]
+  webForms          WebForm[]
+  chatConversations ChatConversation[]
+  expenses          Expense[]
+  assets            Asset[]
+  commissionPayouts CommissionPayout[]
 
   @@map("employees")
 }
@@ -610,6 +635,15 @@ model Customer {
   meetings    Meeting[]
   quotes      Quote[]
   invoices    Invoice[]
+  tickets     Ticket[]
+  contracts   Contract[]
+  orders      Order[]
+  projects    Project[]
+  subscriptions Subscription[]
+  portalUsers PortalUser[]
+  chatConversations ChatConversation[]
+  surveyResponses SurveyResponse[]
+  assets      Asset[]
 
   @@index([name])
   @@index([email])
@@ -713,6 +747,10 @@ model Contact {
   scores                 ContactScore?
   riskMetric             ContactRisk?
   recommendations        ContactRecommendation[]
+  tickets                Ticket[]
+  consentLogs            ConsentLog[]
+  dataRequests           DataRequest[]
+  surveyResponses        SurveyResponse[]
 
   @@index([email])
   @@index([phone])
@@ -740,6 +778,7 @@ model LeadSource {
 
   // Relations
   leads       Lead[]
+  webForms    WebForm[]
 
   @@map("lead_sources")
 }
@@ -764,6 +803,7 @@ model LeadStatus {
 
   // Relations
   leads       Lead[]
+  webForms    WebForm[]
 
   @@map("lead_status")
 }
@@ -847,6 +887,7 @@ model Lead {
   approvals          LeadApproval[]
   contacts           Contact[]         @relation("LeadContacts")
   deals              Deal[]
+  webFormSubmissions WebFormSubmission[]
 
   @@index([leadNumber])
   @@index([fullName])
@@ -995,6 +1036,12 @@ model Deal {
   sla              DealSLA?
   playbooks        DealPlaybook[]
   followups        DealFollowup[]
+  tickets          Ticket[]
+  contracts        Contract[]
+  orders           Order[]
+  expenses         Expense[]
+  commissionPayouts CommissionPayout[]
+  projects         Project[]
 
   @@index([dealNumber])
   @@index([name])
@@ -1196,6 +1243,7 @@ model Product {
   quoteItems  QuoteItem[]
   invoiceItems InvoiceItem[]
   dealProducts DealProduct[]
+  orderItems  OrderItem[]
 
   @@map("products")
 }
@@ -1227,6 +1275,7 @@ model Quote {
   // Relations
   items       QuoteItem[]
   dealQuotes  DealQuote[]
+  orders      Order[]
 
   @@index([status])
   @@map("quotes")
@@ -1282,6 +1331,8 @@ model Invoice {
   // Relations
   items      InvoiceItem[]
   payments   Payment[]
+  orders     Order[]
+  commissionPayouts CommissionPayout[]
 
   @@index([status])
   @@map("invoices")
@@ -1386,6 +1437,8 @@ model EmailTemplate {
   subject   String
   bodyHtml  String
   bodyText  String?
+
+  surveys   Survey[]
 
   // Auditing
   createdBy String?
@@ -4029,5 +4082,930 @@ model CompanyKYC {
   version     Int       @default(1)
 
   @@map("company_kycs")
+}
+
+// ============================================================
+// NEW FEATURE MODELS (106-121)
+// ============================================================
+
+// 106. MARKETING CAMPAIGNS
+model Campaign {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  description String?   @db.Text
+  type        String    @default("Email") // Email, SMS, Social, Multi-channel
+  status      String    @default("Draft") // Draft, Scheduled, Running, Paused, Completed, Cancelled
+  startDate   DateTime?
+  endDate     DateTime?
+  budget      Float     @default(0.0)
+  actualCost  Float     @default(0.0)
+  targetAudience Json?  @default("[]") // segment criteria
+  content     Json?     @default("[]") // campaign content blocks
+  metrics     Json?     @default("{}") // opens, clicks, conversions, revenue
+  ownerId     String?   @db.Uuid
+  owner       Employee? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  lists       CampaignList[]
+  emails      CampaignEmail[]
+
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@index([status, type])
+  @@map("campaigns")
+}
+
+model CampaignList {
+  id          String    @id @default(uuid()) @db.Uuid
+  campaignId  String    @db.Uuid
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  name        String
+  description String?   @db.Text
+  type        String    @default("Static") // Static, Dynamic, Segmented
+  criteria    Json?     @default("{}")
+  totalCount  Int       @default(0)
+  contacts    Json?     @default("[]") // list of contact IDs
+
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("campaign_lists")
+}
+
+model CampaignEmail {
+  id          String    @id @default(uuid()) @db.Uuid
+  campaignId  String    @db.Uuid
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  subject     String
+  preheader   String?
+  bodyHtml    String    @db.Text
+  bodyText    String?   @db.Text
+  senderName  String?
+  senderEmail String?
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  opens       Int       @default(0)
+  clicks      Int       @default(0)
+  bounces     Int       @default(0)
+  status      String    @default("Draft") // Draft, Scheduled, Sent, Failed
+
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  version     Int       @default(1)
+
+  @@map("campaign_emails")
+}
+
+// 107. SUPPORT TICKETS / CASES
+model Ticket {
+  id              String    @id @default(uuid()) @db.Uuid
+  ticketNumber    String    @unique
+  subject         String
+  description     String?   @db.Text
+  status          String    @default("Open") // Open, In Progress, Waiting Customer, Resolved, Closed
+  priority        String    @default("Medium") // Low, Medium, High, Critical
+  severity        String    @default("Normal") // Low, Normal, High, Emergency
+  category        String?   @default("General") // General, Billing, Technical, Account, Feature Request
+  source          String    @default("Email") // Email, Phone, Chat, Portal, Social
+  customerId      String?   @db.Uuid
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  contactId       String?   @db.Uuid
+  contact         Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  companyId       String?   @db.Uuid
+  company         Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  assignedToId    String?   @db.Uuid
+  assignedTo      Employee? @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  dealId          String?   @db.Uuid
+  deal            Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  dueDate         DateTime?
+  resolvedAt      DateTime?
+  resolution      String?   @db.Text
+  satisfaction    Int?      // CSAT 1-5
+  tags            String[]  @default([])
+  comments        TicketComment[]
+  attachments     TicketAttachment[]
+  timeLogs        TicketTimeLog[]
+
+  createdBy       String?
+  updatedBy       String?
+  deletedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  version         Int       @default(1)
+
+  @@index([ticketNumber, status, priority, assignedToId])
+  @@map("tickets")
+}
+
+model TicketComment {
+  id          String   @id @default(uuid()) @db.Uuid
+  ticketId    String   @db.Uuid
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId    String?  @db.Uuid
+  author      User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  content     String   @db.Text
+  isInternal  Boolean  @default(false) // internal note vs customer-facing
+
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  version     Int      @default(1)
+
+  @@map("ticket_comments")
+}
+
+model TicketAttachment {
+  id          String   @id @default(uuid()) @db.Uuid
+  ticketId    String   @db.Uuid
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  fileName    String
+  filePath    String
+  mimeType    String
+  size        Int
+  uploadedById String? @db.Uuid
+  uploadedBy  User?    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  version     Int      @default(1)
+
+  @@map("ticket_attachments")
+}
+
+model TicketTimeLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  ticketId    String   @db.Uuid
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  employeeId  String   @db.Uuid
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  minutes     Int
+  description String?  @db.Text
+  loggedAt    DateTime @default(now())
+
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  version     Int      @default(1)
+
+  @@map("ticket_time_logs")
+}
+
+// 108. KNOWLEDGE BASE
+model KnowledgeArticle {
+  id           String   @id @default(uuid()) @db.Uuid
+  title        String
+  slug         String   @unique
+  content      String   @db.Text
+  excerpt      String?  @db.Text
+  categoryId   String?  @db.Uuid
+  category     KnowledgeCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags         String[] @default([])
+  status       String   @default("Draft") // Draft, Published, Archived
+  visibility   String   @default("Internal") // Internal, External, Both
+  authorId     String?  @db.Uuid
+  author       User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  views        Int      @default(0)
+  helpfulYes   Int      @default(0)
+  helpfulNo    Int      @default(0)
+  featuredImage String?
+  publishedAt  DateTime?
+  attachments  KnowledgeAttachment[]
+
+  createdBy    String?
+  updatedBy    String?
+  deletedBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+  version      Int      @default(1)
+
+  @@index([slug, status, visibility])
+  @@map("knowledge_articles")
+}
+
+model KnowledgeCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  icon        String?
+  color       String?  @default("#6366f1")
+  parentId    String?  @db.Uuid
+  parent      KnowledgeCategory? @relation("KnowledgeCategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    KnowledgeCategory[] @relation("KnowledgeCategoryHierarchy")
+  articles    KnowledgeArticle[]
+  order       Int      @default(0)
+
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  version     Int      @default(1)
+
+  @@map("knowledge_categories")
+}
+
+model KnowledgeAttachment {
+  id          String   @id @default(uuid()) @db.Uuid
+  articleId   String   @db.Uuid
+  article     KnowledgeArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  fileName    String
+  filePath    String
+  mimeType    String
+  size        Int
+
+  createdAt   DateTime @default(now())
+  @@map("knowledge_attachments")
+}
+
+// 109. CONTRACTS MANAGEMENT
+model Contract {
+  id              String    @id @default(uuid()) @db.Uuid
+  contractNumber  String    @unique
+  title           String
+  description     String?   @db.Text
+  type            String    @default("Service") // Service, Sales, Lease, NDA, Partnership, Employment
+  status          String    @default("Draft") // Draft, Pending Approval, Active, Expired, Terminated, Renewed
+  customerId      String?   @db.Uuid
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  companyId       String?   @db.Uuid
+  company         Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  dealId          String?   @db.Uuid
+  deal            Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  ownerId         String?   @db.Uuid
+  owner           Employee? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  startDate       DateTime?
+  endDate         DateTime?
+  renewalDate     DateTime?
+  value           Float     @default(0.0)
+  currency         String    @default("USD")
+  terms           String?   @db.Text
+  fileUrl         String?
+  notes           String?   @db.Text
+  tags            String[]  @default([])
+  approvedById    String?   @db.Uuid
+  approvedBy      User?     @relation(fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt      DateTime?
+  signedAt        DateTime?
+
+  createdBy       String?
+  updatedBy       String?
+  deletedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  version         Int       @default(1)
+
+  @@index([contractNumber, status, customerId, companyId])
+  @@map("contracts")
+}
+
+// 110. ORDERS MANAGEMENT
+model Order {
+  id            String    @id @default(uuid()) @db.Uuid
+  orderNumber   String    @unique
+  customerId    String    @db.Uuid
+  customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  companyId     String?   @db.Uuid
+  company       Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  dealId        String?   @db.Uuid
+  deal          Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  quoteId       String?   @db.Uuid
+  quote         Quote?    @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  invoiceId     String?   @db.Uuid
+  invoice       Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  status        String    @default("Pending") // Pending, Confirmed, Processing, Shipped, Delivered, Cancelled, Returned
+  subtotal      Float     @default(0.0)
+  tax           Float     @default(0.0)
+  discount      Float     @default(0.0)
+  total         Float     @default(0.0)
+  shippingCost  Float     @default(0.0)
+  shippingAddress String?
+  billingAddress String?
+  notes         String?   @db.Text
+  items         OrderItem[]
+  orderedAt     DateTime  @default(now())
+  deliveredAt   DateTime?
+  cancelledAt   DateTime?
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@index([orderNumber, status, customerId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  orderId     String   @db.Uuid
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String   @db.Uuid
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity    Int
+  unitPrice   Float
+  subtotal    Float    @default(0.0)
+
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  version     Int      @default(1)
+
+  @@map("order_items")
+}
+
+// 111. PROJECTS MANAGEMENT
+model Project {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String
+  description   String?   @db.Text
+  code          String    @unique
+  status        String    @default("Planning") // Planning, Active, On Hold, Completed, Cancelled
+  priority      String    @default("Medium") // Low, Medium, High, Critical
+  startDate     DateTime?
+  endDate       DateTime?
+  actualEndDate DateTime?
+  budget        Float     @default(0.0)
+  actualCost    Float     @default(0.0)
+  customerId    String?   @db.Uuid
+  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  companyId     String?   @db.Uuid
+  company       Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  dealId         String?   @db.Uuid
+  deal           Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  ownerId       String?   @db.Uuid
+  owner         Employee? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  tags          String[]  @default([])
+  milestones    ProjectMilestone[]
+  teamMembers   ProjectTeamMember[]
+  expenses      Expense[]
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  version       Int       @default(1)
+
+  @@index([code, status, ownerId])
+  @@map("projects")
+}
+
+model ProjectMilestone {
+  id          String   @id @default(uuid()) @db.Uuid
+  projectId   String   @db.Uuid
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  description String?  @db.Text
+  dueDate     DateTime?
+  completedDate DateTime?
+  status      String   @default("Pending") // Pending, In Progress, Completed
+  order       Int      @default(0)
+
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  version     Int      @default(1)
+
+  @@map("project_milestones")
+}
+
+model ProjectTeamMember {
+  id          String   @id @default(uuid()) @db.Uuid
+  projectId   String   @db.Uuid
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  employeeId  String   @db.Uuid
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  role        String   @default("Member") // Manager, Lead, Member, Reviewer
+  hoursAllocated Float? @default(0.0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  version     Int      @default(1)
+
+  @@unique([projectId, employeeId])
+  @@map("project_team_members")
+}
+
+// 112. SUBSCRIPTIONS / RECURRING BILLING
+model SubscriptionPlan {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  description   String?  @db.Text
+  billingPeriod String   @default("Monthly") // Monthly, Quarterly, Annual, Custom
+  price         Float    @default(0.0)
+  currency      String   @default("USD")
+  isActive      Boolean  @default(true)
+  features      Json?    @default("[]")
+  maxUsers      Int?     @default(1)
+  maxStorage    Float?   @default(0.0)
+  subscriptions Subscription[]
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id              String   @id @default(uuid()) @db.Uuid
+  planId          String   @db.Uuid
+  plan            SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+  customerId      String   @db.Uuid
+  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  status          String   @default("Active") // Active, Paused, Cancelled, Expired
+  startDate       DateTime @default(now())
+  endDate         DateTime?
+  cancelledAt     DateTime?
+  cancelReason    String?
+  autoRenew       Boolean  @default(true)
+  nextBillingDate DateTime?
+  lastBillingDate DateTime?
+  quantity        Int      @default(1)
+  unitPrice       Float    @default(0.0)
+  totalPrice      Float    @default(0.0)
+
+  createdBy       String?
+  updatedBy       String?
+  deletedBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+  version         Int      @default(1)
+
+  @@index([status, customerId, nextBillingDate])
+  @@map("subscriptions")
+}
+
+// 113. EMAIL SYNC / INTEGRATION
+model EmailAccount {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email         String
+  provider      String   @default("IMAP") // IMAP, Gmail, Outlook, Exchange
+  imapHost      String?
+  imapPort      Int?     @default(993)
+  imapSecure    Boolean  @default(true)
+  smtpHost      String?
+  smtpPort      Int?     @default(587)
+  smtpSecure    Boolean  @default(true)
+  username      String?
+  encryptedPassword String?
+  accessToken   String?
+  refreshToken  String?
+  isActive      Boolean  @default(true)
+  lastSyncedAt  DateTime?
+  syncInterval  Int      @default(5) // minutes
+  folders       String[] @default([]) // synced folder names
+  messages      EmailMessage[]
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@map("email_accounts")
+}
+
+model EmailMessage {
+  id            String   @id @default(uuid()) @db.Uuid
+  accountId     String   @db.Uuid
+  account       EmailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  messageId     String   // unique email message ID from provider
+  subject       String
+  fromAddress   String
+  fromName      String?
+  toAddresses   String[] @default([])
+  ccAddresses   String[] @default([])
+  bccAddresses  String[] @default([])
+  bodyHtml      String?  @db.Text
+  bodyText      String?  @db.Text
+  attachments   Json?    @default("[]")
+  receivedAt    DateTime
+  folder        String   @default("INBOX")
+  isRead        Boolean  @default(false)
+  isStarred     Boolean  @default(false)
+  isDeleted     Boolean  @default(false)
+  threadId      String?
+  inReplyTo     String?
+  references    String?
+  relatedEntityType String? // Lead, Contact, Company, Deal, Ticket
+  relatedEntityId   String? @db.Uuid
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@index([accountId, folder, receivedAt])
+  @@map("email_messages")
+}
+
+// 114. WEB-TO-LEAD FORMS
+model WebForm {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  description   String?  @db.Text
+  fields        Json     @default("[]") // [{ name, type, required, options }]
+  submitLabel   String   @default("Submit")
+  successMessage String? @default("Thank you for your submission!")
+  redirectUrl   String?
+  notificationEmails String[] @default([])
+  assignToId    String?  @db.Uuid
+  assignTo      Employee? @relation(fields: [assignToId], references: [id], onDelete: SetNull)
+  sourceId      String?  @db.Uuid
+  source        LeadSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  statusId      String?  @db.Uuid
+  status        LeadStatus? @relation(fields: [statusId], references: [id], onDelete: SetNull)
+  isActive      Boolean  @default(true)
+  submissions   WebFormSubmission[]
+  embedCode     String?  // generated embed snippet
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@map("web_forms")
+}
+
+model WebFormSubmission {
+  id          String   @id @default(uuid()) @db.Uuid
+  formId      String   @db.Uuid
+  form        WebForm  @relation(fields: [formId], references: [id], onDelete: Cascade)
+  data        Json     @default("{}") // submitted field values
+  ipAddress   String?
+  userAgent   String?
+  convertedToLeadId String? @db.Uuid
+  convertedToLead   Lead?   @relation(fields: [convertedToLeadId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+  @@map("web_form_submissions")
+}
+
+// 115. CUSTOMER PORTAL
+model PortalUser {
+  id            String   @id @default(uuid()) @db.Uuid
+  customerId    String   @db.Uuid
+  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  email         String   @unique
+  password      String
+  firstName     String
+  lastName      String
+  isActive      Boolean  @default(true)
+  emailVerified Boolean  @default(false)
+  lastLogin     DateTime?
+  permissions   Json?    @default("[]") // portal feature access
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@map("portal_users")
+}
+
+// 116. LIVE CHAT
+model ChatConversation {
+  id            String   @id @default(uuid()) @db.Uuid
+  sessionId     String   @unique
+  status        String   @default("Active") // Active, Waiting, Resolved, Closed
+  visitorName   String?
+  visitorEmail  String?
+  visitorPhone  String?
+  ipAddress     String?
+  userAgent     String?
+  pageUrl       String?
+  assignedToId  String?  @db.Uuid
+  assignedTo    Employee? @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  customerId    String?  @db.Uuid
+  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  companyId     String?  @db.Uuid
+  company       Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  messages      ChatMessage[]
+  rating        Int?
+  ratingComment String?  @db.Text
+  startedAt     DateTime @default(now())
+  endedAt       DateTime?
+  tags          String[] @default([])
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@index([sessionId, status])
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  id              String   @id @default(uuid()) @db.Uuid
+  conversationId  String   @db.Uuid
+  conversation    ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderType      String   @default("Visitor") // Visitor, Agent, System
+  senderId        String?  @db.Uuid // Employee ID for agents
+  content         String   @db.Text
+  contentType     String   @default("Text") // Text, Image, File, System
+  fileUrl         String?
+  isRead          Boolean  @default(false)
+  sentAt          DateTime @default(now())
+
+  @@map("chat_messages")
+}
+
+// 117. EXPENSE TRACKING
+model Expense {
+  id            String   @id @default(uuid()) @db.Uuid
+  employeeId    String   @db.Uuid
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  categoryId    String?  @db.Uuid
+  category      ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  amount        Float
+  currency      String   @default("USD")
+  description   String?  @db.Text
+  date          DateTime @default(now())
+  receiptUrl    String?
+  status        String   @default("Pending") // Pending, Approved, Reimbursed, Rejected
+  approvedById  String?  @db.Uuid
+  approvedBy    User?    @relation(fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt    DateTime?
+  dealId        String?  @db.Uuid
+  deal          Deal?    @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  projectId     String?  @db.Uuid
+  project       Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  billable      Boolean  @default(false)
+  taxRelevant   Boolean  @default(false)
+  tags          String[] @default([])
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@index([employeeId, status, date])
+  @@map("expenses")
+}
+
+model ExpenseCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?  @db.Text
+  icon        String?
+  isActive    Boolean  @default(true)
+  expenses    Expense[]
+
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  version     Int      @default(1)
+
+  @@map("expense_categories")
+}
+
+// 118. ASSET MANAGEMENT
+model Asset {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  type          String   @default("Hardware") // Hardware, Software, License, Equipment, Vehicle, Other
+  serialNumber  String?  @unique
+  assetTag      String?  @unique
+  status        String   @default("Active") // Active, In Maintenance, Retired, Lost, Sold
+  description   String?  @db.Text
+  purchaseDate  DateTime?
+  purchasePrice Float    @default(0.0)
+  currentValue  Float    @default(0.0)
+  currency      String   @default("USD")
+  warrantyExpiry DateTime?
+  location      String?
+  assignedToId  String?  @db.Uuid
+  assignedTo    Employee? @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  customerId    String?  @db.Uuid
+  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  companyId     String?  @db.Uuid
+  company       Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  vendor        String?
+  notes         String?  @db.Text
+  tags          String[] @default([])
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@index([type, status, serialNumber])
+  @@map("assets")
+}
+
+// 119. GDPR / DATA PRIVACY
+model ConsentLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  contactId   String?  @db.Uuid
+  contact     Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  companyId   String?  @db.Uuid
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type        String   // Marketing, Analytics, ThirdParty, Cookies, Communications
+  granted     Boolean  @default(true)
+  source      String   // Form, Portal, Email, Manual
+  ipAddress   String?
+  consentDate DateTime @default(now())
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  details     Json?    @default("{}")
+
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  @@map("consent_logs")
+}
+
+model DataRequest {
+  id            String   @id @default(uuid()) @db.Uuid
+  requestNumber String   @unique
+  contactId     String?  @db.Uuid
+  contact       Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  companyId     String?  @db.Uuid
+  company       Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type          String   // Access, Rectification, Erasure, Portability, Restrict, Object
+  status        String   @default("Pending") // Pending, In Progress, Completed, Rejected
+  description   String?  @db.Text
+  requestedAt   DateTime  @default(now())
+  completedAt   DateTime?
+  responseData  Json?    @default("{}")
+  notes         String?  @db.Text
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@index([requestNumber, type, status])
+  @@map("data_requests")
+}
+
+// 120. NPS / SURVEYS
+model Survey {
+  id            String   @id @default(uuid()) @db.Uuid
+  title         String
+  description   String?  @db.Text
+  type          String   @default("NPS") // NPS, CSAT, CES, Custom
+  questions     Json     @default("[]") // [{ id, type, question, options, required }]
+  status        String   @default("Draft") // Draft, Active, Closed
+  targetAudience Json?   @default("{}")
+  sendMethod    String   @default("Email") // Email, Portal, Link
+  templateId    String?  @db.Uuid
+  template      EmailTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  responses     SurveyResponse[]
+  responseCount Int      @default(0)
+  averageScore  Float?   @default(0.0)
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@map("surveys")
+}
+
+model SurveyResponse {
+  id          String   @id @default(uuid()) @db.Uuid
+  surveyId    String   @db.Uuid
+  survey      Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  contactId   String?  @db.Uuid
+  contact     Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  customerId   String?  @db.Uuid
+  customer     Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  answers     Json     @default("{}") // [{ questionId, value }]
+  score       Int?     // NPS: 0-10, CSAT: 1-5
+  comment     String?  @db.Text
+  submittedAt DateTime @default(now())
+  ipAddress   String?
+
+  @@index([surveyId, score])
+  @@map("survey_responses")
+}
+
+// 121. COMMISSION TRACKING
+model CommissionRule {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  description   String?  @db.Text
+  type          String   @default("Percentage") // Percentage, Fixed, Tiered, Formula
+  calculation   String?  @db.Text // formula description
+  rate          Float    @default(0.0) // percentage or fixed amount
+  tierConfig    Json?    @default("[]") // [{ minValue, maxValue, rate }]
+  conditions    Json?    @default("{}") // applicable conditions
+  productIds    String[] @default([])
+  dealTypes     String[] @default([])
+  minDealValue  Float    @default(0.0)
+  maxDealValue  Float?
+  isActive      Boolean  @default(true)
+  payouts       CommissionPayout[]
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@map("commission_rules")
+}
+
+model CommissionPayout {
+  id            String   @id @default(uuid()) @db.Uuid
+  ruleId        String   @db.Uuid
+  rule          CommissionRule @relation(fields: [ruleId], references: [id], onDelete: Restrict)
+  employeeId    String   @db.Uuid
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  dealId        String?  @db.Uuid
+  deal          Deal?    @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  invoiceId     String?  @db.Uuid
+  invoice       Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  amount        Float    @default(0.0)
+  currency      String   @default("USD")
+  status        String   @default("Pending") // Pending, Approved, Paid, Cancelled
+  periodStart   DateTime?
+  periodEnd     DateTime?
+  paidAt        DateTime?
+  notes         String?  @db.Text
+
+  createdBy     String?
+  updatedBy     String?
+  deletedBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  version       Int      @default(1)
+
+  @@index([employeeId, status, periodStart, periodEnd])
+  @@map("commission_payouts")
 }
 

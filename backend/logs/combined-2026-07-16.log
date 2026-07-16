@@ -321,3 +321,65 @@
 {"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 0.539 ms","timestamp":"2026-07-16 19:50:16"}
 {"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 0.473 ms","timestamp":"2026-07-16 19:50:16"}
 {"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 0.663 ms","timestamp":"2026-07-16 19:50:16"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 401 217 - 3.830 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 401 217 - 10.647 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 401 217 - 4.764 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 401 217 - 3.240 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 401 217 - 5.239 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 401 217 - 5.463 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 401 217 - 3.094 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/notifications 401 217 - 5.916 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 401 217 - 8.266 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 401 217 - 4.527 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 401 217 - 3.974 ms","timestamp":"2026-07-16 20:09:26"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"GET /api/v1/notifications 401 217 - 1.934 ms","timestamp":"2026-07-16 20:09:26"}
+{"level":"info","message":"POST /api/v1/auth/refresh 200 - - 2660.617 ms","timestamp":"2026-07-16 20:09:29"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:29"}
+{"level":"info","message":"GET /api/v1/companies/employees 401 217 - 2.502 ms","timestamp":"2026-07-16 20:09:29"}
+{"error":"jwt expired","level":"error","message":"Authentication check failed","timestamp":"2026-07-16 20:09:29"}
+{"level":"info","message":"GET /api/v1/companies/employees 401 217 - 3.086 ms","timestamp":"2026-07-16 20:09:29"}
+{"level":"info","message":"GET /api/v1/notifications 200 183 - 701.106 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 856.890 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 868.048 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 841.174 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/overview 200 314 - 3.573 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/charts?timeframe=30d 200 - - 2.346 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/activities 200 - - 1.718 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 895.286 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 1037.970 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/notifications 200 183 - 167.383 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 285.618 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 304.757 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 5.141 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/deals 200 182 - 543.425 ms","timestamp":"2026-07-16 20:09:30"}
+{"level":"info","message":"GET /api/v1/dashboard/tasks 200 178 - 435.407 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/business-overview?timeframe=30d 200 283 - 2.994 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 135.761 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/revenue 200 283 - 4.574 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/calendar-preview 200 250 - 3.916 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 169.891 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/health 200 326 - 4.926 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/goals 200 358 - 5.832 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 592.986 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/team 200 181 - 3.555 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 333.152 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/dashboard/pipeline?timeframe=30d 200 720 - 2.859 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"POST /api/v1/auth/refresh 200 - - 1607.229 ms","timestamp":"2026-07-16 20:09:31"}
+{"level":"info","message":"GET /api/v1/companies/employees 200 179 - 133.007 ms","timestamp":"2026-07-16 20:09:32"}
+{"level":"info","message":"GET /api/v1/companies/employees 200 179 - 92.267 ms","timestamp":"2026-07-16 20:09:32"}
+{"level":"info","message":"GET /api/v1/companies 200 244 - 259.601 ms","timestamp":"2026-07-16 20:09:32"}
+{"level":"info","message":"GET /api/v1/meetings 403 211 - 2.459 ms","timestamp":"2026-07-16 20:09:32"}
+{"level":"info","message":"GET /api/v1/companies 200 244 - 303.568 ms","timestamp":"2026-07-16 20:09:32"}
+{"level":"info","message":"GET /api/v1/meetings 403 211 - 2.792 ms","timestamp":"2026-07-16 20:09:32"}

@@ -29,7 +29,23 @@ import {
   User,
   Shield,
   Clock,
-  X
+  X,
+  Megaphone,
+  TicketCheck,
+  BookOpen,
+  FileSignature,
+  ShoppingCart,
+  FolderKanban,
+  Repeat,
+  Mail,
+  FormInput,
+  Globe,
+  MessageSquare,
+  Wallet,
+  HardDrive,
+  ShieldCheck,
+  ClipboardCheck,
+  DollarSign
 } from 'lucide-react';
 import { useSettingsStore } from '../store/settingsStore';
 import { useAuthStore } from '../store/authStore';
@@ -146,6 +162,23 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Team', icon: <Users size={18} />, path: '/team' },
     { label: 'Notifications', icon: <Bell size={18} />, path: '/notifications' },
     { label: 'Settings', icon: <Settings size={18} />, path: '/settings', requiredPermission: 'settings:access' },
+    // New Features
+    { label: 'Campaigns', icon: <Megaphone size={18} />, path: '/campaigns', requiredPermission: 'campaigns:view' },
+    { label: 'Support Tickets', icon: <TicketCheck size={18} />, path: '/tickets', requiredPermission: 'tickets:view' },
+    { label: 'Knowledge Base', icon: <BookOpen size={18} />, path: '/knowledge', requiredPermission: 'knowledge:view' },
+    { label: 'Contracts', icon: <FileSignature size={18} />, path: '/contracts', requiredPermission: 'contracts:view' },
+    { label: 'Orders', icon: <ShoppingCart size={18} />, path: '/orders', requiredPermission: 'orders:view' },
+    { label: 'Projects', icon: <FolderKanban size={18} />, path: '/projects', requiredPermission: 'projects:view' },
+    { label: 'Subscriptions', icon: <Repeat size={18} />, path: '/subscriptions', requiredPermission: 'subscriptions:view' },
+    { label: 'Email', icon: <Mail size={18} />, path: '/email' },
+    { label: 'Web Forms', icon: <FormInput size={18} />, path: '/webforms', requiredPermission: 'webforms:view' },
+    { label: 'Customer Portal', icon: <Globe size={18} />, path: '/portal', requiredPermission: 'portal:view' },
+    { label: 'Live Chat', icon: <MessageSquare size={18} />, path: '/chat' },
+    { label: 'Expenses', icon: <Wallet size={18} />, path: '/expenses', requiredPermission: 'expenses:view' },
+    { label: 'Assets', icon: <HardDrive size={18} />, path: '/assets', requiredPermission: 'assets:view' },
+    { label: 'GDPR & Privacy', icon: <ShieldCheck size={18} />, path: '/gdpr', requiredPermission: 'gdpr:view' },
+    { label: 'Surveys (NPS)', icon: <ClipboardCheck size={18} />, path: '/surveys', requiredPermission: 'surveys:view' },
+    { label: 'Commissions', icon: <DollarSign size={18} />, path: '/commissions', requiredPermission: 'commissions:view' },
   ];
 
   // Dynamically filter menu items based on assigned user permissions
