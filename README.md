@@ -101,8 +101,21 @@ Users, Roles, Permissions, Customers, Calendar, Notifications, Reports, Analytic
 
 ## Recent Updates & Bug Fixes
 
-Here are the key issues resolved in the latest release:
+Here are the key issues resolved in the latest releases:
 
+### Release 2.0 (Latest)
+1. **CVR Import Validation Relaxation**: Modified phone, industry, sub-industry, and business category validators to handle flexible data patterns (e.g. international phone characters, symbols like `&`, `-`, and numbers in industry names) during corporate lookups and CVR imports.
+2. **Form Preprocessors for Empty Inputs**: Integrated Zod preprocessors to map empty/blank form fields (e.g. `foundedYear`, `annualRevenue`, and `employeeCount`) to `null` before passing them to integer/number validation rules, resolving company creation blocking bugs.
+3. **Logo URL Validation Phase**: Bound `logo` field check in step 1 of the basic company wizard to prevent moving to step 2 with invalid image extensions.
+4. **Employee Directory Seeding**: Updated database seed script to auto-generate default employee listings for proper owner selection dropdown mappings.
+5. **Activity Status & Enum Sync**: Swapped default front-end status from `Open` to `Planned` to align with the backend's allowed enum values.
+6. **File Upload Content-Type Boundary**: Bound standard `multipart/form-data` content-type header context to frontend Axios file upload requests, enabling correct request parsing on the backend server.
+7. **Branch Update Sanitizer**: Configured the backend branch update controller to safely map empty manager ID UUID strings and opening dates to `null` or valid dates, avoiding database constraints failures.
+8. **Relaxed Close Dates in Deals**: Allowed expected and actual close dates for Deals to accept non-ISO string formats, supporting standard web date input formats.
+9. **Workflow Trigger Types Extension**: Expanded backend workflow triggers enum to allow user-configured conditions (e.g. manual, scheduled, score/health/risk change, etc.).
+10. **Nullable Follow-up Details**: Refined validation schemas for Follow-up creation to make description and ownerId optional/nullable to match the DB schema.
+
+### Release 1.0 (Previous)
 1. **Date-Only Validator Compatibility**: Fixed `companyActivity.validator` and `companyIntelligence.validator` schemas to accept date-only strings (e.g. `2026-07-12`) instead of strictly requiring full ISO datetimes, resolving activity and follow-up logging failures.
 2. **Prisma List Fields Formatting**: Updated deals service array sanitizer to map undefined tags to `[]` instead of `null`, preventing Prisma database insert errors.
 3. **Address Form Validations**: Enforced text-only constraint for `country`, `state`, and `city` inputs, and digits-only constraint for `postalCode` (postal code) fields on both backend validators and frontend layouts.
