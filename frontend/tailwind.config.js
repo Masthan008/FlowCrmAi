@@ -9,16 +9,16 @@ export default {
     extend: {
       colors: {
         brand: {
-          50: '#f0f6ff',
-          100: '#e0edff',
-          200: '#c2dbff',
-          300: '#94beff',
-          400: '#5e99ff',
-          550: '#2563eb', // Core blue accent
-          600: '#1d4ed8',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: '#f0fdf4',   // mint green tint
+          100: '#dcfce7',  // mint green light
+          200: '#e0f2fe',  // sky blue tint
+          300: '#bae6fd',  // sky blue light
+          400: '#38bdf8',  // sky blue medium
+          550: '#0d9488',  // teal green-blue primary accent
+          600: '#0f766e',  // teal deep accent
+          700: '#115e59',  // teal dark
+          800: '#075985',  // ocean blue
+          900: '#0c4a6e',  // deep navy
         },
         slate: {
           25: '#fcfdfd',
