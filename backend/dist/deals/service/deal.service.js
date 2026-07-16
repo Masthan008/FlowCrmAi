@@ -7,7 +7,12 @@ const cleanData = (data) => {
     const cleaned = {};
     for (const [key, value] of Object.entries(data)) {
         if (value === '' || value === undefined) {
-            cleaned[key] = null;
+            if (key === 'tags') {
+                cleaned[key] = [];
+            }
+            else {
+                cleaned[key] = null;
+            }
         }
         else {
             cleaned[key] = value;

@@ -10,6 +10,8 @@ const segmentMatchTypes = ['ALL', 'ANY'];
 const workflowTriggers = [
     'company_created', 'status_changed', 'lifecycle_changed', 'owner_changed',
     'revenue_updated', 'deal_closed', 'invoice_generated', 'payment_received', 'branch_added',
+    'manual', 'stage_change', 'score_change', 'health_change', 'risk_change',
+    'tag_added', 'activity_created', 'scheduled',
 ];
 const recommendationTypes = ['upsell', 'cross_sell', 'renewal_reminder', 'contact_time', 'risk_warning', 'follow_up', 'general'];
 const followupTypes = ['Business Review', 'Renewal', 'Contract Discussion', 'Quarterly Meeting', 'Executive Meeting', 'Sales Visit', 'Customer Success Review', 'Escalation'];
@@ -23,18 +25,18 @@ exports.updateLifecycleSchema = zod_1.z.object({
 });
 exports.getScoreSchema = zod_1.z.object({
     params: zod_1.z.object({ id: zod_1.z.string().uuid('Invalid company ID') }),
-    query: zod_1.z.object({}).optional(),
-    body: zod_1.z.object({}).optional(),
+    query: zod_1.z.any().optional(),
+    body: zod_1.z.any().optional(),
 });
 exports.getHealthSchema = zod_1.z.object({
     params: zod_1.z.object({ id: zod_1.z.string().uuid('Invalid company ID') }),
-    query: zod_1.z.object({}).optional(),
-    body: zod_1.z.object({}).optional(),
+    query: zod_1.z.any().optional(),
+    body: zod_1.z.any().optional(),
 });
 exports.getRiskSchema = zod_1.z.object({
     params: zod_1.z.object({ id: zod_1.z.string().uuid('Invalid company ID') }),
-    query: zod_1.z.object({}).optional(),
-    body: zod_1.z.object({}).optional(),
+    query: zod_1.z.any().optional(),
+    body: zod_1.z.any().optional(),
 });
 const segmentRuleSchema = zod_1.z.object({
     field: zod_1.z.string().min(1, 'Field is required'),
@@ -127,22 +129,22 @@ exports.createRecommendationSchema = zod_1.z.object({
         description: zod_1.z.string().max(1000).optional().or(zod_1.z.literal('')),
         priority: zod_1.z.enum(['Low', 'Medium', 'High', 'Critical']).optional(),
         confidence: zod_1.z.number().min(0).max(100).optional(),
-        expiresAt: zod_1.z.string().datetime().optional().or(zod_1.z.literal('')),
+        expiresAt: zod_1.z.string().optional().or(zod_1.z.literal('')),
     }),
     params: zod_1.z.object({ id: zod_1.z.string().uuid('Invalid company ID') }),
-    query: zod_1.z.object({}).optional(),
+    query: zod_1.z.any().optional(),
 });
 exports.createFollowupSchema = zod_1.z.object({
     body: zod_1.z.object({
         type: zod_1.z.enum(followupTypes),
         title: zod_1.z.string().min(1, 'Title is required').max(200),
-        description: zod_1.z.string().max(1000).optional().or(zod_1.z.literal('')),
-        ownerId: zod_1.z.string().uuid('Invalid owner ID').optional().or(zod_1.z.literal('')),
-        dueDate: zod_1.z.string().datetime({ message: 'Invalid due date format' }),
+        description: zod_1.z.string().max(1000).optional().nullable().or(zod_1.z.literal('')),
+        ownerId: zod_1.z.string().uuid('Invalid owner ID').optional().nullable().or(zod_1.z.literal('')),
+        dueDate: zod_1.z.string(),
         priority: zod_1.z.enum(['Low', 'Medium', 'High']).optional(),
     }),
     params: zod_1.z.object({ id: zod_1.z.string().uuid('Invalid company ID') }),
-    query: zod_1.z.object({}).optional(),
+    query: zod_1.z.any().optional(),
 });
 exports.updateFollowupSchema = zod_1.z.object({
     body: zod_1.z.object({
@@ -150,13 +152,13 @@ exports.updateFollowupSchema = zod_1.z.object({
         title: zod_1.z.string().min(1).max(200).optional(),
         description: zod_1.z.string().max(1000).optional().or(zod_1.z.literal('')),
         ownerId: zod_1.z.string().uuid('Invalid owner ID').optional().or(zod_1.z.literal('')),
-        dueDate: zod_1.z.string().datetime().optional(),
+        dueDate: zod_1.z.string().optional(),
         priority: zod_1.z.enum(['Low', 'Medium', 'High']).optional(),
         status: zod_1.z.enum(['Pending', 'Completed', 'Cancelled', 'Overdue']).optional(),
         notes: zod_1.z.string().max(2000).optional().or(zod_1.z.literal('')),
     }),
     params: zod_1.z.object({ id: zod_1.z.string().uuid('Invalid company ID'), followupId: zod_1.z.string().uuid('Invalid followup ID') }),
-    query: zod_1.z.object({}).optional(),
+    query: zod_1.z.any().optional(),
 });
 exports.listQuerySchema = zod_1.z.object({
     query: zod_1.z.object({
@@ -165,7 +167,7 @@ exports.listQuerySchema = zod_1.z.object({
         status: zod_1.z.string().optional(),
         type: zod_1.z.string().optional(),
         priority: zod_1.z.string().optional(),
-    }),
-    params: zod_1.z.object({}).optional(),
-    body: zod_1.z.object({}).optional(),
+    }).passthrough(),
+    params: zod_1.z.any().optional(),
+    body: zod_1.z.any().optional(),
 });

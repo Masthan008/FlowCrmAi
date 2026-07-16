@@ -1,7 +1,15 @@
 import { z } from 'zod';
 
-const exactPhoneRegex = /^\d{10}$/;
+const phoneRegex = /^[\d\s\+\-\(\)\.]{6,20}$/;
 const textOnlyRegex = /^[A-Za-z\s]*$/;
+const industryTextRegex = /^[A-Za-z0-9\s&\-\(\),\.]+$/;
+
+// Preprocessor: converts empty strings and NaN to null for optional number fields
+const emptyToNull = (val: unknown) => {
+  if (val === '' || val === undefined || val === null) return null;
+  const n = Number(val);
+  return isNaN(n) ? null : n;
+};
 const timezoneRegex = /^(UTC|GMT|[A-Za-z_]+\/[A-Za-z_]+)$/;
 const currencyRegex = /^[A-Z]{3}$/;
 const langRegex = /^[a-z]{2}$/;
@@ -20,22 +28,22 @@ export const createCompanySchema = z.object({
       return /\.(png|jpg|jpeg|gif|svg|webp|ico)$/i.test(cleanUrl);
     }, 'Logo must be a valid image URL ending with png, jpg, jpeg, gif, svg, webp, or ico').optional().nullable().or(z.literal('')),
     companyType: z.string().max(100).optional().nullable().or(z.literal('')),
-    industry: z.string().regex(textOnlyRegex, 'Industry must contain only letters').max(100).optional().nullable().or(z.literal('')),
-    subIndustry: z.string().regex(textOnlyRegex, 'Sub Industry must contain only letters').max(100).optional().nullable().or(z.literal('')),
-    businessCategory: z.string().regex(textOnlyRegex, 'Business Category must contain only letters').max(100).optional().nullable().or(z.literal('')),
+    industry: z.string().regex(industryTextRegex, 'Industry must contain only letters, numbers, and common symbols').max(100).optional().nullable().or(z.literal('')),
+    subIndustry: z.string().regex(industryTextRegex, 'Sub Industry must contain only letters, numbers, and common symbols').max(100).optional().nullable().or(z.literal('')),
+    businessCategory: z.string().regex(industryTextRegex, 'Business Category must contain only letters, numbers, and common symbols').max(100).optional().nullable().or(z.literal('')),
     website: z.string().url('Invalid website URL').optional().nullable().or(z.literal('')),
     primaryEmail: z.string().email('Invalid email format').optional().nullable().or(z.literal('')),
     secondaryEmail: z.string().email('Invalid secondary email format').optional().nullable().or(z.literal('')),
-    primaryPhone: z.string().regex(exactPhoneRegex, 'Primary Phone must be exactly 10 digits').optional().nullable().or(z.literal('')),
-    secondaryPhone: z.string().regex(exactPhoneRegex, 'Secondary Phone must be exactly 10 digits').optional().nullable().or(z.literal('')),
-    whatsApp: z.string().regex(exactPhoneRegex, 'WhatsApp must be exactly 10 digits').optional().nullable().or(z.literal('')),
+    primaryPhone: z.string().regex(phoneRegex, 'Primary Phone must be 6-20 digits (may include +, -, spaces)').optional().nullable().or(z.literal('')),
+    secondaryPhone: z.string().regex(phoneRegex, 'Secondary Phone must be 6-20 digits (may include +, -, spaces)').optional().nullable().or(z.literal('')),
+    whatsApp: z.string().regex(phoneRegex, 'WhatsApp must be 6-20 digits (may include +, -, spaces)').optional().nullable().or(z.literal('')),
     gstNumber: z.string().max(50).refine(val => !val || gstRegex.test(val), 'Invalid GST format (e.g. 22AAAAA0000A1Z5)').optional().nullable(),
     taxNumber: z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Tax Number must contain only alphanumeric characters').optional().nullable(),
     registrationNumber: z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Registration Number must contain only alphanumeric characters').optional().nullable(),
     panNumber: z.string().max(50).refine(val => !val || panRegex.test(val), 'Invalid PAN format (e.g. ABCDE1234F)').optional().nullable(),
-    foundedYear: z.number().int().min(1800).max(2100).optional().nullable(),
-    annualRevenue: z.number().min(0).optional().nullable(),
-    employeeCount: z.number().int().min(0).optional().nullable(),
+    foundedYear: z.preprocess(emptyToNull, z.number().int().min(1800).max(2100).optional().nullable()),
+    annualRevenue: z.preprocess(emptyToNull, z.number().min(0).optional().nullable()),
+    employeeCount: z.preprocess(emptyToNull, z.number().int().min(0).optional().nullable()),
     ownershipType: z.string().regex(textOnlyRegex, 'Ownership Type must contain only letters').max(50).optional().nullable().or(z.literal('')),
     currency: z.string().regex(currencyRegex, 'Currency must be a valid 3-letter uppercase code').optional().nullable().or(z.literal('')),
     timezone: z.string().regex(timezoneRegex, 'Timezone must be a valid timezone identifier (e.g. UTC, Europe/Copenhagen)').optional().nullable().or(z.literal('')),
@@ -71,22 +79,22 @@ export const updateCompanySchema = z.object({
       return /\.(png|jpg|jpeg|gif|svg|webp|ico)$/i.test(cleanUrl);
     }, 'Logo must be a valid image URL ending with png, jpg, jpeg, gif, svg, webp, or ico').optional().nullable().or(z.literal('')),
     companyType: z.string().max(100).optional().nullable().or(z.literal('')),
-    industry: z.string().regex(textOnlyRegex, 'Industry must contain only letters').max(100).optional().nullable().or(z.literal('')),
-    subIndustry: z.string().regex(textOnlyRegex, 'Sub Industry must contain only letters').max(100).optional().nullable().or(z.literal('')),
-    businessCategory: z.string().regex(textOnlyRegex, 'Business Category must contain only letters').max(100).optional().nullable().or(z.literal('')),
+    industry: z.string().regex(industryTextRegex, 'Industry must contain only letters, numbers, and common symbols').max(100).optional().nullable().or(z.literal('')),
+    subIndustry: z.string().regex(industryTextRegex, 'Sub Industry must contain only letters, numbers, and common symbols').max(100).optional().nullable().or(z.literal('')),
+    businessCategory: z.string().regex(industryTextRegex, 'Business Category must contain only letters, numbers, and common symbols').max(100).optional().nullable().or(z.literal('')),
     website: z.string().url('Invalid website URL').optional().nullable().or(z.literal('')),
     primaryEmail: z.string().email('Invalid email format').optional().nullable().or(z.literal('')),
     secondaryEmail: z.string().email('Invalid secondary email format').optional().nullable().or(z.literal('')),
-    primaryPhone: z.string().regex(exactPhoneRegex, 'Primary Phone must be exactly 10 digits').optional().nullable().or(z.literal('')),
-    secondaryPhone: z.string().regex(exactPhoneRegex, 'Secondary Phone must be exactly 10 digits').optional().nullable().or(z.literal('')),
-    whatsApp: z.string().regex(exactPhoneRegex, 'WhatsApp must be exactly 10 digits').optional().nullable().or(z.literal('')),
+    primaryPhone: z.string().regex(phoneRegex, 'Primary Phone must be 6-20 digits (may include +, -, spaces)').optional().nullable().or(z.literal('')),
+    secondaryPhone: z.string().regex(phoneRegex, 'Secondary Phone must be 6-20 digits (may include +, -, spaces)').optional().nullable().or(z.literal('')),
+    whatsApp: z.string().regex(phoneRegex, 'WhatsApp must be 6-20 digits (may include +, -, spaces)').optional().nullable().or(z.literal('')),
     gstNumber: z.string().max(50).refine(val => !val || gstRegex.test(val), 'Invalid GST format (e.g. 22AAAAA0000A1Z5)').optional().nullable(),
     taxNumber: z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Tax Number must contain only alphanumeric characters').optional().nullable(),
     registrationNumber: z.string().max(50).refine(val => !val || alphanumericRegex.test(val), 'Registration Number must contain only alphanumeric characters').optional().nullable(),
     panNumber: z.string().max(50).refine(val => !val || panRegex.test(val), 'Invalid PAN format (e.g. ABCDE1234F)').optional().nullable(),
-    foundedYear: z.number().int().min(1800).max(2100).optional().nullable(),
-    annualRevenue: z.number().min(0).optional().nullable(),
-    employeeCount: z.number().int().min(0).optional().nullable(),
+    foundedYear: z.preprocess(emptyToNull, z.number().int().min(1800).max(2100).optional().nullable()),
+    annualRevenue: z.preprocess(emptyToNull, z.number().min(0).optional().nullable()),
+    employeeCount: z.preprocess(emptyToNull, z.number().int().min(0).optional().nullable()),
     ownershipType: z.string().regex(textOnlyRegex, 'Ownership Type must contain only letters').max(50).optional().nullable().or(z.literal('')),
     currency: z.string().regex(currencyRegex, 'Currency must be a valid 3-letter uppercase code').optional().nullable().or(z.literal('')),
     timezone: z.string().regex(timezoneRegex, 'Timezone must be a valid timezone identifier (e.g. UTC, Europe/Copenhagen)').optional().nullable().or(z.literal('')),

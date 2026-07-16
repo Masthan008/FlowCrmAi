@@ -123,7 +123,9 @@ exports.bulkUpdateOwnerSchema = zod_1.z.object({
  * Validation: Single ID param check
  */
 exports.getContactByIdSchema = zod_1.z.object({
+    body: zod_1.z.any().optional(),
     params: zod_1.z.object({
         id: zod_1.z.string().uuid('Invalid contact ID'),
     }),
+    query: zod_1.z.any().optional(),
 });

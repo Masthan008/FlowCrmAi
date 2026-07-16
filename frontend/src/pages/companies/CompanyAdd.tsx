@@ -113,7 +113,7 @@ export const CompanyAdd: React.FC = () => {
 
   const nextSection = async () => {
     const sectionFields: Record<string, (keyof CompanyFormFields)[]> = {
-      basic: ['name', 'legalName', 'displayName', 'companyType', 'website'],
+      basic: ['name', 'legalName', 'displayName', 'logo', 'companyType', 'website'],
       business: ['industry', 'subIndustry', 'businessCategory', 'foundedYear', 'annualRevenue', 'employeeCount', 'ownershipType'],
       contact: ['primaryEmail', 'secondaryEmail', 'primaryPhone', 'secondaryPhone', 'whatsApp'],
       tax: ['gstNumber', 'taxNumber', 'registrationNumber', 'panNumber'],

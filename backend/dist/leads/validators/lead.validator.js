@@ -162,9 +162,9 @@ exports.listLeadsSchema = zod_1.z.object({
  * Validation: Get by ID param
  */
 exports.getLeadByIdSchema = zod_1.z.object({
-    body: zod_1.z.object({}).optional(),
+    body: zod_1.z.any().optional(),
     params: zod_1.z.object({
         id: zod_1.z.string().uuid('Invalid lead ID'),
     }),
-    query: zod_1.z.object({}).optional(),
+    query: zod_1.z.any().optional(),
 });

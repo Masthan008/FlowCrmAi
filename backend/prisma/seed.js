@@ -355,6 +355,52 @@ async function main() {
   } else {
     console.log('Default Super Admin user already exists. Skipping user creation.');
   }
+  // 8. Seed default employees for owner assignment dropdown
+  const existingEmployees = await prisma.employee.count({ where: { deletedAt: null } });
+  if (existingEmployees === 0) {
+    // Create a default internal company for employees if none exists
+    let internalCompany = await prisma.company.findFirst({ where: { name: 'FlowCRM Internal', deletedAt: null } });
+    if (!internalCompany) {
+      const companyNumber = `CO-${Date.now()}`;
+      internalCompany = await prisma.company.create({
+        data: {
+          name: 'FlowCRM Internal',
+          companyNumber,
+          companyType: 'Internal',
+          status: 'Customer',
+          priority: 'Medium',
+        },
+      });
+      console.log(`Created internal company: ${internalCompany.name}`);
+    }
+
+    // Resolve admin user for linking
+    const adminUser = await prisma.user.findUnique({ where: { email: defaultAdminEmail } });
+
+    const employeeRecords = [
+      { firstName: 'Alex', lastName: 'Mercer', email: 'alex.mercer@flowcrm.ai', phone: '+15550199', department: 'Management', designation: 'CEO', userId: adminUser?.id || null },
+      { firstName: 'Sarah', lastName: 'Johnson', email: 'sarah.johnson@flowcrm.ai', phone: '+15550200', department: 'Sales', designation: 'Sales Manager', userId: null },
+      { firstName: 'Michael', lastName: 'Chen', email: 'michael.chen@flowcrm.ai', phone: '+15550201', department: 'Engineering', designation: 'CTO', userId: null },
+    ];
+
+    for (const emp of employeeRecords) {
+      await prisma.employee.create({
+        data: {
+          companyId: internalCompany.id,
+          firstName: emp.firstName,
+          lastName: emp.lastName,
+          email: emp.email,
+          phone: emp.phone,
+          department: emp.department,
+          designation: emp.designation,
+          userId: emp.userId,
+        },
+      });
+    }
+    console.log(`Seeded ${employeeRecords.length} default employees.`);
+  } else {
+    console.log(`Employees already exist (${existingEmployees}). Skipping employee seeding.`);
+  }
 
   console.log('Database Seeding Completed successfully!');
 }

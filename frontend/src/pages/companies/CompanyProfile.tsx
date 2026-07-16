@@ -286,7 +286,7 @@ export const CompanyProfile: React.FC = () => {
         await updateActivity(id, editingActivityId, { type: newActivityType, title: newActivityTitle, description: newActivityDesc, activityDate: new Date(newActivityDate).toISOString(), priority: newActivityPriority });
         toast.success('Activity Updated', 'Activity updated successfully.'); setEditingActivityId(null);
       } else {
-        await createActivity(id, { type: newActivityType, title: newActivityTitle, description: newActivityDesc, activityDate: new Date(newActivityDate).toISOString(), priority: newActivityPriority, status: 'Open' });
+        await createActivity(id, { type: newActivityType, title: newActivityTitle, description: newActivityDesc, activityDate: new Date(newActivityDate).toISOString(), priority: newActivityPriority, status: 'Planned' });
         toast.success('Activity Created', 'New activity logged.');
       }
       setNewActivityType('Call'); setNewActivityTitle(''); setNewActivityDesc(''); setNewActivityDate(new Date().toISOString().split('T')[0]); setNewActivityPriority('Medium');

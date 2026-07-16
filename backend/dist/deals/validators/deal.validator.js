@@ -18,8 +18,8 @@ exports.createDealSchema = zod_1.z.object({
         probability: zod_1.z.number().min(0).max(100).optional(),
         value: zod_1.z.number().min(0).optional(),
         expectedRevenue: zod_1.z.number().min(0).optional(),
-        expectedCloseDate: zod_1.z.string().datetime({ offset: true }).optional().or(zod_1.z.literal('')),
-        actualCloseDate: zod_1.z.string().datetime({ offset: true }).optional().or(zod_1.z.literal('')),
+        expectedCloseDate: zod_1.z.string().optional().or(zod_1.z.literal('')),
+        actualCloseDate: zod_1.z.string().optional().or(zod_1.z.literal('')),
         currency: zod_1.z.string().max(10).optional(),
         source: zod_1.z.string().max(100).optional().or(zod_1.z.literal('')),
         industry: zod_1.z.string().max(100).optional().or(zod_1.z.literal('')),
@@ -46,8 +46,8 @@ exports.updateDealSchema = zod_1.z.object({
         probability: zod_1.z.number().min(0).max(100).optional(),
         value: zod_1.z.number().min(0).optional(),
         expectedRevenue: zod_1.z.number().min(0).optional(),
-        expectedCloseDate: zod_1.z.string().datetime({ offset: true }).optional().or(zod_1.z.literal('')),
-        actualCloseDate: zod_1.z.string().datetime({ offset: true }).optional().or(zod_1.z.literal('')),
+        expectedCloseDate: zod_1.z.string().optional().or(zod_1.z.literal('')),
+        actualCloseDate: zod_1.z.string().optional().or(zod_1.z.literal('')),
         currency: zod_1.z.string().max(10).optional(),
         source: zod_1.z.string().max(100).optional().or(zod_1.z.literal('')),
         industry: zod_1.z.string().max(100).optional().or(zod_1.z.literal('')),
@@ -122,9 +122,9 @@ exports.listDealsSchema = zod_1.z.object({
     }),
 });
 exports.getDealByIdSchema = zod_1.z.object({
-    body: zod_1.z.object({}).optional(),
+    body: zod_1.z.any().optional(),
     params: zod_1.z.object({
         id: zod_1.z.string().uuid('Invalid deal ID'),
     }),
-    query: zod_1.z.object({}).optional(),
+    query: zod_1.z.any().optional(),
 });

@@ -49,13 +49,16 @@ exports.branchService = {
         const existing = await branch_repository_1.branchRepository.findById(branchId);
         if (!existing)
             throw Object.assign(new Error('Branch not found'), { statusCode: 404 });
+        // Sanitize empty strings to null for UUID and date fields
+        const cleanManagerId = data.managerId !== undefined ? (data.managerId || null) : existing.managerId;
+        const cleanEmail = data.email !== undefined ? (data.email || null) : existing.email;
         const updated = await branch_repository_1.branchRepository.update(branchId, {
             name: data.name !== undefined ? data.name : existing.name,
             branchCode: data.branchCode !== undefined ? data.branchCode : existing.branchCode,
             branchType: data.branchType !== undefined ? data.branchType : existing.branchType,
-            managerId: data.managerId !== undefined ? data.managerId : existing.managerId,
+            managerId: cleanManagerId,
             phone: data.phone !== undefined ? data.phone : existing.phone,
-            email: data.email !== undefined ? data.email : existing.email,
+            email: cleanEmail,
             address: data.address !== undefined ? data.address : existing.address,
             gst: data.gst !== undefined ? data.gst : existing.gst,
             country: data.country !== undefined ? data.country : existing.country,

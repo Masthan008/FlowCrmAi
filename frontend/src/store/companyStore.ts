@@ -349,7 +349,7 @@ export const useCompanyStore = create<CompanyState>((set, get) => ({
   },
 
   uploadFile: async (id, data) => {
-    await api.post(`${COMPANIES_URL}/${id}/files`, data); get().fetchFiles(id);
+    await api.post(`${COMPANIES_URL}/${id}/files`, data, { headers: { 'Content-Type': 'multipart/form-data' } }); get().fetchFiles(id);
   },
 
   deleteFile: async (id, fileId) => {

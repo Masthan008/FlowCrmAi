@@ -10,6 +10,8 @@ const segmentMatchTypes = ['ALL', 'ANY'] as const;
 const workflowTriggers = [
   'company_created', 'status_changed', 'lifecycle_changed', 'owner_changed',
   'revenue_updated', 'deal_closed', 'invoice_generated', 'payment_received', 'branch_added',
+  'manual', 'stage_change', 'score_change', 'health_change', 'risk_change',
+  'tag_added', 'activity_created', 'scheduled',
 ] as const;
 
 const recommendationTypes = ['upsell', 'cross_sell', 'renewal_reminder', 'contact_time', 'risk_warning', 'follow_up', 'general'] as const;
@@ -152,8 +154,8 @@ export const createFollowupSchema = z.object({
   body: z.object({
     type: z.enum(followupTypes),
     title: z.string().min(1, 'Title is required').max(200),
-    description: z.string().max(1000).optional().or(z.literal('')),
-    ownerId: z.string().uuid('Invalid owner ID').optional().or(z.literal('')),
+    description: z.string().max(1000).optional().nullable().or(z.literal('')),
+    ownerId: z.string().uuid('Invalid owner ID').optional().nullable().or(z.literal('')),
     dueDate: z.string(),
     priority: z.enum(['Low', 'Medium', 'High']).optional(),
   }),
