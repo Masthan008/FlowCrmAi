@@ -13,6 +13,8 @@ router.post('/accounts', (0, permission_1.requirePermission)('email:manage'), (0
 router.put('/accounts/:id', (0, permission_1.requirePermission)('email:manage'), (0, validate_1.validateRequest)(email_validator_1.updateAccountSchema), email_controller_1.emailController.updateAccount);
 router.delete('/accounts/:id', (0, permission_1.requirePermission)('email:manage'), email_controller_1.emailController.removeAccount);
 router.post('/accounts/:id/sync', (0, permission_1.requirePermission)('email:manage'), email_controller_1.emailController.syncAccount);
+router.post('/sync', (0, permission_1.requirePermission)('email:manage'), email_controller_1.emailController.syncAccount);
+router.get('/messages', (0, permission_1.requirePermission)('email:view'), email_controller_1.emailController.listMessages);
 router.get('/accounts/:id/messages', (0, permission_1.requirePermission)('email:view'), email_controller_1.emailController.listMessages);
 router.get('/messages/:id', (0, permission_1.requirePermission)('email:view'), email_controller_1.emailController.getMessage);
 router.patch('/messages/:id/read', (0, permission_1.requirePermission)('email:view'), email_controller_1.emailController.markAsRead);

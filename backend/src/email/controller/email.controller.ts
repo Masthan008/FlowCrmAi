@@ -42,8 +42,9 @@ export const emailController = {
     try {
       const page = req.query.page ? parseInt(req.query.page as string, 10) : undefined;
       const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+      const accountId = (req.params.id as string) || (req.query.accountId as string);
 
-      const result = await emailService.listMessages(req.params.id as string, { page, limit });
+      const result = await emailService.listMessages(accountId, { page, limit });
       ResponseHelper.sendSuccess(req, res, 200, 'Messages retrieved successfully.', result);
     } catch (error) { next(error); }
   },

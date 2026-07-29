@@ -48,22 +48,32 @@ export const GDPR: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [consentRes, reqRes] = await Promise.all([
-        gdprApi.getConsentLogs(),
-        gdprApi.getDataRequests(),
-      ]);
+      let consentItems: any[] = [];
+      let reqItems: any[] = [];
 
-      const consentItems = consentRes.data.data?.items || [];
+      try {
+        const consentRes = await gdprApi.getConsentLogs();
+        consentItems = consentRes.data.data?.items || consentRes.data.data || [];
+      } catch (err) {
+        console.warn('Failed to load consent logs', err);
+      }
+
+      try {
+        const reqRes = await gdprApi.getDataRequests();
+        reqItems = reqRes.data.data?.items || reqRes.data.data || [];
+      } catch (err) {
+        console.warn('Failed to load data requests', err);
+      }
+
       setConsentLogs(consentItems.map((c: any) => ({
         id: c.id,
-        contactName: c.contactName || '-',
-        contactEmail: c.contactEmail || '-',
-        purpose: c.purpose,
+        contactName: c.contactName || c.contact?.fullName || '-',
+        contactEmail: c.contactEmail || c.contact?.email || '-',
+        purpose: c.purpose || c.type || 'General',
         status: c.status || 'active',
-        grantedAt: c.grantedAt ? c.grantedAt.split('T')[0] : '',
+        grantedAt: c.grantedAt ? c.grantedAt.split('T')[0] : (c.createdAt ? c.createdAt.split('T')[0] : ''),
       })));
 
-      const reqItems = reqRes.data.data?.items || [];
       setDataRequests(reqItems.map((r: any) => ({
         id: r.id,
         requestorName: r.requestorName || '-',

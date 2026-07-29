@@ -86,10 +86,10 @@ exports.emailService = {
         return { synced: true, accountId: id, lastSyncedAt: new Date() };
     },
     listMessages: async (accountId, params) => {
-        const page = params.page || 1;
-        const limit = params.limit || 25;
+        const page = params?.page || 1;
+        const limit = params?.limit || 25;
         const skip = (page - 1) * limit;
-        const where = { deletedAt: null, accountId };
+        const where = { deletedAt: null, ...(accountId ? { accountId } : {}) };
         const [items, total] = await Promise.all([
             db_1.prisma.emailMessage.findMany({
                 where,

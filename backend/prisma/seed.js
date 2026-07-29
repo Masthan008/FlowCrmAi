@@ -155,19 +155,80 @@ async function main() {
 
     // Operations Suite
     { name: 'campaigns:view', module: 'campaigns', action: 'view', description: 'View marketing campaigns' },
+    { name: 'campaigns:create', module: 'campaigns', action: 'create', description: 'Create marketing campaigns' },
+    { name: 'campaigns:edit', module: 'campaigns', action: 'edit', description: 'Edit marketing campaigns' },
+    { name: 'campaigns:delete', module: 'campaigns', action: 'delete', description: 'Delete marketing campaigns' },
+
     { name: 'tickets:view', module: 'tickets', action: 'view', description: 'View support tickets' },
+    { name: 'tickets:create', module: 'tickets', action: 'create', description: 'Create support tickets' },
+    { name: 'tickets:edit', module: 'tickets', action: 'edit', description: 'Edit support tickets' },
+    { name: 'tickets:delete', module: 'tickets', action: 'delete', description: 'Delete support tickets' },
+
     { name: 'knowledge:view', module: 'knowledge', action: 'view', description: 'View knowledge base articles' },
+    { name: 'knowledge:create', module: 'knowledge', action: 'create', description: 'Create knowledge base articles' },
+    { name: 'knowledge:edit', module: 'knowledge', action: 'edit', description: 'Edit knowledge base articles' },
+    { name: 'knowledge:delete', module: 'knowledge', action: 'delete', description: 'Delete knowledge base articles' },
+
     { name: 'contracts:view', module: 'contracts', action: 'view', description: 'View enterprise contracts' },
+    { name: 'contracts:create', module: 'contracts', action: 'create', description: 'Create enterprise contracts' },
+    { name: 'contracts:edit', module: 'contracts', action: 'edit', description: 'Edit enterprise contracts' },
+    { name: 'contracts:delete', module: 'contracts', action: 'delete', description: 'Delete enterprise contracts' },
+
     { name: 'orders:view', module: 'orders', action: 'view', description: 'View sales orders' },
+    { name: 'orders:create', module: 'orders', action: 'create', description: 'Create sales orders' },
+    { name: 'orders:edit', module: 'orders', action: 'edit', description: 'Edit sales orders' },
+    { name: 'orders:delete', module: 'orders', action: 'delete', description: 'Delete sales orders' },
+
     { name: 'projects:view', module: 'projects', action: 'view', description: 'View client projects' },
+    { name: 'projects:create', module: 'projects', action: 'create', description: 'Create client projects' },
+    { name: 'projects:edit', module: 'projects', action: 'edit', description: 'Edit client projects' },
+    { name: 'projects:delete', module: 'projects', action: 'delete', description: 'Delete client projects' },
+
     { name: 'subscriptions:view', module: 'subscriptions', action: 'view', description: 'View customer subscriptions' },
+    { name: 'subscriptions:create', module: 'subscriptions', action: 'create', description: 'Create customer subscriptions' },
+    { name: 'subscriptions:edit', module: 'subscriptions', action: 'edit', description: 'Edit customer subscriptions' },
+    { name: 'subscriptions:delete', module: 'subscriptions', action: 'delete', description: 'Delete customer subscriptions' },
+
     { name: 'expenses:view', module: 'expenses', action: 'view', description: 'View company expenses' },
+    { name: 'expenses:create', module: 'expenses', action: 'create', description: 'Create company expenses' },
+    { name: 'expenses:edit', module: 'expenses', action: 'edit', description: 'Edit company expenses' },
+    { name: 'expenses:delete', module: 'expenses', action: 'delete', description: 'Delete company expenses' },
+
     { name: 'assets:view', module: 'assets', action: 'view', description: 'View IT assets' },
+    { name: 'assets:create', module: 'assets', action: 'create', description: 'Create IT assets' },
+    { name: 'assets:edit', module: 'assets', action: 'edit', description: 'Edit IT assets' },
+    { name: 'assets:delete', module: 'assets', action: 'delete', description: 'Delete IT assets' },
+
     { name: 'webforms:view', module: 'webforms', action: 'view', description: 'View web forms' },
+    { name: 'webforms:create', module: 'webforms', action: 'create', description: 'Create web forms' },
+    { name: 'webforms:edit', module: 'webforms', action: 'edit', description: 'Edit web forms' },
+    { name: 'webforms:delete', module: 'webforms', action: 'delete', description: 'Delete web forms' },
+
     { name: 'portal:view', module: 'portal', action: 'view', description: 'View customer portal' },
+    { name: 'portal:manage', module: 'portal', action: 'manage', description: 'Manage customer portal' },
+
     { name: 'gdpr:view', module: 'gdpr', action: 'view', description: 'View GDPR compliance' },
+    { name: 'gdpr:manage', module: 'gdpr', action: 'manage', description: 'Manage GDPR compliance' },
+    { name: 'gdpr:create', module: 'gdpr', action: 'create', description: 'Create GDPR consent or requests' },
+
     { name: 'surveys:view', module: 'surveys', action: 'view', description: 'View NPS surveys' },
+    { name: 'surveys:create', module: 'surveys', action: 'create', description: 'Create NPS surveys' },
+    { name: 'surveys:edit', module: 'surveys', action: 'edit', description: 'Edit NPS surveys' },
+    { name: 'surveys:delete', module: 'surveys', action: 'delete', description: 'Delete NPS surveys' },
+
     { name: 'commissions:view', module: 'commissions', action: 'view', description: 'View sales commissions' },
+    { name: 'commissions:manage', module: 'commissions', action: 'manage', description: 'Manage sales commissions and rules' },
+    { name: 'commissions:create', module: 'commissions', action: 'create', description: 'Create commission payouts' },
+
+    // Live Chat & Email Communications
+    { name: 'chat:view', module: 'chat', action: 'view', description: 'View live chat conversations' },
+    { name: 'chat:respond', module: 'chat', action: 'respond', description: 'Respond to live chat conversations' },
+    { name: 'chat:manage', module: 'chat', action: 'manage', description: 'Manage live chat settings' },
+    { name: 'chat:create', module: 'chat', action: 'create', description: 'Create live chat conversations' },
+
+    { name: 'email:view', module: 'email', action: 'view', description: 'View emails & accounts' },
+    { name: 'email:manage', module: 'email', action: 'manage', description: 'Manage email accounts & sync' },
+    { name: 'email:send', module: 'email', action: 'send', description: 'Send emails' },
   ];
 
   const dbPermissions = [];
@@ -230,69 +291,116 @@ async function main() {
   // Sales Manager
   await assignPermissions('Sales Manager', (p) =>
     p.module === 'dashboard' ||
-    (p.module === 'leads' && !p.action.startsWith('workflow') && !p.action.startsWith('score') && !p.action.startsWith('insights')) ||
-    (p.module === 'contacts' && !p.action.startsWith('workflow') && !p.action.startsWith('segment') && !p.action.startsWith('score') && !p.action.startsWith('risk') && !p.action.startsWith('preferences')) ||
-    (p.module === 'companies' && p.name !== 'company:analytics:view') ||
+    p.module === 'leads' ||
+    p.module === 'contacts' ||
+    p.module === 'companies' ||
     p.module === 'deals' ||
-    (p.module === 'tasks') ||
-    (p.module === 'reports') ||
-    p.name === 'relationship:view' || p.name === 'communication:view' || p.name === 'health:view' || p.name === 'journey:view'
+    p.module === 'tasks' ||
+    p.module === 'reports' ||
+    p.module === 'products' ||
+    p.module === 'quotes' ||
+    p.module === 'invoices' ||
+    p.module === 'contracts' ||
+    p.module === 'orders' ||
+    p.module === 'projects' ||
+    p.module === 'subscriptions' ||
+    p.module === 'campaigns' ||
+    p.module === 'tickets' ||
+    p.module === 'knowledge' ||
+    p.module === 'webforms' ||
+    p.module === 'portal' ||
+    p.module === 'chat' ||
+    p.module === 'email' ||
+    p.module === 'expenses' ||
+    p.module === 'assets' ||
+    p.module === 'gdpr' ||
+    p.module === 'surveys' ||
+    p.module === 'commissions' ||
+    p.module === 'meetings'
   );
 
   // Sales Executive
   await assignPermissions('Sales Executive', (p) =>
     p.module === 'dashboard' ||
-    (p.module === 'leads' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'assign' || p.action === 'convert' || p.action === 'notes:create' || p.action === 'notes:edit' || p.action === 'activities:create' || p.action === 'activities:edit' || p.action === 'files:upload' || p.action === 'score-view')) ||
-    (p.module === 'contacts' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'notes:create' || p.action === 'notes:edit' || p.action === 'activities:create' || p.action === 'activities:edit' || p.action === 'files:upload' || p.name === 'relationship:view' || p.name === 'communication:view' || p.name === 'journey:view')) ||
-    (p.module === 'companies' && (p.action === 'view' || p.action === 'create' || p.action === 'edit')) ||
-    (p.module === 'deals' && (p.action === 'view' || p.action === 'create' || p.action === 'edit')) ||
-    (p.module === 'tasks' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'complete' || p.action === 'assign'))
+    p.module === 'leads' ||
+    p.module === 'contacts' ||
+    p.module === 'companies' ||
+    p.module === 'deals' ||
+    p.module === 'tasks' ||
+    p.module === 'products' ||
+    p.module === 'quotes' ||
+    p.module === 'invoices' ||
+    p.module === 'contracts' ||
+    p.module === 'orders' ||
+    p.module === 'projects' ||
+    p.module === 'subscriptions' ||
+    p.module === 'chat' ||
+    p.module === 'email' ||
+    p.module === 'meetings'
   );
 
   // Marketing
   await assignPermissions('Marketing', (p) =>
     p.module === 'dashboard' ||
-    (p.module === 'leads' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'export' || p.action === 'insights-view')) ||
-    (p.module === 'contacts' && (p.action === 'view')) ||
-    (p.module === 'deals' && p.action === 'view') ||
-    (p.module === 'tasks' && (p.action === 'view' || p.action === 'create')) ||
-    p.module === 'reports'
+    p.module === 'leads' ||
+    p.module === 'contacts' ||
+    p.module === 'deals' ||
+    p.module === 'tasks' ||
+    p.module === 'reports' ||
+    p.module === 'campaigns' ||
+    p.module === 'webforms' ||
+    p.module === 'surveys' ||
+    p.module === 'chat' ||
+    p.module === 'email' ||
+    p.module === 'portal'
   );
 
   // Support
   await assignPermissions('Support', (p) =>
     p.module === 'dashboard' ||
-    (p.module === 'contacts' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'notes:create' || p.action === 'notes:edit')) ||
-    (p.module === 'companies' && p.action === 'view') ||
-    (p.module === 'deals' && p.action === 'view') ||
-    (p.module === 'tasks' && (p.action === 'view' || p.action === 'create' || p.action === 'edit' || p.action === 'complete'))
+    p.module === 'contacts' ||
+    p.module === 'companies' ||
+    p.module === 'deals' ||
+    p.module === 'tasks' ||
+    p.module === 'tickets' ||
+    p.module === 'knowledge' ||
+    p.module === 'chat' ||
+    p.module === 'portal' ||
+    p.module === 'email'
   );
 
   // Finance
   await assignPermissions('Finance', (p) =>
     p.module === 'dashboard' ||
-    (p.module === 'companies' && p.action === 'view') ||
-    (p.module === 'deals' && p.action === 'view') ||
-    p.module === 'reports'
+    p.module === 'companies' ||
+    p.module === 'deals' ||
+    p.module === 'reports' ||
+    p.module === 'invoices' ||
+    p.module === 'subscriptions' ||
+    p.module === 'expenses' ||
+    p.module === 'commissions' ||
+    p.module === 'orders'
   );
 
   // HR
   await assignPermissions('HR', (p) =>
     p.module === 'dashboard' ||
     p.module === 'settings' ||
-    (p.module === 'users' && p.action === 'view')
+    p.module === 'users' ||
+    p.module === 'assets'
   );
 
-  // Team Lead: lifecycle, tag, score, health, risk view, followup, recommendation, deal view & edit
+  // Team Lead
   await assignPermissions('Team Lead', (p) =>
-    p.name === 'company:lifecycle:manage' ||
-    p.name === 'company:tag:manage' ||
-    p.name === 'company:score:view' ||
-    p.name === 'company:health:view' ||
-    p.name === 'company:risk:view' ||
-    p.name === 'company:followup:manage' ||
-    p.name === 'company:recommendation:view' ||
-    (p.module === 'deals' && (p.action === 'view' || p.action === 'edit'))
+    p.module === 'dashboard' ||
+    p.module === 'leads' ||
+    p.module === 'contacts' ||
+    p.module === 'companies' ||
+    p.module === 'deals' ||
+    p.module === 'tasks' ||
+    p.module === 'projects' ||
+    p.module === 'orders' ||
+    p.module === 'quotes'
   );
 
   // Viewer: only view & access actions plus company view permissions

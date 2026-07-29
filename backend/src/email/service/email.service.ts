@@ -112,12 +112,12 @@ export const emailService = {
     return { synced: true, accountId: id, lastSyncedAt: new Date() };
   },
 
-  listMessages: async (accountId: string, params: { page?: number; limit?: number }) => {
-    const page = params.page || 1;
-    const limit = params.limit || 25;
+  listMessages: async (accountId?: string, params?: { page?: number; limit?: number }) => {
+    const page = params?.page || 1;
+    const limit = params?.limit || 25;
     const skip = (page - 1) * limit;
 
-    const where: any = { deletedAt: null, accountId };
+    const where: any = { deletedAt: null, ...(accountId ? { accountId } : {}) };
 
     const [items, total] = await Promise.all([
       prisma.emailMessage.findMany({
