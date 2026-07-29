@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const order_controller_1 = require("../controller/order.controller");
+const auth_1 = require("../../middlewares/auth");
+const permission_1 = require("../../middlewares/permission");
+const validate_1 = require("../../middlewares/validate");
+const order_validator_1 = require("../validators/order.validator");
+const router = (0, express_1.Router)();
+router.use(auth_1.requireAuth);
+router.get('/', (0, permission_1.requirePermission)('orders:view'), order_controller_1.orderController.list);
+router.get('/:id', (0, permission_1.requirePermission)('orders:view'), order_controller_1.orderController.getById);
+router.post('/', (0, permission_1.requirePermission)('orders:create'), (0, validate_1.validateRequest)(order_validator_1.createOrderSchema), order_controller_1.orderController.create);
+router.put('/:id', (0, permission_1.requirePermission)('orders:edit'), (0, validate_1.validateRequest)(order_validator_1.updateOrderSchema), order_controller_1.orderController.update);
+router.delete('/:id', (0, permission_1.requirePermission)('orders:delete'), order_controller_1.orderController.delete);
+router.patch('/:id/status', (0, permission_1.requirePermission)('orders:edit'), order_controller_1.orderController.updateStatus);
+exports.default = router;

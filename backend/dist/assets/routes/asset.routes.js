@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const asset_controller_1 = require("../controller/asset.controller");
+const auth_1 = require("../../middlewares/auth");
+const permission_1 = require("../../middlewares/permission");
+const validate_1 = require("../../middlewares/validate");
+const asset_validator_1 = require("../validators/asset.validator");
+const router = (0, express_1.Router)();
+router.use(auth_1.requireAuth);
+router.get('/', (0, permission_1.requirePermission)('assets:view'), asset_controller_1.assetController.list);
+router.get('/:id', (0, permission_1.requirePermission)('assets:view'), asset_controller_1.assetController.getById);
+router.post('/', (0, permission_1.requirePermission)('assets:create'), (0, validate_1.validateRequest)(asset_validator_1.createAssetSchema), asset_controller_1.assetController.create);
+router.put('/:id', (0, permission_1.requirePermission)('assets:edit'), (0, validate_1.validateRequest)(asset_validator_1.updateAssetSchema), asset_controller_1.assetController.update);
+router.delete('/:id', (0, permission_1.requirePermission)('assets:delete'), asset_controller_1.assetController.delete);
+router.patch('/:id/assign', (0, permission_1.requirePermission)('assets:edit'), (0, validate_1.validateRequest)(asset_validator_1.assignAssetSchema), asset_controller_1.assetController.assign);
+router.patch('/:id/retire', (0, permission_1.requirePermission)('assets:edit'), asset_controller_1.assetController.retire);
+exports.default = router;

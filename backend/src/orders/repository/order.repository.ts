@@ -65,6 +65,7 @@ export class OrderRepository {
     return prisma.order.create({
       data: {
         ...orderData,
+        orderNumber: data.orderNumber || `ORD-${Date.now()}`,
         createdBy: userId || null,
         items: items && items.length > 0
           ? {

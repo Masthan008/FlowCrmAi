@@ -79,6 +79,7 @@ export const projectService = {
   ) => {
     return projectRepository.create({
       ...data,
+      code: `PRJ-${Date.now()}`,
       startDate: data.startDate ? new Date(data.startDate) : undefined,
       endDate: data.endDate ? new Date(data.endDate) : undefined,
       createdBy: userId || null,

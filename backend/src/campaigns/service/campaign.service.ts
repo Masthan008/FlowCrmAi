@@ -70,8 +70,11 @@ export const campaignService = {
     userId?: string
   ) => {
     return campaignRepository.create({
-      ...data,
-      scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : undefined,
+      name: data.name,
+      description: data.description,
+      type: data.type,
+      status: data.status,
+      startDate: data.scheduledAt ? new Date(data.scheduledAt) : undefined,
       createdBy: userId || null,
     });
   },
@@ -93,7 +96,8 @@ export const campaignService = {
     }
 
     const updateData: any = { ...data, updatedBy: userId || null };
-    if (data.scheduledAt) updateData.scheduledAt = new Date(data.scheduledAt);
+    if (data.scheduledAt) updateData.startDate = new Date(data.scheduledAt);
+    delete updateData.scheduledAt;
 
     return campaignRepository.update(id, updateData);
   },
@@ -177,7 +181,7 @@ export const campaignService = {
     }
     return prisma.campaignEmail.findMany({
       where: { campaignId: id, deletedAt: null },
-      orderBy: { order: 'asc' },
+      orderBy: { createdAt: 'asc' },
     });
   },
 
@@ -194,8 +198,7 @@ export const campaignService = {
       data: {
         campaignId,
         subject: data.subject,
-        body: data.body,
-        order: data.order || 0,
+        bodyHtml: data.body,
         createdBy: userId || null,
       },
     });
@@ -211,9 +214,12 @@ export const campaignService = {
     if (!email || email.deletedAt || email.campaignId !== campaignId) {
       throw Object.assign(new Error('Campaign email not found'), { statusCode: 404 });
     }
+    const updateData: any = { updatedBy: userId || null };
+    if (data.subject !== undefined) updateData.subject = data.subject;
+    if (data.body !== undefined) updateData.bodyHtml = data.body;
     return prisma.campaignEmail.update({
       where: { id: emailId },
-      data: { ...data, updatedBy: userId || null },
+      data: updateData,
     });
   },
 

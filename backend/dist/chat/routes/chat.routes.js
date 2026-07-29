@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const chat_controller_1 = require("../controller/chat.controller");
+const auth_1 = require("../../middlewares/auth");
+const permission_1 = require("../../middlewares/permission");
+const validate_1 = require("../../middlewares/validate");
+const chat_validator_1 = require("../validators/chat.validator");
+const router = (0, express_1.Router)();
+router.use(auth_1.requireAuth);
+router.get('/', (0, permission_1.requirePermission)('chat:view'), chat_controller_1.chatController.list);
+router.get('/:id', (0, permission_1.requirePermission)('chat:view'), chat_controller_1.chatController.getById);
+router.post('/', (0, permission_1.requirePermission)('chat:respond'), (0, validate_1.validateRequest)(chat_validator_1.createChatConversationSchema), chat_controller_1.chatController.create);
+router.post('/:id/messages', (0, permission_1.requirePermission)('chat:respond'), (0, validate_1.validateRequest)(chat_validator_1.sendMessageSchema), chat_controller_1.chatController.sendMessage);
+router.patch('/:id/assign', (0, permission_1.requirePermission)('chat:manage'), (0, validate_1.validateRequest)(chat_validator_1.assignConversationSchema), chat_controller_1.chatController.assign);
+router.patch('/:id/close', (0, permission_1.requirePermission)('chat:manage'), chat_controller_1.chatController.close);
+router.patch('/:id/rate', (0, validate_1.validateRequest)(chat_validator_1.rateConversationSchema), chat_controller_1.chatController.rate);
+exports.default = router;

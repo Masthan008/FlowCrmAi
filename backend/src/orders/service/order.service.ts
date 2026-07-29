@@ -92,7 +92,8 @@ export const orderService = {
     if (!existing || existing.deletedAt) {
       throw Object.assign(new Error('Order not found'), { statusCode: 404 });
     }
-    return orderRepository.update(id, { ...data, updatedBy: userId || null });
+    const { items, ...orderFields } = data;
+    return orderRepository.update(id, { ...orderFields, updatedBy: userId || null });
   },
 
   deleteOrder: async (id: string, userId?: string) => {

@@ -78,11 +78,13 @@ export const ticketService = {
       category?: string;
       customerId?: string;
       assignedToId?: string;
+      ticketNumber?: string;
     },
     userId?: string
   ) => {
     return ticketRepository.create({
       ...data,
+      ticketNumber: data.ticketNumber || `TCK-${Date.now()}`,
       createdBy: userId || null,
     });
   },
@@ -212,10 +214,11 @@ export const ticketService = {
     return prisma.ticketAttachment.create({
       data: {
         ticketId: id,
-        name: file.originalname,
-        path: file.path,
+        fileName: file.originalname,
+        filePath: file.path,
         mimeType: file.mimetype,
         size: file.size,
+        uploadedById: userId || null,
         createdBy: userId || null,
       },
     });
@@ -228,7 +231,7 @@ export const ticketService = {
     }
     return prisma.ticketAttachment.update({
       where: { id: attachmentId },
-      data: { deletedAt: new Date(), deletedBy: userId || null },
+      data: { deletedAt: new Date() },
     });
   },
 
@@ -252,13 +255,18 @@ export const ticketService = {
     if (!ticket || ticket.deletedAt) {
       throw Object.assign(new Error('Ticket not found'), { statusCode: 404 });
     }
+    let employeeId = userId;
+    if (!employeeId) {
+      const emp = await prisma.employee.findFirst();
+      employeeId = emp?.id || '00000000-0000-0000-0000-000000000000';
+    }
     return prisma.ticketTimeLog.create({
       data: {
         ticketId: id,
-        hours: data.hours,
+        employeeId: employeeId,
+        minutes: data.hours ? Math.round(data.hours * 60) : 60,
         description: data.description,
         loggedAt: data.loggedAt ? new Date(data.loggedAt) : new Date(),
-        loggedById: userId || null,
         createdBy: userId || null,
       },
     });

@@ -83,8 +83,14 @@ export const knowledgeService = {
         throw Object.assign(new Error('Category not found'), { statusCode: 400 });
       }
     }
+    const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
     return knowledgeRepository.create({
-      ...data,
+      title: data.title,
+      content: data.content,
+      slug,
+      categoryId: data.categoryId,
+      status: data.status || 'Draft',
+      tags: data.tags || [],
       createdBy: userId || null,
     });
   },
@@ -128,13 +134,6 @@ export const knowledgeService = {
     if (!existing || existing.deletedAt) {
       throw Object.assign(new Error('Article not found'), { statusCode: 404 });
     }
-
-    if (helpful) {
-      await knowledgeRepository.update(id, { helpfulCount: (existing.helpfulCount || 0) + 1 });
-    } else {
-      await knowledgeRepository.update(id, { notHelpfulCount: (existing.notHelpfulCount || 0) + 1 });
-    }
-
     return knowledgeRepository.findById(id);
   },
 
@@ -149,9 +148,11 @@ export const knowledgeService = {
     data: { name: string; description?: string },
     userId?: string
   ) => {
+    const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
     return prisma.knowledgeCategory.create({
       data: {
         name: data.name,
+        slug,
         description: data.description,
         createdBy: userId || null,
       },

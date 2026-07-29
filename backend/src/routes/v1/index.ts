@@ -64,6 +64,10 @@ import activitiesRouter from './activities.routes';
 import reportsRouter from './reports.routes';
 import userRouter from './user.routes';
 import notificationsRouter from './notifications.routes';
+import settingsRouter from './settings.routes';
+import rolesRouter from './roles.routes';
+import permissionsRouter from './permissions.routes';
+import pipelinesRouter from './pipelines.routes';
 
 // Custom routes
 router.use('/auth', authRouter);
@@ -79,6 +83,10 @@ router.use('/reports', reportsRouter);
 router.use('/analytics', reportsRouter);
 router.use('/users', userRouter);
 router.use('/notifications', notificationsRouter);
+router.use('/settings', settingsRouter);
+router.use('/roles', rolesRouter);
+router.use('/permissions', permissionsRouter);
+router.use('/pipelines', pipelinesRouter);
 
 router.use('/products', productRouter);
 router.use('/meetings', meetingRouter);
@@ -111,13 +119,9 @@ router.post('/deal-workflows', requireAuth, requirePermission('deals:workflows:m
 
 // Generate placeholder routers for all remaining CRM infrastructure modules
 const placeholderModules = [
-  'roles',
-  'permissions',
   'customers',
   'calendar',
-  'payments',
-  'settings',
-  'pipelines'
+  'payments'
 ];
 
 placeholderModules.forEach((moduleName) => {

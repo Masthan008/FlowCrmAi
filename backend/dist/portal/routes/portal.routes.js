@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const portal_controller_1 = require("../controller/portal.controller");
+const auth_1 = require("../../middlewares/auth");
+const permission_1 = require("../../middlewares/permission");
+const validate_1 = require("../../middlewares/validate");
+const portal_validator_1 = require("../validators/portal.validator");
+const router = (0, express_1.Router)();
+router.use(auth_1.requireAuth);
+router.get('/users', (0, permission_1.requirePermission)('portal:view'), portal_controller_1.portalController.listUsers);
+router.get('/users/:id', (0, permission_1.requirePermission)('portal:view'), portal_controller_1.portalController.getUserById);
+router.post('/users', (0, permission_1.requirePermission)('portal:manage'), (0, validate_1.validateRequest)(portal_validator_1.createPortalUserSchema), portal_controller_1.portalController.createUser);
+router.put('/users/:id', (0, permission_1.requirePermission)('portal:manage'), (0, validate_1.validateRequest)(portal_validator_1.updatePortalUserSchema), portal_controller_1.portalController.updateUser);
+router.delete('/users/:id', (0, permission_1.requirePermission)('portal:manage'), portal_controller_1.portalController.deleteUser);
+router.get('/me', portal_controller_1.portalController.getProfile);
+exports.default = router;

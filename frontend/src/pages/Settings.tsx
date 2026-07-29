@@ -13,7 +13,7 @@ import { Button } from '../components/ui/Button';
 import {
   Settings as SettingsIcon, Sliders, User, Shield, Bell, Palette,
   Globe, Lock, Moon, Sun, Loader2, Save, Eye, EyeOff, Check,
-  Monitor, Smartphone
+  Monitor, Layers, Plus, CheckSquare, Square
 } from 'lucide-react';
 
 const profileSchema = z.object({
@@ -74,13 +74,95 @@ const Settings: React.FC = () => {
   const [cacheExpiry, setCacheExpiry] = useState(300);
   const [webhooksEnabled, setWebhooksEnabled] = useState(true);
   const [rateLimit, setRateLimit] = useState(60);
-  const [companyName, setCompanyName] = useState('Acme Enterprise');
-  const [supportEmail, setSupportEmail] = useState('support@acme.com');
+  const [companyName, setCompanyName] = useState('FlowCRM Enterprise');
+  const [supportEmail, setSupportEmail] = useState('support@flowcrm.ai');
   const [defaultCurrency, setDefaultCurrency] = useState('USD');
 
-  const handleSaveSystem = (e: React.FormEvent) => {
+  // RBAC State
+  const [roles, setRoles] = useState<any[]>([]);
+  const [permissions, setPermissions] = useState<any[]>([]);
+  const [selectedRole, setSelectedRole] = useState<any>(null);
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+
+  // Pipeline State
+  const [pipelines, setPipelines] = useState<any[]>([]);
+
+  // Fetch initial System Settings
+  useEffect(() => {
+    api.get('/settings')
+      .then(res => {
+        const d = res.data.data;
+        if (d) {
+          setCompanyName(d.companyName || 'FlowCRM Enterprise');
+          setSupportEmail(d.supportEmail || 'support@flowcrm.ai');
+          setDefaultCurrency(d.defaultCurrency || 'USD');
+          setCacheExpiry(d.cacheExpiry || 300);
+          setRateLimit(d.rateLimit || 60);
+          setWebhooksEnabled(d.webhooksEnabled ?? true);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Fetch Roles, Permissions & Pipelines when tab opens
+  useEffect(() => {
+    if (activeTab === 'rbac') {
+      Promise.all([api.get('/roles'), api.get('/permissions')])
+        .then(([rolesRes, permRes]) => {
+          const rList = rolesRes.data.data || [];
+          setRoles(rList);
+          setPermissions(permRes.data.data || []);
+          if (rList.length > 0 && !selectedRole) {
+            setSelectedRole(rList[0]);
+            const pIds = rList[0].permissions?.map((p: any) => p.permissionId || p.permission?.id) || [];
+            setSelectedPermissions(pIds);
+          }
+        })
+        .catch(() => toast.error('RBAC Load Failed', 'Could not load roles and permissions.'));
+    } else if (activeTab === 'pipelines') {
+      api.get('/pipelines')
+        .then(res => setPipelines(res.data.data || []))
+        .catch(() => toast.error('Pipeline Load Failed', 'Could not load pipeline configurations.'));
+    }
+  }, [activeTab]);
+
+  const handleSelectRole = (r: any) => {
+    setSelectedRole(r);
+    const pIds = r.permissions?.map((p: any) => p.permissionId || p.permission?.id) || [];
+    setSelectedPermissions(pIds);
+  };
+
+  const togglePermission = (permId: string) => {
+    setSelectedPermissions(prev =>
+      prev.includes(permId) ? prev.filter(id => id !== permId) : [...prev, permId]
+    );
+  };
+
+  const saveRolePermissions = async () => {
+    if (!selectedRole) return;
+    try {
+      await api.put(`/roles/${selectedRole.id}/permissions`, { permissionIds: selectedPermissions });
+      toast.success('Permissions Saved', `Role "${selectedRole.name}" permissions updated.`);
+    } catch (err: any) {
+      toast.error('Save Failed', err.response?.data?.message || 'Failed to update permissions.');
+    }
+  };
+
+  const handleSaveSystem = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Settings Saved', 'System configurations saved successfully.');
+    try {
+      await api.put('/settings', {
+        companyName,
+        supportEmail,
+        defaultCurrency,
+        cacheExpiry,
+        rateLimit,
+        webhooksEnabled,
+      });
+      toast.success('Settings Saved', 'System configurations saved successfully.');
+    } catch (err: any) {
+      toast.error('Save Failed', err.response?.data?.message || 'Could not save system settings.');
+    }
   };
 
   const profileForm = useForm<ProfileFields>({
@@ -155,6 +237,8 @@ const Settings: React.FC = () => {
     { id: 'appearance', label: 'Appearance', icon: Palette },
     { id: 'security', label: 'Security', icon: Lock },
     { id: 'system', label: 'System', icon: SettingsIcon },
+    { id: 'rbac', label: 'RBAC Matrix', icon: Shield },
+    { id: 'pipelines', label: 'Pipelines', icon: Layers },
   ];
 
   const containerVariants = {
@@ -441,6 +525,130 @@ const Settings: React.FC = () => {
             </Button>
           </div>
         </form>
+      )}
+
+      {/* RBAC Matrix Tab */}
+      {activeTab === 'rbac' && (
+        <motion.div key="rbac" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+          <Card className="p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-emerald-50 rounded-xl"><Shield size={18} className="text-emerald-600" /></div>
+                <div>
+                  <h2 className="text-base font-semibold text-slate-800">Role-Based Access Control (RBAC) Matrix</h2>
+                  <p className="text-xs text-slate-400">Configure granular permissions for each user role</p>
+                </div>
+              </div>
+              <Button onClick={saveRolePermissions} variant="primary" size="sm">
+                <Save size={14} className="mr-1.5" /> Save Role Matrix
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {/* Roles List */}
+              <div className="space-y-2 border-r border-slate-100 pr-4">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Roles</span>
+                {roles.map(r => (
+                  <button
+                    key={r.id}
+                    onClick={() => handleSelectRole(r)}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                      selectedRole?.id === r.id
+                        ? 'bg-brand-50 text-brand-600 border border-brand-200 shadow-sm'
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span>{r.name}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-semibold">
+                      {r.permissions?.length || 0}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Permissions Matrix */}
+              <div className="md:col-span-3 space-y-4">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Permissions for Role: <span className="text-slate-800 font-extrabold">{selectedRole?.name || 'Select Role'}</span>
+                </span>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2">
+                  {permissions.map(p => {
+                    const isChecked = selectedPermissions.includes(p.id);
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => togglePermission(p.id)}
+                        className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+                          isChecked
+                            ? 'bg-emerald-50/40 border-emerald-200 text-emerald-900'
+                            : 'bg-slate-50/30 border-slate-150 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        {isChecked ? (
+                          <CheckSquare size={16} className="text-emerald-600 mt-0.5 flex-shrink-0" />
+                        ) : (
+                          <Square size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                        )}
+                        <div>
+                          <div className="text-xs font-bold capitalize">{p.name || `${p.module}:${p.action}`}</div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">{p.description || `Allows ${p.action} on ${p.module}`}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Pipelines Tab */}
+      {activeTab === 'pipelines' && (
+        <motion.div key="pipelines" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+          <Card className="p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-blue-50 rounded-xl"><Layers size={18} className="text-blue-600" /></div>
+                <div>
+                  <h2 className="text-base font-semibold text-slate-800">Sales Pipeline Configurations</h2>
+                  <p className="text-xs text-slate-400">Manage pipeline stages and deal win probabilities</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {pipelines.map(pipe => (
+                <div key={pipe.id} className="p-4 rounded-2xl border border-slate-150 bg-slate-50/30 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-800">{pipe.name}</h3>
+                      <p className="text-xs text-slate-400">{pipe.description}</p>
+                    </div>
+                    {pipe.isDefault && (
+                      <span className="px-2.5 py-1 rounded-full bg-brand-50 text-brand-600 font-bold text-[10px] uppercase">
+                        Default Pipeline
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+                    {pipe.stages?.map((stg: any) => (
+                      <div key={stg.id} className="p-3 bg-white border border-slate-100 rounded-xl shadow-xs text-center space-y-1">
+                        <span className="text-[10px] font-bold text-slate-400 block">Stage {stg.order}</span>
+                        <h4 className="text-xs font-bold text-slate-700 truncate">{stg.name}</h4>
+                        <span className="inline-block px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold text-[10px]">
+                          {stg.probability}% Win
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </motion.div>
       )}
     </motion.div>
   );

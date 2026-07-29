@@ -20,7 +20,7 @@ export const contractService = {
     };
 
     if (params.search) {
-      where.name = { contains: params.search, mode: 'insensitive' };
+      where.title = { contains: params.search, mode: 'insensitive' };
     }
 
     if (params.status) {
@@ -66,7 +66,8 @@ export const contractService = {
 
   createContract: async (
     data: {
-      name: string;
+      name?: string;
+      title?: string;
       description?: string;
       type: string;
       status?: string;
@@ -74,6 +75,7 @@ export const contractService = {
       startDate: string;
       endDate?: string;
       value?: number;
+      contractNumber?: string;
     },
     userId?: string
   ) => {
@@ -84,8 +86,17 @@ export const contractService = {
       }
     }
 
+    const title = data.title || data.name || 'Untitled Contract';
+    const contractNumber = data.contractNumber || `CTR-${Date.now()}`;
+
     return contractRepository.create({
-      ...data,
+      title,
+      contractNumber,
+      description: data.description,
+      type: data.type || 'Service',
+      status: data.status || 'Draft',
+      customerId: data.customerId,
+      value: data.value || 0,
       startDate: new Date(data.startDate),
       endDate: data.endDate ? new Date(data.endDate) : undefined,
       createdBy: userId || null,
