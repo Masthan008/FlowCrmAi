@@ -10,7 +10,7 @@ import { useAuthStore } from '../store/authStore';
 import { useDashboardStore } from '../store/dashboardStore';
 import { Avatar } from '../components/ui/Avatar';
 import { motion } from 'framer-motion';
-import { exportToPDF, exportToCSV } from '../utils/export';
+import { exportToPDF, exportToCSV, exportReportToPDF } from '../utils/export';
 import { useToast } from '../components/ui/ToastProvider';
 import { AnimatedNumber, SpotlightCard, PulseBadge } from '../components/ui/MotionComponents';
 import {
@@ -290,18 +290,36 @@ export const Dashboard: React.FC = () => {
   });
 
   const handleExport = async (type: string) => {
-    const id = 'dashboard-export-area';
-    let el = document.getElementById(id);
-    if (!el) {
-      el = document.querySelector('.grid.grid-cols-1.lg\\:grid-cols-3') as HTMLElement;
-    }
-    if (!el) { toast.error('Export Failed', 'Could not find dashboard content to export.'); return; }
     try {
       if (type === 'PDF') {
-        await exportToPDF(id, 'FlowCRM_Dashboard');
-        toast.success('Export Complete', 'Dashboard exported as PDF.');
+        toast.info('Generating PDF', 'Preparing executive dashboard report...');
+        await exportReportToPDF({
+          title: 'Executive Dashboard & CRM Analytics Report',
+          subtitle: 'Comprehensive performance breakdown, pipeline metrics, and team activity summary.',
+          kpis: [
+            { label: 'Total Leads', value: kpis?.totalLeads || 0 },
+            { label: 'Active Contacts', value: kpis?.activeContacts || 0 },
+            { label: 'Open Deals', value: kpis?.openDeals || 0 },
+            { label: 'Revenue (MTD)', value: `$${(kpis?.revenueThisMonth || 0).toLocaleString()}` },
+          ],
+          columns: [
+            { header: 'Metric Category', key: 'metric' },
+            { header: 'Current Value', key: 'value' },
+            { header: 'Status / Notes', key: 'notes' },
+          ],
+          data: [
+            { metric: 'Total Leads', value: kpis?.totalLeads || 0, notes: 'Active in lead funnel' },
+            { metric: 'Active Contacts', value: kpis?.activeContacts || 0, notes: 'Verified accounts' },
+            { metric: 'Open Deals', value: kpis?.openDeals || 0, notes: 'Pipeline opportunities' },
+            { metric: 'Revenue This Month', value: `$${(kpis?.revenueThisMonth || 0).toLocaleString()}`, notes: 'Monthly closed revenue' },
+            { metric: 'Pending Tasks', value: kpis?.pendingTasks || 0, notes: 'Requires team action' },
+          ],
+          filename: 'FlowCRM_Executive_Dashboard',
+        });
+        toast.success('Export Complete', 'Executive PDF report downloaded.');
       } else {
-        exportToCSV([
+        toast.info('Exporting CSV', 'Preparing CSV data file...');
+        await exportToCSV([
           { metric: 'Total Leads', value: kpis?.totalLeads || 0 },
           { metric: 'Active Contacts', value: kpis?.activeContacts || 0 },
           { metric: 'Open Deals', value: kpis?.openDeals || 0 },
@@ -310,8 +328,9 @@ export const Dashboard: React.FC = () => {
         ], 'FlowCRM_Dashboard_Summary');
         toast.success('Export Complete', 'Dashboard summary exported as CSV.');
       }
-    } catch {
-      toast.error('Export Failed', 'Could not export dashboard. Check console for details.');
+    } catch (err) {
+      console.error(err);
+      toast.error('Export Failed', 'Could not export dashboard report.');
     }
   };
 
