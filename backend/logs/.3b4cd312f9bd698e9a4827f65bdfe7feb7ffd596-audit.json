@@ -6,16 +6,6 @@
     "auditLog": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\.3b4cd312f9bd698e9a4827f65bdfe7feb7ffd596-audit.json",
     "files": [
         {
-            "date": 1782565208817,
-            "name": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\error-2026-06-27.log",
-            "hash": "f79748e1da6b631e0cee2cdb2180055714322912605f6c1ccd6779f938f0729f"
-        },
-        {
-            "date": 1782585296967,
-            "name": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\error-2026-06-28.log",
-            "hash": "274e3fbd5c6c6de991a09421abe5e16ccaf7c4559ac8b359cfbaed9a09cd09f5"
-        },
-        {
             "date": 1782767935080,
             "name": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\error-2026-06-30.log",
             "hash": "b7342cd89e15fdcb94dfa8925424ba2c6f1147e37154901939c00340b66cc2fb"
@@ -29,6 +19,11 @@
             "date": 1784209730632,
             "name": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\error-2026-07-16.log",
             "hash": "3d6cfaea59b99427e5f5ad387f77d3f459b4a0212da8e68c98bfcb689abc7d4c"
+        },
+        {
+            "date": 1785316281931,
+            "name": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\error-2026-07-29.log",
+            "hash": "482e2ffcd5c42c5bea51316c273e7d769cca1a34274626d3101f77990ada4237"
         }
     ],
     "hashType": "sha256"

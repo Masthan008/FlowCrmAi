@@ -128,6 +128,46 @@ async function main() {
     { name: 'tasks:assign', module: 'tasks', action: 'assign', description: 'Assign tasks to team members' },
     { name: 'tasks:complete', module: 'tasks', action: 'complete', description: 'Mark tasks as completed' },
     { name: 'tasks:export', module: 'tasks', action: 'export', description: 'Export task lists' },
+
+    // Meetings & Calendar
+    { name: 'meetings:view', module: 'meetings', action: 'view', description: 'View calendar meetings and events' },
+    { name: 'meetings:create', module: 'meetings', action: 'create', description: 'Create calendar meetings' },
+    { name: 'meetings:edit', module: 'meetings', action: 'edit', description: 'Edit calendar meetings' },
+    { name: 'meetings:delete', module: 'meetings', action: 'delete', description: 'Delete calendar meetings' },
+
+    // Products Catalog
+    { name: 'products:view', module: 'products', action: 'view', description: 'View product catalog' },
+    { name: 'products:create', module: 'products', action: 'create', description: 'Create product catalog items' },
+    { name: 'products:edit', module: 'products', action: 'edit', description: 'Edit product catalog items' },
+    { name: 'products:delete', module: 'products', action: 'delete', description: 'Delete product catalog items' },
+
+    // Quotes & Proposals
+    { name: 'quotes:view', module: 'quotes', action: 'view', description: 'View sales quotes' },
+    { name: 'quotes:create', module: 'quotes', action: 'create', description: 'Create sales quotes' },
+    { name: 'quotes:edit', module: 'quotes', action: 'edit', description: 'Edit sales quotes' },
+    { name: 'quotes:delete', module: 'quotes', action: 'delete', description: 'Delete sales quotes' },
+
+    // Invoices & Billing
+    { name: 'invoices:view', module: 'invoices', action: 'view', description: 'View customer invoices' },
+    { name: 'invoices:create', module: 'invoices', action: 'create', description: 'Create customer invoices' },
+    { name: 'invoices:edit', module: 'invoices', action: 'edit', description: 'Edit customer invoices' },
+    { name: 'invoices:delete', module: 'invoices', action: 'delete', description: 'Delete customer invoices' },
+
+    // Operations Suite
+    { name: 'campaigns:view', module: 'campaigns', action: 'view', description: 'View marketing campaigns' },
+    { name: 'tickets:view', module: 'tickets', action: 'view', description: 'View support tickets' },
+    { name: 'knowledge:view', module: 'knowledge', action: 'view', description: 'View knowledge base articles' },
+    { name: 'contracts:view', module: 'contracts', action: 'view', description: 'View enterprise contracts' },
+    { name: 'orders:view', module: 'orders', action: 'view', description: 'View sales orders' },
+    { name: 'projects:view', module: 'projects', action: 'view', description: 'View client projects' },
+    { name: 'subscriptions:view', module: 'subscriptions', action: 'view', description: 'View customer subscriptions' },
+    { name: 'expenses:view', module: 'expenses', action: 'view', description: 'View company expenses' },
+    { name: 'assets:view', module: 'assets', action: 'view', description: 'View IT assets' },
+    { name: 'webforms:view', module: 'webforms', action: 'view', description: 'View web forms' },
+    { name: 'portal:view', module: 'portal', action: 'view', description: 'View customer portal' },
+    { name: 'gdpr:view', module: 'gdpr', action: 'view', description: 'View GDPR compliance' },
+    { name: 'surveys:view', module: 'surveys', action: 'view', description: 'View NPS surveys' },
+    { name: 'commissions:view', module: 'commissions', action: 'view', description: 'View sales commissions' },
   ];
 
   const dbPermissions = [];

@@ -6,14 +6,14 @@
     "auditLog": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\.24fa0c4b54352b1945030d27bb13ce326617228c-audit.json",
     "files": [
         {
-            "date": 1783851648103,
-            "name": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\combined-2026-07-12.log",
-            "hash": "6ac979e8cb4d056de1c70e48a7f7722a58d64900ad71285c434b9110635b68d8"
-        },
-        {
             "date": 1784209730626,
             "name": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\combined-2026-07-16.log",
             "hash": "20cfead42e111caf23dd525a385b8823876b2316530d19efe244b8cbe29d6385"
+        },
+        {
+            "date": 1785316281923,
+            "name": "C:\\valli\\FlowCRM AI Enterprise\\backend\\logs\\combined-2026-07-29.log",
+            "hash": "21fa5780f6bf7ef04b2fd0ffec3df2a8070aa10c23e2854bacf6f93a5cddfc03"
         }
     ],
     "hashType": "sha256"

@@ -37,20 +37,28 @@ export const Calendar: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      // Fetch employees
-      const empRes = await api.get('/companies/employees');
-      const emps = empRes.data.data || [];
-      setEmployees(emps);
-      if (emps.length > 0) {
-        setSelectedEmployeeId(emps[0].id);
+      // Fetch employees safely
+      try {
+        const empRes = await api.get('/companies/employees');
+        const emps = empRes.data.data || [];
+        setEmployees(emps);
+        if (emps.length > 0) {
+          setSelectedEmployeeId(emps[0].id);
+        }
+      } catch (err) {
+        console.warn('Failed to load employees list for calendar', err);
       }
 
-      // Fetch companies
-      const compRes = await api.get('/companies');
-      const comps = compRes.data.data?.items || [];
-      setCompanies(comps);
-      if (comps.length > 0) {
-        setSelectedCompanyId(comps[0].id);
+      // Fetch companies safely
+      try {
+        const compRes = await api.get('/companies');
+        const comps = compRes.data.data?.items || [];
+        setCompanies(comps);
+        if (comps.length > 0) {
+          setSelectedCompanyId(comps[0].id);
+        }
+      } catch (err) {
+        console.warn('Failed to load companies list for calendar', err);
       }
 
       // Fetch meetings

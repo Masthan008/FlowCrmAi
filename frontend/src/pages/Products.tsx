@@ -37,10 +37,14 @@ export const Products: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      // Load categories
-      const catRes = await api.get('/products/categories');
-      const cats = catRes.data.data || [];
-      setCategories(cats);
+      // Load categories safely
+      try {
+        const catRes = await api.get('/products/categories');
+        const cats = catRes.data.data || [];
+        setCategories(cats);
+      } catch (err) {
+        console.warn('Failed to fetch product categories', err);
+      }
 
       // Load products
       const prodRes = await api.get('/products');

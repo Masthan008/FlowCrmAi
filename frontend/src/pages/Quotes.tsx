@@ -46,15 +46,23 @@ export const Quotes: React.FC = () => {
     try {
       setLoading(true);
 
-      // Load products
-      const prodRes = await api.get('/products');
-      const prods = prodRes.data.data?.items || [];
-      setProducts(prods);
+      // Load products safely
+      try {
+        const prodRes = await api.get('/products');
+        const prods = prodRes.data.data?.items || [];
+        setProducts(prods);
+      } catch (err) {
+        console.warn('Failed to load products list for quotes modal', err);
+      }
 
-      // Load companies
-      const compRes = await api.get('/companies');
-      const comps = compRes.data.data?.items || [];
-      setCompanies(comps);
+      // Load companies safely
+      try {
+        const compRes = await api.get('/companies');
+        const comps = compRes.data.data?.items || [];
+        setCompanies(comps);
+      } catch (err) {
+        console.warn('Failed to load companies list for quotes modal', err);
+      }
 
       // Load quotes
       let quotesRes;
