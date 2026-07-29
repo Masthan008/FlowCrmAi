@@ -1,9 +1,11 @@
 import { create } from 'zustand';
+import { api } from '../services/api';
 
 interface AppSettings {
   sidebarCollapsed: boolean;
   compactMode: boolean;
   notificationsEnabled: boolean;
+  companyName: string;
 }
 
 interface SettingsState {
@@ -12,13 +14,16 @@ interface SettingsState {
   toggleCompactMode: () => void;
   toggleNotifications: () => void;
   updateSettings: (settings: Partial<AppSettings>) => void;
+  fetchCompanySettings: () => Promise<void>;
+  updateCompanyName: (name: string) => Promise<void>;
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: {
     sidebarCollapsed: false,
     compactMode: false,
     notificationsEnabled: true,
+    companyName: 'FlowCRM Enterprise',
   },
   toggleSidebar: () =>
     set((state) => ({
@@ -48,4 +53,27 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         ...newSettings,
       },
     })),
+  fetchCompanySettings: async () => {
+    try {
+      const res = await api.get('/settings');
+      const data = res.data.data;
+      if (data && data.companyName) {
+        set((state) => ({
+          settings: { ...state.settings, companyName: data.companyName },
+        }));
+      }
+    } catch {
+      // Keep default
+    }
+  },
+  updateCompanyName: async (name: string) => {
+    try {
+      await api.put('/settings', { companyName: name });
+      set((state) => ({
+        settings: { ...state.settings, companyName: name },
+      }));
+    } catch (err) {
+      throw err;
+    }
+  },
 }));

@@ -54,12 +54,13 @@ import { useToast } from '../components/ui/ToastProvider';
 import { Avatar } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { Modal } from '../components/ui/Modal';
 import { api } from '../services/api';
 import { useNotificationStore } from '../store/notificationStore';
 import { AmbientAura } from '../components/ui/MotionComponents';
 
 export const DashboardLayout: React.FC = () => {
-  const { settings, toggleSidebar } = useSettingsStore();
+  const { settings, toggleSidebar, fetchCompanySettings, updateCompanyName } = useSettingsStore();
   const { user, role, permissions, logout: storeLogout } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
@@ -73,6 +74,13 @@ export const DashboardLayout: React.FC = () => {
   const { systemNotifications, markAsRead, fetchSystemNotifications } = useNotificationStore();
   const unreadNotifications = systemNotifications.filter(n => !n.read);
   const unreadCount = unreadNotifications.length;
+
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
+  const [editingCompanyName, setEditingCompanyName] = useState('');
+
+  useEffect(() => {
+    fetchCompanySettings();
+  }, [fetchCompanySettings]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<{
@@ -144,7 +152,6 @@ export const DashboardLayout: React.FC = () => {
     }
     toast.success('Theme Toggled', `Switched to ${nextTheme === 'dark' ? 'Dark Mode' : 'Light Mode'}.`);
   };
-  const activeCompany = 'Acme Enterprise';
 
   const menuItems = [
     { label: 'Dashboard', icon: <LayoutDashboard size={18} />, path: '/' },
@@ -337,11 +344,19 @@ export const DashboardLayout: React.FC = () => {
               {settings.sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
             </button>
 
-            {/* Company Selector Placeholder */}
+            {/* Interactive Company Workspace Selector */}
             <div className="relative">
-              <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-100/60 hover:bg-slate-50 text-xs font-semibold text-slate-650 bg-white/60 shadow-glossy-sm">
-                <Building size={14} className="text-brand-550" />
-                <span>{activeCompany}</span>
+              <button
+                onClick={() => {
+                  setEditingCompanyName(settings.companyName || 'FlowCRM Enterprise');
+                  setShowCompanyModal(true);
+                }}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-slate-200/80 hover:border-brand-400 hover:bg-brand-50/50 text-xs font-bold text-slate-700 bg-white/80 shadow-glossy-sm transition-all cursor-pointer group"
+                title="Click to manage Workspace Company Branding"
+              >
+                <Building size={14} className="text-brand-550 group-hover:scale-110 transition-transform" />
+                <span className="truncate max-w-[140px] md:max-w-[200px]">{settings.companyName || 'FlowCRM Enterprise'}</span>
+                <ChevronRight size={12} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
               </button>
             </div>
           </div>
@@ -686,6 +701,69 @@ export const DashboardLayout: React.FC = () => {
           </motion.div>
         </main>
       </div>
+
+      {/* Company Workspace Branding Modal */}
+      <Modal
+        isOpen={showCompanyModal}
+        onClose={() => setShowCompanyModal(false)}
+        title="Workspace & Company Branding"
+        size="md"
+      >
+        <div className="space-y-4 text-left">
+          <div className="p-3 bg-brand-50/60 rounded-xl border border-brand-100 flex items-center gap-3">
+            <Building size={20} className="text-brand-600 shrink-0" />
+            <div>
+              <h4 className="text-xs font-bold text-slate-800">Active Workspace Branding</h4>
+              <p className="text-[11px] text-slate-500">Update company name shown across the header, navigation, and system reports.</p>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">Company Name</label>
+            <input
+              type="text"
+              value={editingCompanyName}
+              onChange={(e) => setEditingCompanyName(e.target.value)}
+              placeholder="e.g. Acme Corporation"
+              className="w-full px-4 py-2.5 text-xs font-bold border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:ring-4 focus:ring-brand-100/60"
+            />
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowCompanyModal(false);
+                navigate('/settings');
+              }}
+            >
+              Full System Settings
+            </Button>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setShowCompanyModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={async () => {
+                  if (!editingCompanyName.trim()) return;
+                  try {
+                    await updateCompanyName(editingCompanyName);
+                    toast.success('Workspace Updated', `Company name set to "${editingCompanyName}".`);
+                    setShowCompanyModal(false);
+                  } catch (err: any) {
+                    toast.error('Update Failed', err.response?.data?.message || 'Failed to update company name.');
+                  }
+                }}
+              >
+                Save Branding
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
