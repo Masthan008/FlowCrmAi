@@ -56,6 +56,7 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { api } from '../services/api';
 import { useNotificationStore } from '../store/notificationStore';
+import { AmbientAura } from '../components/ui/MotionComponents';
 
 export const DashboardLayout: React.FC = () => {
   const { settings, toggleSidebar } = useSettingsStore();
@@ -281,7 +282,8 @@ export const DashboardLayout: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-25 flex">
+    <div className="min-h-screen bg-slate-25 flex relative">
+      <AmbientAura />
       {/* Sidebar - Desktop */}
       <aside
         className={`hidden md:block fixed inset-y-0 left-0 z-30 transition-all duration-300 ${
@@ -670,9 +672,15 @@ export const DashboardLayout: React.FC = () => {
         <main className="flex-grow p-4 md:p-6 max-w-7xl w-full mx-auto">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
+            initial={{ opacity: 0, y: 14, scale: 0.995 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.995 }}
+            transition={{
+              type: 'spring',
+              stiffness: 280,
+              damping: 24,
+              mass: 0.8,
+            }}
           >
             <Outlet />
           </motion.div>

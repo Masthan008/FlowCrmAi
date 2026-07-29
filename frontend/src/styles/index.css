@@ -290,3 +290,99 @@
   color: #6ee7b7 !important;
 }
 
+/* ==========================================
+   ADVANCED ANIMATIONS & GLOW EFFECTS
+   ========================================== */
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(13, 148, 136, 0.2), 0 0 30px rgba(13, 148, 136, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(13, 148, 136, 0.4), 0 0 50px rgba(13, 148, 136, 0.25);
+  }
+}
+
+@keyframes shimmerWave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes floatSoft {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.pulse-glow-effect {
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+.float-animation {
+  animation: floatSoft 4s infinite ease-in-out;
+}
+
+.shimmer-loading {
+  background: linear-gradient(90deg, rgba(241, 245, 249, 0.6) 25%, rgba(226, 232, 240, 0.9) 50%, rgba(241, 245, 249, 0.6) 75%);
+  background-size: 200% 100%;
+  animation: shimmerWave 1.8s infinite linear;
+}
+
+.gradient-text-animated {
+  background: linear-gradient(135deg, #0d9488 0%, #2563eb 50%, #7c3aed 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 4s ease infinite;
+}
+
+.glass-card-interactive {
+  @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.glass-card-interactive:hover {
+  border-color: rgba(13, 148, 136, 0.3);
+  box-shadow: 0 20px 40px -15px rgba(13, 148, 136, 0.15);
+}
+
+/* Smooth Table Row Animations */
+.animated-table-row {
+  @apply transition-all duration-200 hover:bg-brand-50/20 hover:scale-[1.002];
+}
+
+/* Button Spring Effect */
+.button-spring {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.button-spring:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.button-spring:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+

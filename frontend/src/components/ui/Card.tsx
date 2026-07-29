@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   hoverable?: boolean;
@@ -11,14 +12,16 @@ export const Card: React.FC<CardProps> = ({
   ...props
 }) => {
   return (
-    <div
+    <motion.div
+      whileHover={hoverable ? { y: -3, scale: 1.005 } : undefined}
+      transition={{ type: 'spring', stiffness: 350, damping: 25 }}
       className={`glass-card ${hoverable ? 'glass-card-hover cursor-pointer' : ''} ${className}`}
-      {...props}
+      {...(props as any)}
     >
       <div className="rounded-2xl p-6 h-full flex flex-col">
         {children}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

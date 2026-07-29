@@ -12,6 +12,7 @@ import { Avatar } from '../components/ui/Avatar';
 import { motion } from 'framer-motion';
 import { exportToPDF, exportToCSV } from '../utils/export';
 import { useToast } from '../components/ui/ToastProvider';
+import { AnimatedNumber, SpotlightCard, PulseBadge } from '../components/ui/MotionComponents';
 import {
   Users2,
   Briefcase,
@@ -482,21 +483,23 @@ export const Dashboard: React.FC = () => {
             {!widgetLayout.todayOverview?.collapsed && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                 {[
-                  { label: `${getTimeframePrefix(timeframe)} Leads`, val: businessOverview?.leads || 0, icon: <Users2 size={13} className="text-brand-550" />, progress: 42, color: 'blue' },
-                  { label: `${getTimeframePrefix(timeframe)} Meetings`, val: businessOverview?.meetings || 0, icon: <Calendar size={13} className="text-indigo-500" />, progress: 60, color: 'indigo' },
-                  { label: `${getTimeframePrefix(timeframe)} Calls`, val: businessOverview?.calls || 0, icon: <Activity size={13} className="text-emerald-500" />, progress: 80, color: 'emerald' },
-                  { label: `${getTimeframePrefix(timeframe)} Tasks`, val: businessOverview?.tasks || 0, icon: <CheckSquare size={13} className="text-rose-500" />, progress: 25, color: 'rose' },
-                  { label: `${getTimeframePrefix(timeframe)} Revenue`, val: `$${(businessOverview?.revenue || 0).toLocaleString()}`, icon: <DollarSign size={13} className="text-emerald-600" />, progress: 75, color: 'emerald' },
-                  { label: `${getTimeframePrefix(timeframe)} Follow-ups`, val: businessOverview?.followups || 0, icon: <Clock size={13} className="text-indigo-600" />, progress: 50, color: 'indigo' },
-                  { label: `${getTimeframePrefix(timeframe)} Closed Deals`, val: businessOverview?.closedDeals || 0, icon: <Briefcase size={13} className="text-blue-600" />, progress: 90, color: 'blue' },
-                  { label: `${getTimeframePrefix(timeframe)} New Customers`, val: businessOverview?.newCustomers || 0, icon: <Sparkles size={13} className="text-amber-500" />, progress: 35, color: 'amber' },
+                  { label: `${getTimeframePrefix(timeframe)} Leads`, rawVal: businessOverview?.leads || 0, icon: <Users2 size={13} className="text-brand-550" />, progress: 42, color: 'blue' },
+                  { label: `${getTimeframePrefix(timeframe)} Meetings`, rawVal: businessOverview?.meetings || 0, icon: <Calendar size={13} className="text-indigo-500" />, progress: 60, color: 'indigo' },
+                  { label: `${getTimeframePrefix(timeframe)} Calls`, rawVal: businessOverview?.calls || 0, icon: <Activity size={13} className="text-emerald-500" />, progress: 80, color: 'emerald' },
+                  { label: `${getTimeframePrefix(timeframe)} Tasks`, rawVal: businessOverview?.tasks || 0, icon: <CheckSquare size={13} className="text-rose-500" />, progress: 25, color: 'rose' },
+                  { label: `${getTimeframePrefix(timeframe)} Revenue`, rawVal: businessOverview?.revenue || 0, prefix: '$', icon: <DollarSign size={13} className="text-emerald-600" />, progress: 75, color: 'emerald' },
+                  { label: `${getTimeframePrefix(timeframe)} Follow-ups`, rawVal: businessOverview?.followups || 0, icon: <Clock size={13} className="text-indigo-600" />, progress: 50, color: 'indigo' },
+                  { label: `${getTimeframePrefix(timeframe)} Closed Deals`, rawVal: businessOverview?.closedDeals || 0, icon: <Briefcase size={13} className="text-blue-600" />, progress: 90, color: 'blue' },
+                  { label: `${getTimeframePrefix(timeframe)} New Customers`, rawVal: businessOverview?.newCustomers || 0, icon: <Sparkles size={13} className="text-amber-500" />, progress: 35, color: 'amber' },
                 ].map((item, idx) => (
                   <div key={idx} className="p-3.5 rounded-2xl border border-slate-100/80 bg-white shadow-glossy-sm hover:scale-[1.02] hover:shadow-glossy-md transition-all text-left">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[10px] font-bold text-slate-400 truncate pr-2">{item.label}</span>
                       <div className="p-1 rounded-lg bg-slate-50 border border-slate-100">{item.icon}</div>
                     </div>
-                    <p className="text-base font-black text-slate-800 leading-none mb-2">{item.val}</p>
+                    <p className="text-base font-black text-slate-800 leading-none mb-2">
+                      <AnimatedNumber value={item.rawVal} prefix={item.prefix || ''} />
+                    </p>
                     <div className="w-full bg-slate-100/80 rounded-full h-1">
                       <div
                         className={`h-1 rounded-full ${
