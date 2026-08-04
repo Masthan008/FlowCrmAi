@@ -33,23 +33,30 @@ exports.gdprService = {
         if (data.contactId) {
             const contact = await db_1.prisma.contact.findUnique({ where: { id: data.contactId } });
             if (!contact) {
-                throw Object.assign(new Error('Contact not found'), { statusCode: 400 });
+                data.contactId = null;
             }
         }
         if (data.companyId) {
             const company = await db_1.prisma.company.findUnique({ where: { id: data.companyId } });
             if (!company) {
-                throw Object.assign(new Error('Company not found'), { statusCode: 400 });
+                data.companyId = null;
             }
         }
+        const consentType = data.type || (data.purpose ? 'Marketing' : 'Marketing');
+        const sourceVal = data.source || 'Manual';
         const createData = {
             contactId: data.contactId || null,
             companyId: data.companyId || null,
-            type: data.type,
+            type: consentType,
             granted: data.granted !== undefined ? data.granted : true,
-            source: data.source,
+            source: sourceVal,
             ipAddress: data.ipAddress || null,
-            details: data.details || null,
+            details: {
+                ...(data.details || {}),
+                contactName: data.contactName || null,
+                contactEmail: data.contactEmail || null,
+                purpose: data.purpose || null,
+            },
             consentDate: new Date(),
         };
         if (data.expiresAt)
@@ -94,21 +101,22 @@ exports.gdprService = {
         if (data.contactId) {
             const contact = await db_1.prisma.contact.findUnique({ where: { id: data.contactId } });
             if (!contact) {
-                throw Object.assign(new Error('Contact not found'), { statusCode: 400 });
+                data.contactId = null;
             }
         }
         if (data.companyId) {
             const company = await db_1.prisma.company.findUnique({ where: { id: data.companyId } });
             if (!company) {
-                throw Object.assign(new Error('Company not found'), { statusCode: 400 });
+                data.companyId = null;
             }
         }
+        const desc = data.description || (data.requestorName ? `Request from ${data.requestorName} (${data.requestorEmail || 'N/A'})` : null);
         return gdpr_repository_1.dataRequestRepository.create({
             requestNumber,
             contactId: data.contactId || null,
             companyId: data.companyId || null,
-            type: data.type,
-            description: data.description || null,
+            type: data.type || 'Access',
+            description: desc,
             status: 'Pending',
         });
     },
