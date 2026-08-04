@@ -160,6 +160,16 @@ export class TaskService {
    */
   async createTask(data: any, author: string) {
     const dataWithRelations = this.syncRelationFields(data);
+
+    if (!dataWithRelations.assignedToId && author) {
+      const emp = await prisma.employee.findFirst({ where: { userId: author } });
+      if (emp) {
+        dataWithRelations.assignedToId = emp.id;
+      } else {
+        const firstEmp = await prisma.employee.findFirst();
+        if (firstEmp) dataWithRelations.assignedToId = firstEmp.id;
+      }
+    }
     
     // Automatically set status to Overdue if due date is in the past
     if (dataWithRelations.dueDate && new Date(dataWithRelations.dueDate) < new Date() && dataWithRelations.status !== 'Completed') {
