@@ -18,7 +18,7 @@ export class MeetingRepository {
           select: { id: true, firstName: true, lastName: true },
         },
         customer: {
-          select: { id: true, fullName: true, email: true },
+          select: { id: true, name: true, email: true },
         },
         deal: {
           select: { id: true, name: true, value: true },
@@ -39,7 +39,7 @@ export class MeetingRepository {
           select: { id: true, firstName: true, lastName: true },
         },
         customer: {
-          select: { id: true, fullName: true, email: true },
+          select: { id: true, name: true, email: true },
         },
         deal: {
           select: { id: true, name: true, value: true },
@@ -56,7 +56,7 @@ export class MeetingRepository {
           select: { id: true, firstName: true, lastName: true },
         },
         customer: {
-          select: { id: true, fullName: true, email: true },
+          select: { id: true, name: true, email: true },
         },
         deal: {
           select: { id: true, name: true, value: true },
@@ -74,7 +74,7 @@ export class MeetingRepository {
           select: { id: true, firstName: true, lastName: true },
         },
         customer: {
-          select: { id: true, fullName: true, email: true },
+          select: { id: true, name: true, email: true },
         },
         deal: {
           select: { id: true, name: true, value: true },

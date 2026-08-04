@@ -502,7 +502,7 @@ export const CompanyProfile: React.FC = () => {
     }
   };
 
-  if (loading && !currentCompany) {
+  if (loading || (!currentCompany && !error)) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-64" />

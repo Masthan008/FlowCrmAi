@@ -310,7 +310,7 @@ export const ContactProfile: React.FC = () => {
     }
   };
 
-  if (loading && !currentContact) {
+  if (loading || (!currentContact && !error)) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-450 gap-3">
         <Loader2 className="animate-spin text-brand-550 w-8 h-8" />
