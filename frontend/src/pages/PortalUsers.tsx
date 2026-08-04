@@ -84,7 +84,7 @@ export const PortalUsers: React.FC = () => {
         await portalApi.updateUser(editingUser.id, { name, email, company });
         toast.success('User Updated', `${name} updated successfully.`);
       } else {
-        await portalApi.createUser({ name, email, company, password });
+        await portalApi.createUser({ name, email, company, password: password || null });
         toast.success('User Created', `${name} added to portal.`);
       }
       setShowAddModal(false);
