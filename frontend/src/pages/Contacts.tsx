@@ -326,7 +326,7 @@ export const Contacts: React.FC = () => {
       const payload = {
         ...data,
         tags: formTags,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString() : undefined,
+        dateOfBirth: data.dateOfBirth && data.dateOfBirth.trim() ? new Date(data.dateOfBirth).toISOString() : undefined,
       };
 
       if (editingContactId) {

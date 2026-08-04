@@ -3,14 +3,45 @@ import { auditLogRepository } from '../../repositories/auditLog.repository';
 import { prisma } from '../../database/db';
 
 const cleanData = (data: Record<string, any>): Record<string, any> => {
+  const validContactFields = new Set([
+    'firstName', 'middleName', 'lastName', 'fullName', 'profilePhoto',
+    'gender', 'dateOfBirth', 'jobTitle', 'department', 'companyId', 'leadId',
+    'customerId', 'email', 'secondaryEmail', 'phone', 'alternatePhone',
+    'whatsApp', 'website', 'linkedin', 'twitter', 'facebook', 'instagram',
+    'country', 'state', 'city', 'postalCode', 'addressLine1', 'addressLine2',
+    'status', 'ownerId', 'preferredLanguage', 'preferredContactMethod',
+    'timezone', 'tags', 'description', 'createdBy', 'updatedBy'
+  ]);
+
   const cleaned: Record<string, any> = {};
   for (const [key, value] of Object.entries(data)) {
+    if (!validContactFields.has(key)) continue;
     if (value === '' || value === undefined) {
       cleaned[key] = null;
     } else {
       cleaned[key] = value;
     }
   }
+
+  if (cleaned.tags) {
+    if (!Array.isArray(cleaned.tags)) {
+      cleaned.tags = [];
+    }
+  } else {
+    cleaned.tags = [];
+  }
+
+  if (cleaned.dateOfBirth) {
+    const dob = new Date(cleaned.dateOfBirth);
+    if (!isNaN(dob.getTime())) {
+      cleaned.dateOfBirth = dob;
+    } else {
+      delete cleaned.dateOfBirth;
+    }
+  } else {
+    delete cleaned.dateOfBirth;
+  }
+
   return cleaned;
 };
 
