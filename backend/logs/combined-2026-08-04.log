@@ -9,3 +9,8 @@
 {"level":"info","message":"GET /api/v1/deals?limit=5 200 239 - 859.381 ms","timestamp":"2026-08-04 23:24:33"}
 {"level":"error","message":"No active sales stage found. Please create a sales pipeline stage first.","method":"POST","requestId":"5343d3a8-4f9f-402b-8c93-fbc517d0a6c4","stack":"Error: No active sales stage found. Please create a sales pipeline stage first.\n    at Object.create (C:\\valli\\FlowCRM AI Enterprise\\backend\\dist\\deals\\service\\deal.service.js:101:33)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async create (C:\\valli\\FlowCRM AI Enterprise\\backend\\dist\\deals\\controller\\deal.controller.js:45:26)","statusCode":400,"timestamp":"2026-08-04 23:24:34","url":"/api/v1/deals"}
 {"level":"info","message":"POST /api/v1/deals 400 209 - 868.339 ms","timestamp":"2026-08-04 23:24:34"}
+{"level":"info","message":"POST /api/v1/auth/login 200 7885 - 1755.598 ms","timestamp":"2026-08-04 23:39:41"}
+{"level":"info","message":"POST /api/v1/deals 201 1302 - 1237.728 ms","timestamp":"2026-08-04 23:39:42"}
+{"level":"info","message":"GET /api/v1/deals?limit=5 200 1371 - 664.444 ms","timestamp":"2026-08-04 23:39:43"}
+{"level":"info","message":"POST /api/v1/auth/login 200 7885 - 1959.708 ms","timestamp":"2026-08-04 23:41:10"}
+{"level":"info","message":"DELETE /api/v1/deals/45e28a1f-9aac-4f97-9488-2e44a1e86e61 200 174 - 751.710 ms","timestamp":"2026-08-04 23:41:11"}

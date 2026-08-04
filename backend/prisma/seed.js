@@ -562,12 +562,12 @@ async function main() {
         isDefault: true,
         stages: {
           create: [
-            { name: 'Prospecting', order: 1, probability: 10, color: '#3B82F6', isActive: true },
-            { name: 'Qualification', order: 2, probability: 25, color: '#6366F1', isActive: true },
-            { name: 'Proposal', order: 3, probability: 50, color: '#8B5CF6', isActive: true },
-            { name: 'Negotiation', order: 4, probability: 75, color: '#F59E0B', isActive: true },
-            { name: 'Closed Won', order: 5, probability: 100, color: '#10B981', isActive: true },
-            { name: 'Closed Lost', order: 6, probability: 0, color: '#EF4444', isActive: true },
+            { name: 'Prospecting', order: 1, probability: 10, color: '#3B82F6' },
+            { name: 'Qualification', order: 2, probability: 25, color: '#6366F1' },
+            { name: 'Proposal', order: 3, probability: 50, color: '#8B5CF6' },
+            { name: 'Negotiation', order: 4, probability: 75, color: '#F59E0B' },
+            { name: 'Closed Won', order: 5, probability: 100, color: '#10B981' },
+            { name: 'Closed Lost', order: 6, probability: 0, color: '#EF4444' },
           ],
         },
       },
