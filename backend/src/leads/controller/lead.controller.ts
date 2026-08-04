@@ -548,8 +548,8 @@ export const leadController = {
   sla: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = req.params.id as string;
-      const { responseMinutes } = req.body;
-      const sla = await leadAutomationService.updateSlaStatus(id, Number(responseMinutes || 0));
+      const responseMinutes = req.body?.responseMinutes ?? req.query?.responseMinutes ?? 0;
+      const sla = await leadAutomationService.updateSlaStatus(id, Number(responseMinutes));
       ResponseHelper.sendSuccess(req, res, 200, 'SLA tracking status updated.', sla);
     } catch (error) {
       next(error);
