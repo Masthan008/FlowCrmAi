@@ -65,6 +65,42 @@ export const dealService = {
     const cleaned = cleanData(data);
     const dealNumber = await dealRepository.getNextDealNumber();
 
+    if (!cleaned.customerId) {
+      const firstCust = await prisma.customer.findFirst();
+      if (firstCust) {
+        cleaned.customerId = firstCust.id;
+      } else {
+        const newCust = await prisma.customer.create({
+          data: { name: 'Default Enterprise Customer', type: 'client', status: 'active', createdBy: userId || null }
+        });
+        cleaned.customerId = newCust.id;
+      }
+    }
+
+    if (!cleaned.pipelineId || !cleaned.stageId) {
+      const firstPipeline = await prisma.pipeline.findFirst({
+        include: { stages: { orderBy: { order: 'asc' } } }
+      });
+      if (firstPipeline) {
+        if (!cleaned.pipelineId) cleaned.pipelineId = firstPipeline.id;
+        if (!cleaned.stageId && firstPipeline.stages.length > 0) {
+          cleaned.stageId = firstPipeline.stages[0].id;
+        }
+      }
+    }
+
+    if (!cleaned.stageId) {
+      const firstStage = await prisma.pipelineStage.findFirst();
+      if (firstStage) {
+        cleaned.stageId = firstStage.id;
+        if (!cleaned.pipelineId) cleaned.pipelineId = firstStage.pipelineId;
+      }
+    }
+
+    if (!cleaned.stageId) {
+      throw Object.assign(new Error('No active sales stage found. Please create a sales pipeline stage first.'), { statusCode: 400 });
+    }
+
     if (cleaned.expectedCloseDate) {
       cleaned.expectedCloseDate = new Date(cleaned.expectedCloseDate);
     }

@@ -152,10 +152,12 @@ export const Deals: React.FC = () => {
   const validateForm = () => {
     const errs: Record<string, string> = {};
     if (!formData.name.trim()) errs.name = 'Deal name is required';
-    if (!formData.customerId) errs.customerId = 'Customer is required';
-    if (!formData.stageId) errs.stageId = 'Stage is required';
-    if (!formData.pipelineId) errs.pipelineId = 'Pipeline is required';
     setFormErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      if (errs.name || errs.customerId) setFormStep(1);
+      else if (errs.pipelineId || errs.stageId) setFormStep(2);
+      toast.error('Validation Error', Object.values(errs)[0]);
+    }
     return Object.keys(errs).length === 0;
   };
 
@@ -271,15 +273,19 @@ export const Deals: React.FC = () => {
   };
 
   const resetForm = () => {
+    const defaultPipeline = pipelines[0];
+    const defaultStage = defaultPipeline?.stages?.[0];
+    const defaultCustomer = customers[0];
+
     setFormData({
-      name: '', opportunityName: '', customerId: '', companyId: '',
-      primaryContactId: '', leadId: '', pipelineId: '', stageId: '',
+      name: '', opportunityName: '', customerId: defaultCustomer?.id || '', companyId: '',
+      primaryContactId: '', leadId: '', pipelineId: defaultPipeline?.id || '', stageId: defaultStage?.id || '',
       assignedToId: '', status: 'Open', priority: 'Medium',
-      probability: 0, value: 0, expectedRevenue: 0,
+      probability: defaultStage?.probability || 0, value: 0, expectedRevenue: 0,
       expectedCloseDate: '', currency: 'USD', source: 'Other',
       industry: '', businessType: '', description: '', tags: [],
     });
-    setSelectedPipeline(null);
+    setSelectedPipeline(defaultPipeline || null);
     setFormErrors({});
     setFormStep(1);
   };

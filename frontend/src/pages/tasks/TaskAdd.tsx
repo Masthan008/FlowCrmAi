@@ -20,6 +20,7 @@ import {
   Briefcase,
   AlertCircle,
   HelpCircle,
+  Loader2,
 } from 'lucide-react';
 
 const TaskAdd: React.FC = () => {
