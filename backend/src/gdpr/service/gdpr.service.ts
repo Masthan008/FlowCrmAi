@@ -39,9 +39,12 @@ export const gdprService = {
   recordConsent: async (data: {
     contactId?: string | null;
     companyId?: string | null;
-    type: string;
+    contactName?: string | null;
+    contactEmail?: string | null;
+    purpose?: string | null;
+    type?: string;
     granted?: boolean;
-    source: string;
+    source?: string;
     ipAddress?: string | null;
     expiresAt?: string | null;
     details?: any;
@@ -49,25 +52,33 @@ export const gdprService = {
     if (data.contactId) {
       const contact = await prisma.contact.findUnique({ where: { id: data.contactId } });
       if (!contact) {
-        throw Object.assign(new Error('Contact not found'), { statusCode: 400 });
+        data.contactId = null;
       }
     }
 
     if (data.companyId) {
       const company = await prisma.company.findUnique({ where: { id: data.companyId } });
       if (!company) {
-        throw Object.assign(new Error('Company not found'), { statusCode: 400 });
+        data.companyId = null;
       }
     }
+
+    const consentType = data.type || (data.purpose ? 'Marketing' : 'Marketing');
+    const sourceVal = data.source || 'Manual';
 
     const createData: any = {
       contactId: data.contactId || null,
       companyId: data.companyId || null,
-      type: data.type,
+      type: consentType,
       granted: data.granted !== undefined ? data.granted : true,
-      source: data.source,
+      source: sourceVal,
       ipAddress: data.ipAddress || null,
-      details: data.details || null,
+      details: {
+        ...(data.details || {}),
+        contactName: data.contactName || null,
+        contactEmail: data.contactEmail || null,
+        purpose: data.purpose || null,
+      },
       consentDate: new Date(),
     };
 
@@ -122,7 +133,9 @@ export const gdprService = {
   createDataRequest: async (data: {
     contactId?: string | null;
     companyId?: string | null;
-    type: string;
+    requestorName?: string | null;
+    requestorEmail?: string | null;
+    type?: string;
     description?: string | null;
   }) => {
     const requestNumber = `DR-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
@@ -130,23 +143,25 @@ export const gdprService = {
     if (data.contactId) {
       const contact = await prisma.contact.findUnique({ where: { id: data.contactId } });
       if (!contact) {
-        throw Object.assign(new Error('Contact not found'), { statusCode: 400 });
+        data.contactId = null;
       }
     }
 
     if (data.companyId) {
       const company = await prisma.company.findUnique({ where: { id: data.companyId } });
       if (!company) {
-        throw Object.assign(new Error('Company not found'), { statusCode: 400 });
+        data.companyId = null;
       }
     }
+
+    const desc = data.description || (data.requestorName ? `Request from ${data.requestorName} (${data.requestorEmail || 'N/A'})` : null);
 
     return dataRequestRepository.create({
       requestNumber,
       contactId: data.contactId || null,
       companyId: data.companyId || null,
-      type: data.type,
-      description: data.description || null,
+      type: data.type || 'Access',
+      description: desc,
       status: 'Pending',
     });
   },

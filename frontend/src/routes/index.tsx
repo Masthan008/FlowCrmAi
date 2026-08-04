@@ -213,6 +213,16 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'deals/new',
+        element: (
+          <ProtectedRoute requiredPermission="deals:create">
+            <ErrorBoundary>
+              <Deals />
+            </ErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: 'deals/pipeline',
         element: (
           <ProtectedRoute requiredPermission="deals:view">

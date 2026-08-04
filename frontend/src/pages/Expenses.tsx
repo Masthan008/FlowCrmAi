@@ -39,11 +39,11 @@ export const Expenses: React.FC = () => {
       const items = res.data.data?.items || [];
       const mapped = items.map((e: any) => ({
         id: e.id,
-        title: e.title,
+        title: e.description || e.title || 'Expense Record',
         amount: e.amount,
-        category: e.category?.name || 'General',
-        status: e.status || 'pending',
-        employeeName: e.employeeName || '-',
+        category: e.category?.name || (typeof e.category === 'string' ? e.category : 'General'),
+        status: (e.status || 'pending').toLowerCase(),
+        employeeName: e.employee ? `${e.employee.firstName} ${e.employee.lastName}` : (e.employeeName || '-'),
         date: e.date ? e.date.split('T')[0] : '',
         createdAt: e.createdAt ? e.createdAt.split('T')[0] : '',
       }));

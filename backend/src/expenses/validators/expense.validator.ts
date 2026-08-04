@@ -2,13 +2,16 @@ import { z } from 'zod';
 
 export const createExpenseSchema = z.object({
   body: z.object({
-    employeeId: z.string().uuid('Invalid employee ID'),
+    title: z.string().max(200).optional().nullable(),
+    employeeId: z.string().uuid('Invalid employee ID').optional().nullable(),
+    employeeName: z.string().optional().nullable(),
+    category: z.string().optional().nullable(),
     categoryId: z.string().uuid('Invalid category ID').optional().nullable(),
-    amount: z.number().positive('Amount must be positive'),
+    amount: z.preprocess((val) => Number(val), z.number().positive('Amount must be positive')),
     currency: z.string().max(3).optional().default('USD'),
     description: z.string().max(5000).optional().nullable(),
-    date: z.string().datetime('Invalid date format'),
-    receiptUrl: z.string().url().optional().nullable(),
+    date: z.string().optional().nullable(),
+    receiptUrl: z.string().optional().nullable(),
     dealId: z.string().uuid('Invalid deal ID').optional().nullable(),
     projectId: z.string().uuid('Invalid project ID').optional().nullable(),
     billable: z.boolean().optional().default(false),
@@ -19,13 +22,16 @@ export const createExpenseSchema = z.object({
 
 export const updateExpenseSchema = z.object({
   body: z.object({
-    employeeId: z.string().uuid('Invalid employee ID').optional(),
+    title: z.string().max(200).optional().nullable(),
+    employeeId: z.string().uuid('Invalid employee ID').optional().nullable(),
+    employeeName: z.string().optional().nullable(),
+    category: z.string().optional().nullable(),
     categoryId: z.string().uuid('Invalid category ID').optional().nullable(),
-    amount: z.number().positive('Amount must be positive').optional(),
+    amount: z.preprocess((val) => (val !== undefined ? Number(val) : undefined), z.number().positive('Amount must be positive').optional()),
     currency: z.string().max(3).optional(),
     description: z.string().max(5000).optional().nullable(),
-    date: z.string().datetime('Invalid date format').optional(),
-    receiptUrl: z.string().url().optional().nullable(),
+    date: z.string().optional().nullable(),
+    receiptUrl: z.string().optional().nullable(),
     dealId: z.string().uuid('Invalid deal ID').optional().nullable(),
     projectId: z.string().uuid('Invalid project ID').optional().nullable(),
     billable: z.boolean().optional(),

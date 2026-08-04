@@ -4,13 +4,16 @@ exports.updateExpenseCategorySchema = exports.createExpenseCategorySchema = expo
 const zod_1 = require("zod");
 exports.createExpenseSchema = zod_1.z.object({
     body: zod_1.z.object({
-        employeeId: zod_1.z.string().uuid('Invalid employee ID'),
+        title: zod_1.z.string().max(200).optional().nullable(),
+        employeeId: zod_1.z.string().uuid('Invalid employee ID').optional().nullable(),
+        employeeName: zod_1.z.string().optional().nullable(),
+        category: zod_1.z.string().optional().nullable(),
         categoryId: zod_1.z.string().uuid('Invalid category ID').optional().nullable(),
-        amount: zod_1.z.number().positive('Amount must be positive'),
+        amount: zod_1.z.preprocess((val) => Number(val), zod_1.z.number().positive('Amount must be positive')),
         currency: zod_1.z.string().max(3).optional().default('USD'),
         description: zod_1.z.string().max(5000).optional().nullable(),
-        date: zod_1.z.string().datetime('Invalid date format'),
-        receiptUrl: zod_1.z.string().url().optional().nullable(),
+        date: zod_1.z.string().optional().nullable(),
+        receiptUrl: zod_1.z.string().optional().nullable(),
         dealId: zod_1.z.string().uuid('Invalid deal ID').optional().nullable(),
         projectId: zod_1.z.string().uuid('Invalid project ID').optional().nullable(),
         billable: zod_1.z.boolean().optional().default(false),
@@ -20,13 +23,16 @@ exports.createExpenseSchema = zod_1.z.object({
 });
 exports.updateExpenseSchema = zod_1.z.object({
     body: zod_1.z.object({
-        employeeId: zod_1.z.string().uuid('Invalid employee ID').optional(),
+        title: zod_1.z.string().max(200).optional().nullable(),
+        employeeId: zod_1.z.string().uuid('Invalid employee ID').optional().nullable(),
+        employeeName: zod_1.z.string().optional().nullable(),
+        category: zod_1.z.string().optional().nullable(),
         categoryId: zod_1.z.string().uuid('Invalid category ID').optional().nullable(),
-        amount: zod_1.z.number().positive('Amount must be positive').optional(),
+        amount: zod_1.z.preprocess((val) => (val !== undefined ? Number(val) : undefined), zod_1.z.number().positive('Amount must be positive').optional()),
         currency: zod_1.z.string().max(3).optional(),
         description: zod_1.z.string().max(5000).optional().nullable(),
-        date: zod_1.z.string().datetime('Invalid date format').optional(),
-        receiptUrl: zod_1.z.string().url().optional().nullable(),
+        date: zod_1.z.string().optional().nullable(),
+        receiptUrl: zod_1.z.string().optional().nullable(),
         dealId: zod_1.z.string().uuid('Invalid deal ID').optional().nullable(),
         projectId: zod_1.z.string().uuid('Invalid project ID').optional().nullable(),
         billable: zod_1.z.boolean().optional(),

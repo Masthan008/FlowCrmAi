@@ -69,12 +69,15 @@ export const expenseService = {
 
   createExpense: async (
     data: {
-      employeeId: string;
+      title?: string | null;
+      employeeId?: string | null;
+      employeeName?: string | null;
+      category?: string | null;
       categoryId?: string | null;
       amount: number;
       currency?: string;
       description?: string | null;
-      date: string;
+      date?: string | null;
       receiptUrl?: string | null;
       dealId?: string | null;
       projectId?: string | null;
@@ -84,21 +87,41 @@ export const expenseService = {
     },
     userId?: string
   ) => {
-    const employee = await prisma.employee.findUnique({ where: { id: data.employeeId } });
-    if (!employee) {
-      throw Object.assign(new Error('Employee not found'), { statusCode: 400 });
+    let empId = data.employeeId;
+    if (!empId && userId) {
+      const emp = await prisma.employee.findFirst({ where: { userId } });
+      if (emp) empId = emp.id;
+    }
+    if (!empId) {
+      const firstEmp = await prisma.employee.findFirst();
+      if (firstEmp) empId = firstEmp.id;
+    }
+    if (!empId) {
+      throw Object.assign(new Error('No employee found. Please add an employee first.'), { statusCode: 400 });
     }
 
     if (data.categoryId) {
       const category = await prisma.expenseCategory.findUnique({ where: { id: data.categoryId } });
       if (!category) {
-        throw Object.assign(new Error('Expense category not found'), { statusCode: 400 });
+        data.categoryId = null;
       }
     }
 
+    const dateObj = data.date ? new Date(data.date) : new Date();
+
     return expenseRepository.create({
-      ...data,
-      date: new Date(data.date),
+      employeeId: empId,
+      categoryId: data.categoryId || null,
+      amount: Number(data.amount),
+      currency: data.currency || 'USD',
+      description: data.description || data.title || null,
+      date: isNaN(dateObj.getTime()) ? new Date() : dateObj,
+      receiptUrl: data.receiptUrl || null,
+      dealId: data.dealId || null,
+      projectId: data.projectId || null,
+      billable: data.billable ?? false,
+      taxRelevant: data.taxRelevant ?? false,
+      tags: data.tags || [],
       createdBy: userId || null,
     });
   },

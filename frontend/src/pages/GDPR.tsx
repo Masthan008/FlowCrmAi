@@ -67,20 +67,20 @@ export const GDPR: React.FC = () => {
 
       setConsentLogs(consentItems.map((c: any) => ({
         id: c.id,
-        contactName: c.contactName || c.contact?.fullName || '-',
-        contactEmail: c.contactEmail || c.contact?.email || '-',
-        purpose: c.purpose || c.type || 'General',
-        status: c.status || 'active',
-        grantedAt: c.grantedAt ? c.grantedAt.split('T')[0] : (c.createdAt ? c.createdAt.split('T')[0] : ''),
+        contactName: c.details?.contactName || c.contactName || (c.contact ? `${c.contact.firstName || ''} ${c.contact.lastName || ''}`.trim() : '-') || '-',
+        contactEmail: c.details?.contactEmail || c.contactEmail || c.contact?.email || '-',
+        purpose: c.details?.purpose || c.purpose || c.type || 'General',
+        status: c.granted ? 'active' : 'revoked',
+        grantedAt: c.consentDate ? c.consentDate.split('T')[0] : (c.createdAt ? c.createdAt.split('T')[0] : ''),
       })));
 
       setDataRequests(reqItems.map((r: any) => ({
         id: r.id,
-        requestorName: r.requestorName || '-',
-        requestorEmail: r.requestorEmail || '-',
-        type: r.type || 'access',
-        status: r.status || 'pending',
-        createdAt: r.createdAt ? r.createdAt.split('T')[0] : '',
+        requestorName: r.requestorName || (r.contact ? `${r.contact.firstName || ''} ${r.contact.lastName || ''}`.trim() : '-') || '-',
+        requestorEmail: r.requestorEmail || r.contact?.email || '-',
+        type: r.type || 'Access',
+        status: (r.status || 'pending').toLowerCase(),
+        createdAt: r.requestedAt ? r.requestedAt.split('T')[0] : (r.createdAt ? r.createdAt.split('T')[0] : ''),
       })));
     } catch (err) {
       console.error(err);

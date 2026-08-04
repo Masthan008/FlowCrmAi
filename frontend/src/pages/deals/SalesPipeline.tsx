@@ -290,6 +290,10 @@ export const SalesPipeline: React.FC = () => {
             </select>
           </div>
 
+          <Button onClick={() => navigate('/deals/new')} variant="secondary" size="sm">
+            <Plus size={14} className="mr-1.5" /> New Deal
+          </Button>
+
           <Button onClick={() => setShowCreatePipeline(true)} variant="primary" size="sm">
             <Plus size={14} className="mr-1.5" /> Create Pipeline
           </Button>

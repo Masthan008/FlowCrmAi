@@ -97,18 +97,21 @@ export const Deals: React.FC = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
-    const isNew = searchParams.get('new') === 'true';
+    const isNew = searchParams.get('new') === 'true' || window.location.pathname.endsWith('/deals/new');
     if (isNew) {
       const coId = searchParams.get('companyId') || '';
       setFormData((prev: any) => ({
         ...prev,
         companyId: coId,
       }));
+      resetForm();
       setShowCreateModal(true);
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete('new');
-      newParams.delete('companyId');
-      setSearchParams(newParams, { replace: true });
+      if (searchParams.get('new') === 'true') {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete('new');
+        newParams.delete('companyId');
+        setSearchParams(newParams, { replace: true });
+      }
     }
   }, [searchParams, setSearchParams]);
 
