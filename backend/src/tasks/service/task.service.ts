@@ -162,7 +162,7 @@ export class TaskService {
     const dataWithRelations = this.syncRelationFields(data);
 
     if (!dataWithRelations.assignedToId && author) {
-      const emp = await prisma.employee.findFirst({ where: { userId: author } });
+      const emp = await prisma.employee.findFirst({ where: { email: author } });
       if (emp) {
         dataWithRelations.assignedToId = emp.id;
       } else {

@@ -138,7 +138,7 @@ class TaskService {
     async createTask(data, author) {
         const dataWithRelations = this.syncRelationFields(data);
         if (!dataWithRelations.assignedToId && author) {
-            const emp = await db_1.prisma.employee.findFirst({ where: { userId: author } });
+            const emp = await db_1.prisma.employee.findFirst({ where: { email: author } });
             if (emp) {
                 dataWithRelations.assignedToId = emp.id;
             }

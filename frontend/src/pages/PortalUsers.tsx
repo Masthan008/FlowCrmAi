@@ -38,9 +38,9 @@ export const PortalUsers: React.FC = () => {
       const items = res.data.data?.items || [];
       const mapped = items.map((u: any) => ({
         id: u.id,
-        name: u.name,
+        name: [u.firstName, u.lastName].filter(Boolean).join(' ') || u.name || 'Unknown',
         email: u.email,
-        company: u.company || '-',
+        company: u.company || u.customer?.name || '-',
         isActive: u.isActive,
         lastLogin: u.lastLogin ? u.lastLogin.split('T')[0] : 'Never',
         createdAt: u.createdAt ? u.createdAt.split('T')[0] : '',
@@ -110,8 +110,8 @@ export const PortalUsers: React.FC = () => {
   };
 
   const filtered = users.filter(u =>
-    u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchQuery.toLowerCase())
+    (u.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (u.email || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
