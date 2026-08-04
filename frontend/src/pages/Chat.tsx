@@ -37,11 +37,11 @@ export const Chat: React.FC = () => {
       const items = res.data.data?.items || [];
       const mapped = items.map((c: any) => ({
         id: c.id,
-        contactName: c.contactName || c.contact?.name || 'Unknown',
-        contactEmail: c.contactEmail || c.contact?.email || '-',
-        subject: c.subject || 'No subject',
+        contactName: c.visitorName || 'Unknown',
+        contactEmail: c.visitorEmail || '-',
+        subject: c.sessionId || 'Live Chat',
         messageCount: c.messageCount || 0,
-        status: c.status || 'active',
+        status: (c.status || 'active').toLowerCase(),
         lastMessageAt: c.lastMessageAt ? c.lastMessageAt.split('T')[0] : '-',
         createdAt: c.createdAt ? c.createdAt.split('T')[0] : '',
       }));
@@ -62,7 +62,12 @@ export const Chat: React.FC = () => {
     e.preventDefault();
     if (!contactName.trim() || !subject.trim()) return;
     try {
-      await chatApi.createConversation({ contactName, contactEmail, subject });
+      await chatApi.createConversation({
+        sessionId: `chat-${Date.now()}`,
+        visitorName: contactName,
+        visitorEmail: contactEmail || null,
+        pageUrl: window.location.href,
+      });
       toast.success('Conversation Created', 'New chat conversation started.');
       setShowNewModal(false);
       setContactName('');
