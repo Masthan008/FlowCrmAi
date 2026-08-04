@@ -15,8 +15,18 @@ const leadInclude = {
  * Clean empty string values from input data — convert them to null
  */
 const cleanData = (data: Record<string, any>): Record<string, any> => {
+  const validLeadFields = new Set([
+    'firstName', 'lastName', 'fullName', 'email', 'phone', 'alternatePhone',
+    'jobTitle', 'companyName', 'industry', 'website', 'address', 'city',
+    'state', 'country', 'postalCode', 'sourceId', 'statusId', 'assignedToId',
+    'customerId', 'priority', 'rating', 'value', 'expectedClosingDate',
+    'description', 'createdBy', 'updatedBy', 'socialLinks', 'isFavorite',
+    'archivedAt', 'archivedBy', 'assignedDate', 'assignmentReason', 'previousOwnerId'
+  ]);
+
   const cleaned: Record<string, any> = {};
   for (const [key, value] of Object.entries(data)) {
+    if (!validLeadFields.has(key)) continue;
     if (value === '' || value === undefined) {
       cleaned[key] = null;
     } else {
