@@ -112,10 +112,4 @@ router.get('/:id/playbooks', (0, permission_1.requirePermission)('deals:view'), 
 router.get('/:id/followups', (0, permission_1.requirePermission)('deals:view'), dealAutomation_controller_1.dealAutomationController.getFollowups);
 router.post('/:id/followups', (0, permission_1.requirePermission)('deals:edit'), dealAutomation_controller_1.dealAutomationController.createFollowup);
 router.patch('/:id/lifecycle', (0, permission_1.requirePermission)('deals:edit'), dealAutomation_controller_1.dealAutomationController.updateLifecycle);
-router.get('/:id/recommendations', (0, permission_1.requirePermission)('deals:view'), dealAutomation_controller_1.dealAutomationController.getRecommendations);
-router.get('/:id/sla', (0, permission_1.requirePermission)('deals:view'), dealAutomation_controller_1.dealAutomationController.getSLA);
-router.get('/:id/playbooks', (0, permission_1.requirePermission)('deals:view'), dealAutomation_controller_1.dealAutomationController.getPlaybooks);
-router.get('/:id/followups', (0, permission_1.requirePermission)('deals:view'), dealAutomation_controller_1.dealAutomationController.getFollowups);
-router.post('/:id/followups', (0, permission_1.requirePermission)('deals:edit'), dealAutomation_controller_1.dealAutomationController.createFollowup);
-router.patch('/:id/lifecycle', (0, permission_1.requirePermission)('deals:edit'), dealAutomation_controller_1.dealAutomationController.updateLifecycle);
 exports.default = router;
