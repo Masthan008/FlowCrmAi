@@ -37,6 +37,9 @@ import orderRouter from '../../orders/routes/order.routes';
 import projectRouter from '../../projects/routes/project.routes';
 import subscriptionRouter from '../../subscriptions/routes/subscription.routes';
 import emailRouter from '../../email/routes/email.routes';
+import customerRouter from '../../customers/routes/customer.routes';
+import calendarRouter from '../../calendar/routes/calendar.routes';
+import paymentRouter from '../../payments/routes/payment.routes';
 
 const router = Router();
 
@@ -111,21 +114,13 @@ router.use('/projects', projectRouter);
 router.use('/subscriptions', subscriptionRouter);
 router.use('/email', emailRouter);
 router.use('/commissions', commissionRouter);
+router.use('/customers', customerRouter);
+router.use('/calendar', calendarRouter);
+router.use('/payments', paymentRouter);
 
 router.get('/global-search', requireAuth, searchController.globalSearch);
 
 router.get('/deal-workflows', requireAuth, requirePermission('deals:workflows:manage'), dealAutomationController.getWorkflows);
 router.post('/deal-workflows', requireAuth, requirePermission('deals:workflows:manage'), dealAutomationController.createWorkflow);
-
-// Generate placeholder routers for all remaining CRM infrastructure modules
-const placeholderModules = [
-  'customers',
-  'calendar',
-  'payments'
-];
-
-placeholderModules.forEach((moduleName) => {
-  router.use(`/${moduleName}`, createPlaceholderRouter(moduleName));
-});
 
 export default router;

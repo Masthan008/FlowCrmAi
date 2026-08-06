@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const db_1 = require("../../database/db");
 const config_1 = require("../../config");
-const placeholder_1 = require("./placeholder");
 const auth_1 = __importDefault(require("./auth"));
 const dashboard_routes_1 = __importDefault(require("../../dashboard/routes/dashboard.routes"));
 const lead_routes_1 = __importDefault(require("../../leads/routes/lead.routes"));
@@ -42,6 +41,9 @@ const order_routes_1 = __importDefault(require("../../orders/routes/order.routes
 const project_routes_1 = __importDefault(require("../../projects/routes/project.routes"));
 const subscription_routes_1 = __importDefault(require("../../subscriptions/routes/subscription.routes"));
 const email_routes_1 = __importDefault(require("../../email/routes/email.routes"));
+const customer_routes_1 = __importDefault(require("../../customers/routes/customer.routes"));
+const calendar_routes_1 = __importDefault(require("../../calendar/routes/calendar.routes"));
+const payment_routes_1 = __importDefault(require("../../payments/routes/payment.routes"));
 const router = (0, express_1.Router)();
 // Health check endpoint
 router.get('/health', async (req, res) => {
@@ -111,16 +113,10 @@ router.use('/projects', project_routes_1.default);
 router.use('/subscriptions', subscription_routes_1.default);
 router.use('/email', email_routes_1.default);
 router.use('/commissions', commission_routes_1.default);
+router.use('/customers', customer_routes_1.default);
+router.use('/calendar', calendar_routes_1.default);
+router.use('/payments', payment_routes_1.default);
 router.get('/global-search', auth_2.requireAuth, search_controller_1.searchController.globalSearch);
 router.get('/deal-workflows', auth_2.requireAuth, (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.getWorkflows);
 router.post('/deal-workflows', auth_2.requireAuth, (0, permission_1.requirePermission)('deals:workflows:manage'), dealAutomation_controller_1.dealAutomationController.createWorkflow);
-// Generate placeholder routers for all remaining CRM infrastructure modules
-const placeholderModules = [
-    'customers',
-    'calendar',
-    'payments'
-];
-placeholderModules.forEach((moduleName) => {
-    router.use(`/${moduleName}`, (0, placeholder_1.createPlaceholderRouter)(moduleName));
-});
 exports.default = router;

@@ -158,7 +158,7 @@ exports.dealWorkspaceRepository = {
     },
     // PRODUCTS
     findProductsByDealId: async (dealId, search) => {
-        const items = await db_1.prisma.dealProduct.findMany({
+        return db_1.prisma.dealProduct.findMany({
             where: {
                 dealId,
                 deletedAt: null,
@@ -166,17 +166,6 @@ exports.dealWorkspaceRepository = {
             },
             orderBy: { createdAt: 'desc' },
         });
-        // Seed dummy products for MVP if empty to display dynamic layout
-        if (items.length === 0 && !search) {
-            await db_1.prisma.dealProduct.createMany({
-                data: [
-                    { dealId, name: 'Enterprise CRM License', sku: 'CRM-ENT-101', quantity: 25, unitPrice: 120.00, discount: 500.00, tax: 200.00, subtotal: 3000.00, total: 2700.00, createdBy: 'system' },
-                    { dealId, name: 'AI Prediction Module Integration', sku: 'CRM-AI-440', quantity: 1, unitPrice: 1500.00, discount: 0.00, tax: 150.00, subtotal: 1500.00, total: 1650.00, createdBy: 'system' }
-                ]
-            });
-            return db_1.prisma.dealProduct.findMany({ where: { dealId, deletedAt: null } });
-        }
-        return items;
     },
     addProductLine: async (data) => {
         return db_1.prisma.dealProduct.create({ data });
@@ -200,7 +189,7 @@ exports.dealWorkspaceRepository = {
     },
     // QUOTES
     findQuotesByDealId: async (dealId, search) => {
-        const items = await db_1.prisma.dealQuote.findMany({
+        return db_1.prisma.dealQuote.findMany({
             where: {
                 dealId,
                 deletedAt: null,
@@ -211,33 +200,6 @@ exports.dealWorkspaceRepository = {
             },
             orderBy: { createdAt: 'desc' },
         });
-        // Seed dummy quotes for MVP if empty to display dynamic layout
-        if (items.length === 0 && !search) {
-            const q = await db_1.prisma.dealQuote.create({
-                data: {
-                    dealId,
-                    quoteNumber: `QT-DEAL-${dealId.substring(0, 4).toUpperCase()}-01`,
-                    version: '1.0',
-                    status: 'sent',
-                    amount: 4350.00,
-                    expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                    createdBy: 'system'
-                }
-            });
-            await db_1.prisma.dealQuoteVersion.create({
-                data: {
-                    dealQuoteId: q.id,
-                    version: '1.0',
-                    status: 'sent',
-                    amount: 4350.00,
-                    expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                    changes: 'Initial quote release',
-                    createdBy: 'system'
-                }
-            });
-            return db_1.prisma.dealQuote.findMany({ where: { dealId, deletedAt: null }, include: { versions: true } });
-        }
-        return items;
     },
     createQuote: async (data) => {
         const quote = await db_1.prisma.dealQuote.create({ data });
@@ -296,7 +258,7 @@ exports.dealWorkspaceRepository = {
     },
     // COMPETITORS
     findCompetitorsByDealId: async (dealId, search) => {
-        const items = await db_1.prisma.dealCompetitor.findMany({
+        return db_1.prisma.dealCompetitor.findMany({
             where: {
                 dealId,
                 deletedAt: null,
@@ -304,26 +266,6 @@ exports.dealWorkspaceRepository = {
             },
             orderBy: { createdAt: 'desc' },
         });
-        // Seed dummy competitor for MVP
-        if (items.length === 0 && !search) {
-            await db_1.prisma.dealCompetitor.create({
-                data: {
-                    dealId,
-                    name: 'Salesforce Enterprise',
-                    product: 'Sales Cloud',
-                    pricing: 150.00,
-                    strengths: 'Strong brand presence, massive ecosystem, rich third-party extensions.',
-                    weaknesses: 'Extremely high licensing costs, complex setup, hidden API charges.',
-                    status: 'Active',
-                    marketPosition: 'Market Leader',
-                    website: 'https://salesforce.com',
-                    notes: 'Customer is reviewing Salesforce pricing sheet against our proposal.',
-                    createdBy: 'system'
-                }
-            });
-            return db_1.prisma.dealCompetitor.findMany({ where: { dealId, deletedAt: null } });
-        }
-        return items;
     },
     createCompetitor: async (data) => {
         return db_1.prisma.dealCompetitor.create({ data });

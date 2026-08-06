@@ -15,7 +15,7 @@ export interface SystemSettings {
   taskReminders: boolean;
 }
 
-let memorySettings: SystemSettings = {
+const defaultSettings: SystemSettings = {
   companyName: 'FlowCRM Enterprise',
   supportEmail: 'support@flowcrm.ai',
   defaultCurrency: 'USD',
@@ -32,15 +32,84 @@ let memorySettings: SystemSettings = {
 
 export class SettingsRepository {
   async getSettings(): Promise<SystemSettings> {
-    return memorySettings;
+    const existing = await prisma.systemSetting.findFirst();
+    if (existing) {
+      return {
+        companyName: existing.companyName,
+        supportEmail: existing.supportEmail,
+        defaultCurrency: existing.defaultCurrency,
+        cacheExpiry: existing.cacheExpiry,
+        rateLimit: existing.rateLimit,
+        webhooksEnabled: existing.webhooksEnabled,
+        emailAlerts: existing.emailAlerts,
+        pushNotifications: existing.pushNotifications,
+        weeklyDigest: existing.weeklyDigest,
+        leadAssignments: existing.leadAssignments,
+        dealUpdates: existing.dealUpdates,
+        taskReminders: existing.taskReminders,
+      };
+    }
+    const created = await prisma.systemSetting.create({
+      data: defaultSettings,
+    });
+    return {
+      companyName: created.companyName,
+      supportEmail: created.supportEmail,
+      defaultCurrency: created.defaultCurrency,
+      cacheExpiry: created.cacheExpiry,
+      rateLimit: created.rateLimit,
+      webhooksEnabled: created.webhooksEnabled,
+      emailAlerts: created.emailAlerts,
+      pushNotifications: created.pushNotifications,
+      weeklyDigest: created.weeklyDigest,
+      leadAssignments: created.leadAssignments,
+      dealUpdates: created.dealUpdates,
+      taskReminders: created.taskReminders,
+    };
   }
 
   async updateSettings(data: Partial<SystemSettings>): Promise<SystemSettings> {
-    memorySettings = {
-      ...memorySettings,
-      ...data,
+    const existing = await prisma.systemSetting.findFirst();
+    if (existing) {
+      const updated = await prisma.systemSetting.update({
+        where: { id: existing.id },
+        data,
+      });
+      return {
+        companyName: updated.companyName,
+        supportEmail: updated.supportEmail,
+        defaultCurrency: updated.defaultCurrency,
+        cacheExpiry: updated.cacheExpiry,
+        rateLimit: updated.rateLimit,
+        webhooksEnabled: updated.webhooksEnabled,
+        emailAlerts: updated.emailAlerts,
+        pushNotifications: updated.pushNotifications,
+        weeklyDigest: updated.weeklyDigest,
+        leadAssignments: updated.leadAssignments,
+        dealUpdates: updated.dealUpdates,
+        taskReminders: updated.taskReminders,
+      };
+    }
+    const created = await prisma.systemSetting.create({
+      data: {
+        ...defaultSettings,
+        ...data,
+      },
+    });
+    return {
+      companyName: created.companyName,
+      supportEmail: created.supportEmail,
+      defaultCurrency: created.defaultCurrency,
+      cacheExpiry: created.cacheExpiry,
+      rateLimit: created.rateLimit,
+      webhooksEnabled: created.webhooksEnabled,
+      emailAlerts: created.emailAlerts,
+      pushNotifications: created.pushNotifications,
+      weeklyDigest: created.weeklyDigest,
+      leadAssignments: created.leadAssignments,
+      dealUpdates: created.dealUpdates,
+      taskReminders: created.taskReminders,
     };
-    return memorySettings;
   }
 }
 

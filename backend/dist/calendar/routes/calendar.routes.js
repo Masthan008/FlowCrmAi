@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const calendar_controller_1 = require("../controller/calendar.controller");
+const auth_1 = require("../../middlewares/auth");
+const permission_1 = require("../../middlewares/permission");
+const validate_1 = require("../../middlewares/validate");
+const calendar_validator_1 = require("../validators/calendar.validator");
+const router = (0, express_1.Router)();
+router.use(auth_1.requireAuth);
+router.get('/', (0, permission_1.requirePermission)('meetings:view'), calendar_controller_1.calendarController.list);
+router.get('/:id', (0, permission_1.requirePermission)('meetings:view'), (0, validate_1.validateRequest)(calendar_validator_1.getCalendarByIdSchema), calendar_controller_1.calendarController.getById);
+router.post('/', (0, permission_1.requirePermission)('meetings:create'), (0, validate_1.validateRequest)(calendar_validator_1.createCalendarSchema), calendar_controller_1.calendarController.create);
+router.put('/:id', (0, permission_1.requirePermission)('meetings:edit'), (0, validate_1.validateRequest)(calendar_validator_1.updateCalendarSchema), calendar_controller_1.calendarController.update);
+router.delete('/:id', (0, permission_1.requirePermission)('meetings:delete'), (0, validate_1.validateRequest)(calendar_validator_1.getCalendarByIdSchema), calendar_controller_1.calendarController.delete);
+exports.default = router;

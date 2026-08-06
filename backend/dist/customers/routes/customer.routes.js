@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const customer_controller_1 = require("../controller/customer.controller");
+const auth_1 = require("../../middlewares/auth");
+const permission_1 = require("../../middlewares/permission");
+const validate_1 = require("../../middlewares/validate");
+const customer_validator_1 = require("../validators/customer.validator");
+const router = (0, express_1.Router)();
+router.use(auth_1.requireAuth);
+router.get('/', (0, permission_1.requirePermission)('contacts:view'), customer_controller_1.customerController.list);
+router.get('/:id', (0, permission_1.requirePermission)('contacts:view'), (0, validate_1.validateRequest)(customer_validator_1.getCustomerByIdSchema), customer_controller_1.customerController.getById);
+router.post('/', (0, permission_1.requirePermission)('contacts:create'), (0, validate_1.validateRequest)(customer_validator_1.createCustomerSchema), customer_controller_1.customerController.create);
+router.put('/:id', (0, permission_1.requirePermission)('contacts:edit'), (0, validate_1.validateRequest)(customer_validator_1.updateCustomerSchema), customer_controller_1.customerController.update);
+router.delete('/:id', (0, permission_1.requirePermission)('contacts:delete'), (0, validate_1.validateRequest)(customer_validator_1.getCustomerByIdSchema), customer_controller_1.customerController.delete);
+exports.default = router;

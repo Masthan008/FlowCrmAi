@@ -174,7 +174,7 @@ export const dealWorkspaceRepository = {
 
   // PRODUCTS
   findProductsByDealId: async (dealId: string, search?: string) => {
-    const items = await prisma.dealProduct.findMany({
+    return prisma.dealProduct.findMany({
       where: {
         dealId,
         deletedAt: null,
@@ -182,18 +182,6 @@ export const dealWorkspaceRepository = {
       },
       orderBy: { createdAt: 'desc' },
     });
-
-    // Seed dummy products for MVP if empty to display dynamic layout
-    if (items.length === 0 && !search) {
-      await prisma.dealProduct.createMany({
-        data: [
-          { dealId, name: 'Enterprise CRM License', sku: 'CRM-ENT-101', quantity: 25, unitPrice: 120.00, discount: 500.00, tax: 200.00, subtotal: 3000.00, total: 2700.00, createdBy: 'system' },
-          { dealId, name: 'AI Prediction Module Integration', sku: 'CRM-AI-440', quantity: 1, unitPrice: 1500.00, discount: 0.00, tax: 150.00, subtotal: 1500.00, total: 1650.00, createdBy: 'system' }
-        ]
-      });
-      return prisma.dealProduct.findMany({ where: { dealId, deletedAt: null } });
-    }
-    return items;
   },
 
   addProductLine: async (data: { dealId: string; name: string; sku?: string; quantity: number; unitPrice: number; discount: number; tax: number; subtotal: number; total: number; createdBy?: string }) => {
@@ -222,7 +210,7 @@ export const dealWorkspaceRepository = {
 
   // QUOTES
   findQuotesByDealId: async (dealId: string, search?: string) => {
-    const items = await prisma.dealQuote.findMany({
+    return prisma.dealQuote.findMany({
       where: {
         dealId,
         deletedAt: null,
@@ -233,34 +221,6 @@ export const dealWorkspaceRepository = {
       },
       orderBy: { createdAt: 'desc' },
     });
-
-    // Seed dummy quotes for MVP if empty to display dynamic layout
-    if (items.length === 0 && !search) {
-      const q = await prisma.dealQuote.create({
-        data: {
-          dealId,
-          quoteNumber: `QT-DEAL-${dealId.substring(0, 4).toUpperCase()}-01`,
-          version: '1.0',
-          status: 'sent',
-          amount: 4350.00,
-          expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          createdBy: 'system'
-        }
-      });
-      await prisma.dealQuoteVersion.create({
-        data: {
-          dealQuoteId: q.id,
-          version: '1.0',
-          status: 'sent',
-          amount: 4350.00,
-          expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          changes: 'Initial quote release',
-          createdBy: 'system'
-        }
-      });
-      return prisma.dealQuote.findMany({ where: { dealId, deletedAt: null }, include: { versions: true } });
-    }
-    return items;
   },
 
   createQuote: async (data: { dealId: string; quoteNumber: string; version: string; status: string; amount: number; expiryDate?: Date; createdBy?: string }) => {
@@ -327,7 +287,7 @@ export const dealWorkspaceRepository = {
 
   // COMPETITORS
   findCompetitorsByDealId: async (dealId: string, search?: string) => {
-    const items = await prisma.dealCompetitor.findMany({
+    return prisma.dealCompetitor.findMany({
       where: {
         dealId,
         deletedAt: null,
@@ -335,27 +295,6 @@ export const dealWorkspaceRepository = {
       },
       orderBy: { createdAt: 'desc' },
     });
-
-    // Seed dummy competitor for MVP
-    if (items.length === 0 && !search) {
-      await prisma.dealCompetitor.create({
-        data: {
-          dealId,
-          name: 'Salesforce Enterprise',
-          product: 'Sales Cloud',
-          pricing: 150.00,
-          strengths: 'Strong brand presence, massive ecosystem, rich third-party extensions.',
-          weaknesses: 'Extremely high licensing costs, complex setup, hidden API charges.',
-          status: 'Active',
-          marketPosition: 'Market Leader',
-          website: 'https://salesforce.com',
-          notes: 'Customer is reviewing Salesforce pricing sheet against our proposal.',
-          createdBy: 'system'
-        }
-      });
-      return prisma.dealCompetitor.findMany({ where: { dealId, deletedAt: null } });
-    }
-    return items;
   },
 
   createCompetitor: async (data: { dealId: string; name: string; product?: string; pricing?: number; strengths?: string; weaknesses?: string; status?: string; marketPosition?: string; website?: string; notes?: string; createdBy?: string }) => {
