@@ -47,13 +47,31 @@ exports.orderService = {
         return order;
     },
     createOrder: async (data, userId) => {
-        if (data.customerId) {
-            const customer = await db_1.prisma.customer.findUnique({ where: { id: data.customerId } });
+        let customerId = data.customerId;
+        if (customerId) {
+            const customer = await db_1.prisma.customer.findUnique({ where: { id: customerId } });
             if (!customer) {
                 throw Object.assign(new Error('Customer not found'), { statusCode: 400 });
             }
         }
-        return order_repository_1.orderRepository.createWithItems(data, userId);
+        else {
+            const fallback = await db_1.prisma.customer.findFirst({
+                where: { deletedAt: null },
+                orderBy: { createdAt: 'asc' },
+                select: { id: true },
+            });
+            if (fallback) {
+                customerId = fallback.id;
+            }
+            else {
+                const walkIn = await db_1.prisma.customer.create({
+                    data: { name: 'Walk-in Customer', createdBy: userId || null },
+                    select: { id: true },
+                });
+                customerId = walkIn.id;
+            }
+        }
+        return order_repository_1.orderRepository.createWithItems({ ...data, customerId }, userId);
     },
     updateOrder: async (id, data, userId) => {
         const existing = await order_repository_1.orderRepository.findById(id);

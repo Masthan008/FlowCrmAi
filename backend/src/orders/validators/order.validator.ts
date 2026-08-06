@@ -9,7 +9,7 @@ const orderItemSchema = z.object({
 export const createOrderSchema = z.object({
   body: z.object({
     orderNumber: z.string().optional(),
-    customerId: z.string().uuid('Invalid customer ID'),
+    customerId: z.string().uuid('Invalid customer ID').optional(),
     status: z.string().optional(),
     total: z.number().nonnegative('Total must be non-negative').optional(),
     items: z.array(orderItemSchema).optional(),

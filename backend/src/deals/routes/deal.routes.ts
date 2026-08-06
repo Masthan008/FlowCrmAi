@@ -79,6 +79,8 @@ router.patch('/:id/move-stage', requirePermission('deals:edit'), dealPipelineCon
 
 router.get('/employees', requirePermission('deals:view'), dealController.getEmployees);
 
+router.get('/statistics', requirePermission('deals:view'), dealController.getStatistics);
+
 router.get(
   '/',
   requirePermission('deals:view'),

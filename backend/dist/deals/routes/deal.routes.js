@@ -53,6 +53,7 @@ router.post('/workflows', (0, permission_1.requirePermission)('deals:workflows:m
 router.patch('/:id/move-stage', (0, permission_1.requirePermission)('deals:edit'), dealPipeline_controller_1.dealPipelineController.moveStage);
 // --- EXISTING DEAL CRUD ROUTES ---
 router.get('/employees', (0, permission_1.requirePermission)('deals:view'), deal_controller_1.dealController.getEmployees);
+router.get('/statistics', (0, permission_1.requirePermission)('deals:view'), deal_controller_1.dealController.getStatistics);
 router.get('/', (0, permission_1.requirePermission)('deals:view'), (0, validate_1.validateRequest)(deal_validator_1.listDealsSchema), deal_controller_1.dealController.list);
 router.get('/:id', (0, permission_1.requirePermission)('deals:view'), (0, validate_1.validateRequest)(deal_validator_1.getDealByIdSchema), (0, activityLogger_1.logActivity)('deals', 'DEAL_VIEWED'), deal_controller_1.dealController.getById);
 router.post('/', (0, permission_1.requirePermission)('deals:create'), (0, validate_1.validateRequest)(deal_validator_1.createDealSchema), (0, activityLogger_1.logActivity)('deals', 'DEAL_CREATED'), deal_controller_1.dealController.create);
