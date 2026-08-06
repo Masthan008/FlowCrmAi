@@ -207,11 +207,5 @@ router.get('/:id/playbooks', requirePermission('deals:view'), dealAutomationCont
 router.get('/:id/followups', requirePermission('deals:view'), dealAutomationController.getFollowups);
 router.post('/:id/followups', requirePermission('deals:edit'), dealAutomationController.createFollowup);
 router.patch('/:id/lifecycle', requirePermission('deals:edit'), dealAutomationController.updateLifecycle);
-router.get('/:id/recommendations', requirePermission('deals:view'), dealAutomationController.getRecommendations);
-router.get('/:id/sla', requirePermission('deals:view'), dealAutomationController.getSLA);
-router.get('/:id/playbooks', requirePermission('deals:view'), dealAutomationController.getPlaybooks);
-router.get('/:id/followups', requirePermission('deals:view'), dealAutomationController.getFollowups);
-router.post('/:id/followups', requirePermission('deals:edit'), dealAutomationController.createFollowup);
-router.patch('/:id/lifecycle', requirePermission('deals:edit'), dealAutomationController.updateLifecycle);
 
 export default router;
