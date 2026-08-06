@@ -11,6 +11,8 @@ import { Button } from '../../components/ui/Button';
 
 import SplashScreen from '../../components/public/SplashScreen';
 
+import { Logo } from '../../components/ui/Logo';
+
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'pipeline' | 'intelligence' | 'leads' | 'tickets'>('pipeline');
@@ -22,6 +24,7 @@ export const LandingPage: React.FC = () => {
   const handleSplashComplete = () => {
     sessionStorage.setItem('flowcrm_splash_viewed', 'true');
     setShowSplash(false);
+    navigate('/onboarding');
   };
 
   return (
@@ -37,15 +40,9 @@ export const LandingPage: React.FC = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             onClick={() => navigate('/landing')}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <span className="text-xl font-black tracking-tight text-white font-display">FlowCRM</span>
-              <span className="text-[10px] font-extrabold text-indigo-400 block -mt-1 tracking-widest">AI ENTERPRISE</span>
-            </div>
+            <Logo size="md" />
           </motion.div>
 
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-slate-400">
@@ -378,7 +375,7 @@ export const LandingPage: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => navigate('/onboarding')}
+                onClick={() => navigate(`/checkout?plan=starter&billing=${isAnnual ? 'annual' : 'monthly'}`)}
                 className="w-full mt-8 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 cursor-pointer transition-all text-center"
               >
                 Get Started with Starter
@@ -426,7 +423,7 @@ export const LandingPage: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
-                onClick={() => navigate('/onboarding')}
+                onClick={() => navigate(`/checkout?plan=professional&billing=${isAnnual ? 'annual' : 'monthly'}`)}
                 className="w-full mt-8 py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-extrabold text-xs shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 cursor-pointer transition-all text-center"
               >
                 Upgrade to Professional
@@ -469,7 +466,7 @@ export const LandingPage: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => navigate('/onboarding')}
+                onClick={() => navigate(`/checkout?plan=enterprise&billing=${isAnnual ? 'annual' : 'monthly'}`)}
                 className="w-full mt-8 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 cursor-pointer transition-all text-center"
               >
                 Contact Sales / Start Trial

@@ -167,6 +167,8 @@ const STEPS = [
   },
 ];
 
+import { Logo } from '../../components/ui/Logo';
+
 export const Onboarding: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
@@ -177,7 +179,7 @@ export const Onboarding: React.FC = () => {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
-      navigate('/register');
+      navigate('/landing');
     }
   };
 
@@ -200,15 +202,9 @@ export const Onboarding: React.FC = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => navigate('/landing')}
-          className="flex items-center gap-3 cursor-pointer group"
+          className="cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <span className="text-lg font-black tracking-tight text-white font-display">FlowCRM</span>
-            <span className="text-xs font-bold text-indigo-400 block -mt-1">AI ENTERPRISE</span>
-          </div>
+          <Logo size="md" />
         </motion.div>
 
         <div className="flex items-center gap-3">

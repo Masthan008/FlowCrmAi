@@ -52,8 +52,8 @@ import Commissions from '../pages/Commissions';
 
 // Public Experience Pages
 import LandingPage from '../pages/public/LandingPage';
-import Onboarding from '../pages/public/Onboarding';
 import AboutPage from '../pages/public/AboutPage';
+import CheckoutPage from '../pages/public/CheckoutPage';
 import SplashScreen from '../components/public/SplashScreen';
 
 // Authentication Pages
@@ -86,8 +86,12 @@ export const router = createBrowserRouter([
     element: <AboutPage />,
   },
   {
+    path: '/checkout',
+    element: <CheckoutPage />,
+  },
+  {
     path: '/splash',
-    element: <SplashScreen onComplete={() => { window.location.href = '/landing'; }} />,
+    element: <SplashScreen onComplete={() => { window.location.href = '/onboarding'; }} />,
   },
 
   // Public Auth Pages
