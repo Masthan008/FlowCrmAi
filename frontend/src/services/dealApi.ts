@@ -106,7 +106,7 @@ export const dealApi = {
   createDealFollowup: (dealId: string, data: any) => api.post(`${DEALS_URL}/${dealId}/followups`, data),
 
   // --- CRM Workflows & Insights ---
-  getWorkflows: (module?: string) => api.get('/deal-workflows', { params: { module } }),
-  createWorkflow: (data: any) => api.post('/deal-workflows', data),
+  getWorkflows: (module?: string) => api.get(`${DEALS_URL}/workflows`, { params: { module } }),
+  createWorkflow: (data: any) => api.post(`${DEALS_URL}/workflows`, data),
   getExecutiveInsights: () => api.get(`${DEALS_URL}/executive-insights`),
 };

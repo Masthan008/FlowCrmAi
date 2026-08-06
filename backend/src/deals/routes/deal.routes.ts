@@ -67,10 +67,10 @@ router.post('/pipeline-views', requirePermission('deals:create'), dealPipelineCo
 router.delete('/pipeline-views/:viewId', requirePermission('deals:delete'), dealPipelineController.deleteView);
 
 // --- ENTERPRISE AUTOMATION & INTELLIGENCE ---
-router.get('/executive-insights', requirePermission('deals:insights:view'), dealAutomationController.getExecutiveInsights);
-router.get('/playbooks', requirePermission('deals:playbook:manage'), dealAutomationController.getPlaybooks);
-router.get('/workflows', requirePermission('deals:workflows:manage'), dealAutomationController.getWorkflows);
-router.post('/workflows', requirePermission('deals:workflows:manage'), dealAutomationController.createWorkflow);
+router.get('/executive-insights', requirePermission('deals:view'), dealAutomationController.getExecutiveInsights);
+router.get('/playbooks', requirePermission('deals:view'), dealAutomationController.getPlaybooks);
+router.get('/workflows', requirePermission('deals:view'), dealAutomationController.getWorkflows);
+router.post('/workflows', requirePermission('deals:create'), dealAutomationController.createWorkflow);
 
 // Move Stage (drag & drop)
 router.patch('/:id/move-stage', requirePermission('deals:edit'), dealPipelineController.moveStage);
@@ -138,7 +138,7 @@ router.patch(
 
 router.patch(
   '/owner',
-  requirePermission('deals:assign'),
+  requirePermission('deals:edit'),
   validateRequest(bulkUpdateOwnerSchema),
   logActivity('deals', 'DEAL_OWNER_CHANGED'),
   dealController.bulkUpdateOwner
@@ -197,10 +197,16 @@ router.get('/:id/negotiations', requirePermission('deals:view'), dealWorkspaceCo
 router.post('/:id/negotiations', requirePermission('deals:edit'), dealWorkspaceController.createNegotiation);
 
 // --- DEAL INTELLIGENCE & SCORING ENDPOINTS ---
-router.get('/:id/score', requirePermission('deals:score:view'), dealAutomationController.getScore);
+router.get('/:id/score', requirePermission('deals:view'), dealAutomationController.getScore);
 router.get('/:id/win-probability', requirePermission('deals:view'), dealAutomationController.getWinProbability);
-router.get('/:id/health', requirePermission('deals:health:view'), dealAutomationController.getHealth);
-router.get('/:id/risk', requirePermission('deals:risk:view'), dealAutomationController.getRisk);
+router.get('/:id/health', requirePermission('deals:view'), dealAutomationController.getHealth);
+router.get('/:id/risk', requirePermission('deals:view'), dealAutomationController.getRisk);
+router.get('/:id/recommendations', requirePermission('deals:view'), dealAutomationController.getRecommendations);
+router.get('/:id/sla', requirePermission('deals:view'), dealAutomationController.getSLA);
+router.get('/:id/playbooks', requirePermission('deals:view'), dealAutomationController.getPlaybooks);
+router.get('/:id/followups', requirePermission('deals:view'), dealAutomationController.getFollowups);
+router.post('/:id/followups', requirePermission('deals:edit'), dealAutomationController.createFollowup);
+router.patch('/:id/lifecycle', requirePermission('deals:edit'), dealAutomationController.updateLifecycle);
 router.get('/:id/recommendations', requirePermission('deals:view'), dealAutomationController.getRecommendations);
 router.get('/:id/sla', requirePermission('deals:view'), dealAutomationController.getSLA);
 router.get('/:id/playbooks', requirePermission('deals:view'), dealAutomationController.getPlaybooks);
