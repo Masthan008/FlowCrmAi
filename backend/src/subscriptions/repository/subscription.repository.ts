@@ -18,7 +18,7 @@ export class SubscriptionRepository {
           select: { id: true, name: true, email: true },
         },
         plan: {
-          select: { id: true, name: true, price: true, interval: true },
+          select: { id: true, name: true, price: true, billingPeriod: true },
         },
       },
     });
@@ -36,7 +36,7 @@ export class SubscriptionRepository {
           select: { id: true, name: true, email: true },
         },
         plan: {
-          select: { id: true, name: true, price: true, interval: true },
+          select: { id: true, name: true, price: true, billingPeriod: true },
         },
       },
     });
@@ -50,7 +50,7 @@ export class SubscriptionRepository {
           select: { id: true, name: true, email: true },
         },
         plan: {
-          select: { id: true, name: true, price: true, interval: true },
+          select: { id: true, name: true, price: true, billingPeriod: true },
         },
       },
     });
@@ -65,7 +65,7 @@ export class SubscriptionRepository {
           select: { id: true, name: true, email: true },
         },
         plan: {
-          select: { id: true, name: true, price: true, interval: true },
+          select: { id: true, name: true, price: true, billingPeriod: true },
         },
       },
     });

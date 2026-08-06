@@ -16,7 +16,7 @@ exports.subscriptionService = {
                 name: data.name,
                 description: data.description,
                 price: data.price,
-                interval: data.interval,
+                billingPeriod: data.interval,
                 features: data.features,
                 createdBy: userId || null,
             },
@@ -29,7 +29,7 @@ exports.subscriptionService = {
         }
         return db_1.prisma.subscriptionPlan.update({
             where: { id },
-            data: { ...data, updatedBy: userId || null },
+            data: { ...data, interval: undefined, billingPeriod: data.interval, updatedBy: userId || null },
         });
     },
     deletePlan: async (id, userId) => {

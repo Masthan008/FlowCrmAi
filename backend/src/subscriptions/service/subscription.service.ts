@@ -19,7 +19,7 @@ export const subscriptionService = {
         name: data.name,
         description: data.description,
         price: data.price,
-        interval: data.interval,
+        billingPeriod: data.interval,
         features: data.features,
         createdBy: userId || null,
       },
@@ -37,7 +37,7 @@ export const subscriptionService = {
     }
     return prisma.subscriptionPlan.update({
       where: { id },
-      data: { ...data, updatedBy: userId || null },
+      data: { ...data, interval: undefined, billingPeriod: data.interval, updatedBy: userId || null },
     });
   },
 
