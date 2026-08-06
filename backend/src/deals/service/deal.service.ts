@@ -1,10 +1,13 @@
 import { dealRepository } from '../repository/deal.repository';
 import { prisma } from '../../database/db';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const isUuid = (val: any) => typeof val === 'string' && UUID_REGEX.test(val);
+
 const cleanData = (data: Record<string, any>): Record<string, any> => {
   const cleaned: Record<string, any> = {};
   for (const [key, value] of Object.entries(data)) {
-    if (value === '' || value === undefined) {
+    if (value === '' || value === undefined || value === null) {
       if (key === 'tags') {
         cleaned[key] = [];
       } else {
@@ -14,6 +17,20 @@ const cleanData = (data: Record<string, any>): Record<string, any> => {
       cleaned[key] = value;
     }
   }
+
+  // Ensure UUID foreign keys are valid UUIDs or set to null
+  const uuidFields = ['customerId', 'companyId', 'primaryContactId', 'leadId', 'pipelineId', 'stageId', 'assignedToId'];
+  for (const field of uuidFields) {
+    if (cleaned[field] && !isUuid(cleaned[field])) {
+      cleaned[field] = null;
+    }
+  }
+
+  // Safe numeric parsing
+  if (cleaned.value !== undefined && cleaned.value !== null) cleaned.value = Number(cleaned.value) || 0;
+  if (cleaned.probability !== undefined && cleaned.probability !== null) cleaned.probability = Number(cleaned.probability) || 0;
+  if (cleaned.expectedRevenue !== undefined && cleaned.expectedRevenue !== null) cleaned.expectedRevenue = Number(cleaned.expectedRevenue) || 0;
+
   return cleaned;
 };
 
