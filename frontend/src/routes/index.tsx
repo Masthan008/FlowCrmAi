@@ -52,6 +52,7 @@ import Commissions from '../pages/Commissions';
 
 // Public Experience Pages
 import LandingPage from '../pages/public/LandingPage';
+import Onboarding from '../pages/public/Onboarding';
 import AboutPage from '../pages/public/AboutPage';
 import CheckoutPage from '../pages/public/CheckoutPage';
 import SplashScreen from '../components/public/SplashScreen';
