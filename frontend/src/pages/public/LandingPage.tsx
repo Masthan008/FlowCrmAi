@@ -11,6 +11,7 @@ import { Button } from '../../components/ui/Button';
 
 import SplashScreen from '../../components/public/SplashScreen';
 import PhoneMockupBasic from '../../components/ui/phone-mockups-1';
+import PricingCalculator from '../../components/public/PricingCalculator';
 
 import { Logo } from '../../components/ui/Logo';
 
@@ -322,16 +323,19 @@ export const LandingPage: React.FC = () => {
 
       {/* ─── Real Feature INR Pricing Section ───────────────────── */}
       <section className="py-24 px-6 relative bg-slate-950/80 border-t border-slate-900">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
+        <div className="max-w-7xl mx-auto space-y-16">
+          {/* Interactive Pricing Calculator */}
+          <PricingCalculator />
+
+          <div className="text-center space-y-4 max-w-3xl mx-auto pt-8 border-t border-slate-900">
             <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-extrabold tracking-widest uppercase">
-              <DollarSign className="w-3.5 h-3.5" /> TRANSPARENT ENTERPRISE PRICING (INR ₹)
+              <DollarSign className="w-3.5 h-3.5" /> TRANSPARENT ENTERPRISE TIERS (INR ₹)
             </span>
             <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-display">
-              Simple Plans Powered by Real Features
+              Simple Standard Plans
             </h2>
             <p className="text-sm sm:text-base text-slate-400 font-normal">
-              Every plan includes genuine, database-backed CRM features built right into FlowCRM AI Enterprise.
+              Or pick from our fixed standard user plan tiers below.
             </p>
 
             {/* Monthly / Annual Billing Toggle */}
