@@ -12,6 +12,7 @@ import { Button } from '../../components/ui/Button';
 import SplashScreen from '../../components/public/SplashScreen';
 import PhoneMockupBasic from '../../components/ui/phone-mockups-1';
 import PricingCalculator from '../../components/public/PricingCalculator';
+import Footer from '../../components/public/Footer';
 
 import { Logo } from '../../components/ui/Logo';
 
@@ -323,203 +324,14 @@ export const LandingPage: React.FC = () => {
 
       {/* ─── Real Feature INR Pricing Section ───────────────────── */}
       <section className="py-24 px-6 relative bg-slate-950/80 border-t border-slate-900">
-        <div className="max-w-7xl mx-auto space-y-16">
+        <div className="max-w-7xl mx-auto">
           {/* Interactive Pricing Calculator */}
           <PricingCalculator />
-
-          <div className="text-center space-y-4 max-w-3xl mx-auto pt-8 border-t border-slate-900">
-            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-extrabold tracking-widest uppercase">
-              <DollarSign className="w-3.5 h-3.5" /> TRANSPARENT ENTERPRISE TIERS (INR ₹)
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-display">
-              Simple Standard Plans
-            </h2>
-            <p className="text-sm sm:text-base text-slate-400 font-normal">
-              Or pick from our fixed standard user plan tiers below.
-            </p>
-
-            {/* Monthly / Annual Billing Toggle */}
-            <div className="flex items-center justify-center gap-4 pt-4">
-              <span className={`text-xs font-bold ${!isAnnual ? 'text-white' : 'text-slate-400'}`}>Monthly Billing</span>
-              <button
-                onClick={() => setIsAnnual(!isAnnual)}
-                className="w-14 h-8 rounded-full bg-slate-800 p-1 relative transition-colors border border-slate-700 cursor-pointer"
-              >
-                <motion.div
-                  animate={{ x: isAnnual ? 24 : 0 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                  className="w-6 h-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-md"
-                />
-              </button>
-              <span className={`text-xs font-bold flex items-center gap-2 ${isAnnual ? 'text-white' : 'text-slate-400'}`}>
-                Annual Billing
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold">
-                  SAVE 20%
-                </span>
-              </span>
-            </div>
-          </div>
-
-          {/* Pricing Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-            {/* Starter Plan */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-8 backdrop-blur-xl flex flex-col justify-between hover:border-slate-700 transition-all">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-1">Starter</h3>
-                  <p className="text-xs text-slate-400">Essential CRM database & pipeline management</p>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl sm:text-4xl font-black text-white font-mono">
-                    ₹{isAnnual ? '1,199' : '1,499'}
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium">/ user / month</span>
-                </div>
-
-                <div className="space-y-3 pt-4 border-t border-slate-800">
-                  <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">Real Features Included:</p>
-                  {[
-                    'Lead Capture & SLA Qualification',
-                    'Contact & Company Relationship Management',
-                    'Deals & Kanban Sales Pipelines',
-                    'Tasks, Subtasks & Reminders',
-                    'Product Catalog & Price Lists',
-                    'Quotes & Invoice Generation',
-                    'Customer Directory (/customers)',
-                    'Activity & Email History Logs',
-                  ].map((feat, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-xs text-slate-300">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>{feat}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => navigate(`/checkout?plan=starter&billing=${isAnnual ? 'annual' : 'monthly'}`)}
-                className="w-full mt-8 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 cursor-pointer transition-all text-center"
-              >
-                Get Started with Starter
-              </motion.button>
-            </div>
-
-            {/* Professional Plan (Most Popular) */}
-            <div className="relative bg-slate-900/90 border-2 border-indigo-500 rounded-3xl p-8 backdrop-blur-2xl flex flex-col justify-between shadow-2xl shadow-indigo-500/20">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-[10px] font-black tracking-widest uppercase shadow-md">
-                MOST POPULAR
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-1">Professional</h3>
-                  <p className="text-xs text-indigo-300">Complete Lead-to-Cash & Service Desk Automation</p>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl sm:text-4xl font-black text-white font-mono">
-                    ₹{isAnnual ? '3,199' : '3,999'}
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium">/ user / month</span>
-                </div>
-
-                <div className="space-y-3 pt-4 border-t border-slate-800">
-                  <p className="text-xs font-bold text-indigo-300 uppercase tracking-wider">Everything in Starter, plus:</p>
-                  {[
-                    'Lead-to-Cash Automated Workflow (Quotes → Orders → Invoices → Payments)',
-                    'Real Payment Processing & Status Reconciliation (/payments)',
-                    'Calendar Event Management & Meeting Sync (/calendar)',
-                    'Contracts, Orders & Recurring Subscriptions (/subscriptions)',
-                    'Support Tickets & Knowledge Base (/tickets, /knowledge)',
-                    'Web-to-Lead Forms & CSAT Surveys (/webforms, /surveys)',
-                    'Expense Tracking & Asset Management (/expenses, /assets)',
-                    'Persistent PostgreSQL System Settings',
-                  ].map((feat, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-xs text-slate-200">
-                      <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-                      <span>{feat}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => navigate(`/checkout?plan=professional&billing=${isAnnual ? 'annual' : 'monthly'}`)}
-                className="w-full mt-8 py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-extrabold text-xs shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 cursor-pointer transition-all text-center"
-              >
-                Upgrade to Professional
-              </motion.button>
-            </div>
-
-            {/* Enterprise Plan */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-8 backdrop-blur-xl flex flex-col justify-between hover:border-slate-700 transition-all">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-1">Enterprise AI</h3>
-                  <p className="text-xs text-slate-400">Grounded AI intelligence & Multi-Tenant security</p>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl sm:text-4xl font-black text-white font-mono">
-                    ₹{isAnnual ? '7,999' : '9,999'}
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium">/ user / month</span>
-                </div>
-
-                <div className="space-y-3 pt-4 border-t border-slate-800">
-                  <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">Everything in Pro, plus:</p>
-                  {[
-                    'Grounded AI Deal Win Probability & Rationale Recommendations',
-                    'Multi-Tenant Security & Organization Boundary Scoping',
-                    'Multi-Factor Authentication (TOTP 2FA) & Recovery Codes',
-                    'GDPR Consent Logs & Erasure Data Requests (/gdpr)',
-                    'Commission Rules & Payout Tracking (/commissions)',
-                    'Customer Portal Access & Live Chat Widget (/portal, /chat)',
-                    'Role-Based Access Control (RBAC) & Audit Logs',
-                  ].map((feat, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-xs text-slate-300">
-                      <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                      <span>{feat}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => navigate(`/checkout?plan=enterprise&billing=${isAnnual ? 'annual' : 'monthly'}`)}
-                className="w-full mt-8 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 cursor-pointer transition-all text-center"
-              >
-                Contact Sales / Start Trial
-              </motion.button>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* ─── Footer ────────────────────────────────────────────── */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 px-6 py-12">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-sm font-bold text-slate-300">FlowCRM AI Enterprise</span>
-          </div>
-
-          <div className="flex items-center gap-6 text-xs font-bold text-slate-400">
-            <button onClick={() => navigate('/landing')} className="hover:text-white transition-colors cursor-pointer">Landing</button>
-            <button onClick={() => navigate('/onboarding')} className="hover:text-white transition-colors cursor-pointer">Onboarding</button>
-            <button onClick={() => navigate('/about')} className="hover:text-white transition-colors cursor-pointer">About Us</button>
-            <button onClick={() => navigate('/login')} className="hover:text-white transition-colors cursor-pointer">Sign In</button>
-          </div>
-
-          <p className="text-[11px] text-slate-500">© 2026 FlowCRM AI Enterprise. All rights reserved.</p>
-        </div>
-      </footer>
+      {/* ─── Multi-Column Enterprise Footer ───────────────────── */}
+      <Footer />
     </div>
   );
 };
