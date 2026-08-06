@@ -5,11 +5,12 @@ import {
   Sparkles, ShieldCheck, Zap, DollarSign, Target, Users, ArrowRight,
   Kanban, BarChart3, Lock, Globe2, Layers, Briefcase, CheckCircle2,
   TrendingUp, Award, Star, Compass, Play, ChevronRight, MessageSquare,
-  FileText, ArrowUpRight, Cpu, Activity
+  FileText, ArrowUpRight, Cpu, Activity, Smartphone
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
 import SplashScreen from '../../components/public/SplashScreen';
+import PhoneMockupBasic from '../../components/ui/phone-mockups-1';
 
 import { Logo } from '../../components/ui/Logo';
 
@@ -297,6 +298,25 @@ export const LandingPage: React.FC = () => {
               )}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ─── Mobile CRM Phone Mockup Section ────────────────────── */}
+      <section className="py-20 px-6 relative bg-slate-900/40 border-t border-slate-900 overflow-hidden">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-4 max-w-2xl mx-auto">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-extrabold tracking-widest uppercase">
+              <Smartphone className="w-3.5 h-3.5" /> ANYWHERE ENTERPRISE CONTROL
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-display">
+              FlowCRM Mobile Executive Suite
+            </h2>
+            <p className="text-sm text-slate-400 font-normal">
+              Manage pipeline velocity, real-time AI win probability, and support SLA tickets seamlessly from your iOS or Android device.
+            </p>
+          </div>
+
+          <PhoneMockupBasic />
         </div>
       </section>
 
