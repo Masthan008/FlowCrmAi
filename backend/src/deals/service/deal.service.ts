@@ -78,9 +78,25 @@ export const dealService = {
     }
 
     if (!cleaned.pipelineId || !cleaned.stageId) {
-      const firstPipeline = await prisma.pipeline.findFirst({
+      let firstPipeline = await prisma.pipeline.findFirst({
         include: { stages: { orderBy: { order: 'asc' } } }
       });
+      if (!firstPipeline) {
+        firstPipeline = await prisma.pipeline.create({
+          data: {
+            name: 'Standard Sales Pipeline',
+            stages: {
+              create: [
+                { name: 'Qualification', order: 1, probability: 20 },
+                { name: 'Proposal', order: 2, probability: 50 },
+                { name: 'Negotiation', order: 3, probability: 80 },
+                { name: 'Closed Won', order: 4, probability: 100 },
+              ]
+            }
+          },
+          include: { stages: { orderBy: { order: 'asc' } } }
+        });
+      }
       if (firstPipeline) {
         if (!cleaned.pipelineId) cleaned.pipelineId = firstPipeline.id;
         if (!cleaned.stageId && firstPipeline.stages.length > 0) {
@@ -90,15 +106,19 @@ export const dealService = {
     }
 
     if (!cleaned.stageId) {
-      const firstStage = await prisma.pipelineStage.findFirst();
-      if (firstStage) {
-        cleaned.stageId = firstStage.id;
-        if (!cleaned.pipelineId) cleaned.pipelineId = firstStage.pipelineId;
+      let firstStage = await prisma.pipelineStage.findFirst();
+      if (!firstStage) {
+        firstStage = await prisma.pipelineStage.create({
+          data: {
+            name: 'Qualification',
+            order: 1,
+            probability: 20,
+            pipelineId: cleaned.pipelineId || (await prisma.pipeline.create({ data: { name: 'Default Pipeline' } })).id
+          }
+        });
       }
-    }
-
-    if (!cleaned.stageId) {
-      throw Object.assign(new Error('No active sales stage found. Please create a sales pipeline stage first.'), { statusCode: 400 });
+      cleaned.stageId = firstStage.id;
+      if (!cleaned.pipelineId) cleaned.pipelineId = firstStage.pipelineId;
     }
 
     if (cleaned.expectedCloseDate) {

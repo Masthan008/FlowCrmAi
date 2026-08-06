@@ -78,9 +78,25 @@ exports.dealService = {
             }
         }
         if (!cleaned.pipelineId || !cleaned.stageId) {
-            const firstPipeline = await db_1.prisma.pipeline.findFirst({
+            let firstPipeline = await db_1.prisma.pipeline.findFirst({
                 include: { stages: { orderBy: { order: 'asc' } } }
             });
+            if (!firstPipeline) {
+                firstPipeline = await db_1.prisma.pipeline.create({
+                    data: {
+                        name: 'Standard Sales Pipeline',
+                        stages: {
+                            create: [
+                                { name: 'Qualification', order: 1, probability: 20 },
+                                { name: 'Proposal', order: 2, probability: 50 },
+                                { name: 'Negotiation', order: 3, probability: 80 },
+                                { name: 'Closed Won', order: 4, probability: 100 },
+                            ]
+                        }
+                    },
+                    include: { stages: { orderBy: { order: 'asc' } } }
+                });
+            }
             if (firstPipeline) {
                 if (!cleaned.pipelineId)
                     cleaned.pipelineId = firstPipeline.id;
@@ -90,15 +106,20 @@ exports.dealService = {
             }
         }
         if (!cleaned.stageId) {
-            const firstStage = await db_1.prisma.pipelineStage.findFirst();
-            if (firstStage) {
-                cleaned.stageId = firstStage.id;
-                if (!cleaned.pipelineId)
-                    cleaned.pipelineId = firstStage.pipelineId;
+            let firstStage = await db_1.prisma.pipelineStage.findFirst();
+            if (!firstStage) {
+                firstStage = await db_1.prisma.pipelineStage.create({
+                    data: {
+                        name: 'Qualification',
+                        order: 1,
+                        probability: 20,
+                        pipelineId: cleaned.pipelineId || (await db_1.prisma.pipeline.create({ data: { name: 'Default Pipeline' } })).id
+                    }
+                });
             }
-        }
-        if (!cleaned.stageId) {
-            throw Object.assign(new Error('No active sales stage found. Please create a sales pipeline stage first.'), { statusCode: 400 });
+            cleaned.stageId = firstStage.id;
+            if (!cleaned.pipelineId)
+                cleaned.pipelineId = firstStage.pipelineId;
         }
         if (cleaned.expectedCloseDate) {
             cleaned.expectedCloseDate = new Date(cleaned.expectedCloseDate);
