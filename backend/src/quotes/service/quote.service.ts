@@ -177,7 +177,7 @@ export const quoteService = {
 
     const total = subtotal + tax - discount;
 
-    return quoteRepository.update(id, {
+    const updatedQuote = await quoteRepository.update(id, {
       status: data.status,
       validUntil: data.validUntil ? new Date(data.validUntil) : undefined,
       subtotal,
@@ -187,6 +187,38 @@ export const quoteService = {
       items: processedItems,
       updatedBy: userId || null,
     });
+
+    // Lead-to-Cash Automation: If quote status changed to approved, auto-create an Order
+    if (data.status && (data.status.toLowerCase() === 'approved' || data.status.toLowerCase() === 'accepted')) {
+      try {
+        const existingOrder = await prisma.order.findFirst({
+          where: { quoteId: id, deletedAt: null },
+        }).catch(() => null);
+
+        if (!existingOrder) {
+          const orderNumber = `ORD-${Date.now().toString().substring(5)}`;
+          const quoteItems = existing.items || [];
+          await prisma.order.create({
+            data: {
+              orderNumber,
+              customerId: existing.customerId,
+              quoteId: id,
+              dealId: existing.dealId,
+              total: updatedQuote.total || existing.total || 0,
+              subtotal: updatedQuote.subtotal || existing.subtotal || 0,
+              tax: updatedQuote.tax || existing.tax || 0,
+              discount: updatedQuote.discount || existing.discount || 0,
+              status: 'confirmed',
+              createdBy: userId || null,
+            },
+          }).catch((err) => console.error('Auto order creation caught:', err?.message));
+        }
+      } catch (err) {
+        console.error('Lead-to-Cash Quote Approval Order Trigger Error:', err);
+      }
+    }
+
+    return updatedQuote;
   },
 
   deleteQuote: async (id: string, userId?: string) => {

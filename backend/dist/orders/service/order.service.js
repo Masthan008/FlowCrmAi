@@ -71,7 +71,32 @@ exports.orderService = {
                 customerId = walkIn.id;
             }
         }
-        return order_repository_1.orderRepository.createWithItems({ ...data, customerId }, userId);
+        const createdOrder = await order_repository_1.orderRepository.createWithItems({ ...data, customerId }, userId);
+        // Lead-to-Cash Automation: Auto-generate Invoice for created Order
+        try {
+            if (customerId) {
+                const invNumber = `INV-${Date.now().toString().substring(5)}`;
+                const dueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+                await db_1.prisma.invoice.create({
+                    data: {
+                        number: invNumber,
+                        customerId,
+                        dealId: createdOrder.dealId || null,
+                        total: createdOrder.total || 0,
+                        subtotal: createdOrder.subtotal || createdOrder.total || 0,
+                        tax: createdOrder.tax || 0,
+                        discount: createdOrder.discount || 0,
+                        dueDate,
+                        status: 'unpaid',
+                        createdBy: userId || null,
+                    },
+                }).catch((err) => console.error('Auto invoice creation caught:', err?.message));
+            }
+        }
+        catch (err) {
+            console.error('Lead-to-Cash Order-to-Invoice Trigger Error:', err);
+        }
+        return createdOrder;
     },
     updateOrder: async (id, data, userId) => {
         const existing = await order_repository_1.orderRepository.findById(id);

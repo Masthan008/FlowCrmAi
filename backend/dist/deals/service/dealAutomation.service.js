@@ -244,11 +244,32 @@ exports.dealAutomationService = {
             where: { deletedAt: null, status: 'Open' },
             include: { stage: true }
         });
-        // Compute win rates and insights
-        const wonCount = await db_1.prisma.deal.count({ where: { status: 'Won' } });
-        const lostCount = await db_1.prisma.deal.count({ where: { status: 'Lost' } });
+        // Compute win rates and insights dynamically
+        const wonDeals = await db_1.prisma.deal.findMany({ where: { status: 'Won', deletedAt: null } });
+        const lostDeals = await db_1.prisma.deal.findMany({ where: { status: 'Lost', deletedAt: null } });
+        const wonCount = wonDeals.length;
+        const lostCount = lostDeals.length;
         const totalClosed = wonCount + lostCount;
         const winRate = totalClosed > 0 ? Math.round((wonCount / totalClosed) * 100) : 75;
+        // Calculate real Average Sales Cycle (in Days)
+        let averageSalesCycle = 30; // fallback
+        if (wonDeals.length > 0) {
+            const totalDays = wonDeals.reduce((sum, d) => {
+                const closedAt = d.actualCloseDate || d.updatedAt || new Date();
+                const diffMs = new Date(closedAt).getTime() - new Date(d.createdAt).getTime();
+                return sum + Math.max(1, Math.round(diffMs / (1000 * 3600 * 24)));
+            }, 0);
+            averageSalesCycle = Math.round(totalDays / wonDeals.length);
+        }
+        // Calculate real Forecast Accuracy Ratio
+        let forecastAccuracy = 85;
+        if (totalClosed > 0) {
+            const totalWonValue = wonDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+            const totalClosedValue = wonDeals.reduce((sum, d) => sum + (d.value || 0), 0) + lostDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+            if (totalClosedValue > 0) {
+                forecastAccuracy = Math.round((totalWonValue / totalClosedValue) * 100);
+            }
+        }
         return {
             highestValueDeals: highestValueDeals.map(d => ({
                 id: d.id,
@@ -265,8 +286,8 @@ exports.dealAutomationService = {
             })),
             insightsKPIs: {
                 winRate,
-                averageSalesCycle: 42, // Days
-                forecastAccuracy: 88, // %
+                averageSalesCycle,
+                forecastAccuracy,
                 fastestClosingDealsCount: wonCount,
                 longestSalesCycleCount: lostCount
             }
