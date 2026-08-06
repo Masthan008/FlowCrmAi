@@ -73,7 +73,7 @@ export class TaskRepository {
         },
         lead: { select: { id: true, fullName: true, companyName: true, phone: true, email: true } },
         contact: { select: { id: true, firstName: true, lastName: true, phone: true, email: true } },
-        company: { select: { id: true, name: true, phone: true } },
+        company: { select: { id: true, name: true, primaryPhone: true } },
         deal: { select: { id: true, name: true, value: true } },
         comments: {
           orderBy: { createdAt: 'asc' },
