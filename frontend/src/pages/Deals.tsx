@@ -1,53 +1,92 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDealStore } from '../store/dealStore';
 import { useToast } from '../components/ui/ToastProvider';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
-import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
-import { Skeleton } from '../components/ui/Skeleton';
 import { Modal } from '../components/ui/Modal';
+import { EmptyState } from '../components/ui/EmptyState';
 import {
-  Briefcase, Plus, Search, Filter, Download, Trash2, Edit2, UserCheck,
-  DollarSign, CalendarDays, Tag, TrendingUp, ArrowUpDown, X, Check,
-  ChevronLeft, ChevronRight, Loader2, ShieldAlert, Eye,
-  BarChart3, ArrowUp, ArrowDown, MoreVertical, Star,
-  Users, Building2, Phone, Mail, FileText, Kanban, RefreshCw, Sparkles, CheckCircle2
+  Briefcase, Plus, Search, Trash2, Edit2, Eye, DollarSign, TrendingUp,
+  ChevronLeft, ChevronRight, Loader2, BarChart3, ArrowUp, ArrowDown,
+  Users, Building2, Kanban, RefreshCw, Sparkles, CheckCircle2,
+  Target, Zap, CalendarDays, Tag, X, Filter, Star, Clock,
+  ArrowUpDown, MoreVertical, Download
 } from 'lucide-react';
 
-const statusColors: Record<string, string> = {
-  Open: 'bg-blue-50 text-blue-700 border-blue-200',
-  Qualified: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  'Proposal Sent': 'bg-amber-50 text-amber-700 border-amber-200',
-  Negotiation: 'bg-orange-50 text-orange-700 border-orange-200',
-  Won: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Lost: 'bg-red-50 text-red-700 border-red-200',
-  Cancelled: 'bg-slate-50 text-slate-500 border-slate-200',
-  'On Hold': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  Archived: 'bg-slate-100 text-slate-500 border-slate-200',
-};
-
-const priorityColors: Record<string, string> = {
-  Low: 'bg-slate-100 text-slate-600 border-slate-200',
-  Medium: 'bg-blue-50 text-blue-700 border-blue-200',
-  High: 'bg-orange-50 text-orange-700 border-orange-200',
-  Critical: 'bg-red-50 text-red-700 border-red-200',
-};
-
-const containerVariants = {
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATION PRESETS
+   ═══════════════════════════════════════════════════════════════ */
+const stagger = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.04 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
 };
-const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.25 } },
+const fadeUp = {
+  hidden: { opacity: 0, y: 18, scale: 0.97 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 320, damping: 28 } },
+};
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.85 },
+  visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 400, damping: 24 } },
 };
 
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════════════════════════ */
+const STATUS_THEME: Record<string, { bg: string; text: string; border: string; glow: string }> = {
+  Open:            { bg: 'bg-sky-50',     text: 'text-sky-700',     border: 'border-sky-200',     glow: 'shadow-sky-100/60' },
+  Qualified:       { bg: 'bg-indigo-50',  text: 'text-indigo-700',  border: 'border-indigo-200',  glow: 'shadow-indigo-100/60' },
+  'Proposal Sent': { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200',   glow: 'shadow-amber-100/60' },
+  Negotiation:     { bg: 'bg-orange-50',  text: 'text-orange-700',  border: 'border-orange-200',  glow: 'shadow-orange-100/60' },
+  Won:             { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', glow: 'shadow-emerald-100/60' },
+  Lost:            { bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200',    glow: 'shadow-rose-100/60' },
+  Cancelled:       { bg: 'bg-slate-50',   text: 'text-slate-500',   border: 'border-slate-200',   glow: 'shadow-slate-100/40' },
+  'On Hold':       { bg: 'bg-yellow-50',  text: 'text-yellow-700',  border: 'border-yellow-200',  glow: 'shadow-yellow-100/60' },
+  Archived:        { bg: 'bg-slate-100',  text: 'text-slate-500',   border: 'border-slate-200',   glow: 'shadow-slate-100/40' },
+};
+const PRIORITY_THEME: Record<string, { bg: string; text: string; border: string }> = {
+  Low:      { bg: 'bg-slate-50',  text: 'text-slate-600',  border: 'border-slate-200' },
+  Medium:   { bg: 'bg-blue-50',   text: 'text-blue-700',   border: 'border-blue-200' },
+  High:     { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+  Critical: { bg: 'bg-rose-50',   text: 'text-rose-700',   border: 'border-rose-200' },
+};
+
+const KPI_CARDS = [
+  { key: 'totalDeals',      label: 'Total Opportunities', icon: Briefcase,  gradient: 'from-violet-500 to-indigo-600',  iconBg: 'bg-violet-100 text-violet-600' },
+  { key: 'openDeals',       label: 'Active Pipeline',     icon: Target,     gradient: 'from-sky-500 to-cyan-600',       iconBg: 'bg-sky-100 text-sky-600' },
+  { key: 'pipelineValue',   label: 'Pipeline Volume',     icon: DollarSign, gradient: 'from-emerald-500 to-teal-600',   iconBg: 'bg-emerald-100 text-emerald-600', isCurrency: true },
+  { key: 'averageDealValue',label: 'Avg Deal Size',       icon: TrendingUp, gradient: 'from-amber-500 to-orange-600',   iconBg: 'bg-amber-100 text-amber-600', isCurrency: true },
+];
+
+const QUICK_TABS = [
+  { id: 'all',       label: 'All Deals',         icon: Briefcase },
+  { id: 'my',        label: 'My Deals',          icon: Users },
+  { id: 'open',      label: 'Open',              icon: Target },
+  { id: 'won',       label: 'Won',               icon: CheckCircle2 },
+  { id: 'lost',      label: 'Lost',              icon: X },
+  { id: 'closing',   label: 'Closing Soon',      icon: Clock },
+  { id: 'high-value',label: 'High Value',        icon: DollarSign },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPER
+   ═══════════════════════════════════════════════════════════════ */
+const fmt = (n: number) =>
+  n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M`
+  : n >= 1_000 ? `$${(n / 1_000).toFixed(1)}K`
+  : `$${n.toLocaleString()}`;
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN COMPONENT
+   ═══════════════════════════════════════════════════════════════ */
 export const Deals: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  /* ─── Store ─────────────────────────────────────────────── */
   const {
     deals, statistics, loading, error, filters, pagination, selectedIds,
     employees, customers, companies, contacts, leads, pipelines,
@@ -55,35 +94,38 @@ export const Deals: React.FC = () => {
     fetchCompanies, fetchContacts, fetchLeads, fetchPipelines,
     createDeal, updateDeal, deleteDeal, setFilters, setPage,
     toggleSelection, toggleAllSelection, clearSelection,
-    bulkUpdateStatus, updateStage, bulkUpdateOwner, clearCurrentDeal,
+    bulkUpdateStatus, clearCurrentDeal,
   } = useDealStore();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
+  /* ─── Local State ───────────────────────────────────────── */
+  const [searchQuery, setSearchQuery]       = useState('');
+  const [activeTab, setActiveTab]           = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingDeal, setEditingDeal] = useState<string | null>(null);
-  const [showFilterPanel, setShowFilterPanel] = useState(false);
-  const [showBulkStatus, setShowBulkStatus] = useState(false);
-  const [showBulkOwner, setShowBulkOwner] = useState(false);
-  const [bulkStatusVal, setBulkStatusVal] = useState('Open');
-  const [bulkOwnerVal, setBulkOwnerVal] = useState('');
-  const [formData, setFormData] = useState<Record<string, any>>({
-    name: '', opportunityName: '', customerId: '', companyId: '',
-    primaryContactId: '', leadId: '', pipelineId: '', stageId: '',
-    assignedToId: '', status: 'Open', priority: 'Medium',
-    probability: 0, value: 0, expectedRevenue: 0,
-    expectedCloseDate: '', currency: 'USD', source: 'Other',
-    industry: '', businessType: '', description: '', tags: [],
-  });
+  const [editingDeal, setEditingDeal]       = useState<any | null>(null);
+  const [viewDeal, setViewDeal]             = useState<any | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [sortField, setSortField]           = useState<string>('createdAt');
+  const [sortDir, setSortDir]               = useState<'asc' | 'desc'>('desc');
+  const [creating, setCreating]             = useState(false);
+
+  /* ─── Form State ────────────────────────────────────────── */
+  const emptyForm = {
+    name: '', value: 0, probability: 50, status: 'Open', priority: 'Medium',
+    description: '', expectedCloseDate: '', currency: 'USD',
+    customerId: '', companyId: '', pipelineId: '', stageId: '',
+    assignedToId: '', source: '', industry: '', tags: [] as string[],
+  };
+  const [form, setForm] = useState({ ...emptyForm });
   const [tagInput, setTagInput] = useState('');
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [selectedPipeline, setSelectedPipeline] = useState<any>(null);
-  const [formStep, setFormStep] = useState(1);
-  const [viewDeal, setViewDeal] = useState<string | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const breadcrumbs = [{ label: 'Deals' }];
+  /* ─── Selected Pipeline Stages ──────────────────────────── */
+  const selectedPipeline = useMemo(
+    () => pipelines.find(p => p.id === form.pipelineId) || pipelines[0] || null,
+    [form.pipelineId, pipelines]
+  );
+  const stageOptions = selectedPipeline?.stages || [];
 
+  /* ─── Bootstrap ─────────────────────────────────────────── */
   useEffect(() => {
     fetchDeals();
     fetchStatistics();
@@ -95,25 +137,104 @@ export const Deals: React.FC = () => {
     fetchPipelines();
   }, []);
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  /* ─── Auto-open create modal from /deals/new ────────────── */
   useEffect(() => {
     const isNew = searchParams.get('new') === 'true' || window.location.pathname.endsWith('/deals/new');
     if (isNew) {
-      const coId = searchParams.get('companyId') || '';
-      setFormData((prev: any) => ({
-        ...prev,
-        companyId: coId,
-      }));
-      resetForm();
-      setShowCreateModal(true);
+      openCreateModal();
       if (searchParams.get('new') === 'true') {
-        const newParams = new URLSearchParams(searchParams);
-        newParams.delete('new');
-        newParams.delete('companyId');
-        setSearchParams(newParams, { replace: true });
+        const p = new URLSearchParams(searchParams);
+        p.delete('new');
+        setSearchParams(p, { replace: true });
       }
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams]);
+
+  /* ─── Handlers ──────────────────────────────────────────── */
+  const openCreateModal = () => {
+    const defPipeline = pipelines[0];
+    const defStage = defPipeline?.stages?.[0];
+    setForm({
+      ...emptyForm,
+      pipelineId: defPipeline?.id || '',
+      stageId: defStage?.id || '',
+      customerId: customers[0]?.id || '',
+    });
+    setEditingDeal(null);
+    setShowCreateModal(true);
+  };
+
+  const openEditModal = (deal: any) => {
+    setForm({
+      name: deal.name || '',
+      value: deal.value || 0,
+      probability: deal.probability || 50,
+      status: deal.status || 'Open',
+      priority: deal.priority || 'Medium',
+      description: deal.description || '',
+      expectedCloseDate: deal.expectedCloseDate?.split('T')[0] || '',
+      currency: deal.currency || 'USD',
+      customerId: deal.customerId || '',
+      companyId: deal.companyId || '',
+      pipelineId: deal.pipelineId || '',
+      stageId: deal.stageId || '',
+      assignedToId: deal.assignedToId || '',
+      source: deal.source || '',
+      industry: deal.industry || '',
+      tags: deal.tags || [],
+    });
+    setEditingDeal(deal);
+    setShowCreateModal(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!form.name.trim()) {
+      toast.error('Validation Error', 'Deal name is required.');
+      return;
+    }
+    setCreating(true);
+    try {
+      // Clean empty strings to prevent UUID validation errors
+      const payload: Record<string, any> = { ...form };
+      Object.keys(payload).forEach(k => {
+        if (payload[k] === '') payload[k] = undefined;
+      });
+      // Ensure name is always present
+      payload.name = form.name.trim();
+      // Keep numeric values
+      payload.value = Number(form.value) || 0;
+      payload.probability = Number(form.probability) || 0;
+
+      if (editingDeal) {
+        await updateDeal(editingDeal.id, payload);
+        toast.success('Deal Updated', `"${form.name}" has been updated successfully.`);
+      } else {
+        await createDeal(payload as any);
+        toast.success('Deal Created', `"${form.name}" has been added to your pipeline.`);
+      }
+      setShowCreateModal(false);
+      setForm({ ...emptyForm });
+      fetchDeals();
+      fetchStatistics();
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Operation failed.';
+      toast.error(editingDeal ? 'Update Failed' : 'Create Failed', msg);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteDeal(id);
+      toast.success('Deal Deleted', 'The deal has been removed from your pipeline.');
+      setDeleteConfirmId(null);
+      fetchDeals();
+      fetchStatistics();
+    } catch (err: any) {
+      toast.error('Delete Failed', err?.response?.data?.message || 'Could not delete deal.');
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,678 +244,792 @@ export const Deals: React.FC = () => {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     const qf: Record<string, any> = {};
-    if (tab === 'my') qf.myDeals = true;
-    else if (tab === 'open') qf.open = true;
-    else if (tab === 'won') qf.won = true;
-    else if (tab === 'lost') qf.lost = true;
+    if (tab === 'my')         qf.myDeals = true;
+    else if (tab === 'open')  qf.open = true;
+    else if (tab === 'won')   qf.won = true;
+    else if (tab === 'lost')  qf.lost = true;
     else if (tab === 'closing') qf.closingThisMonth = true;
-    else if (tab === 'high-prob') qf.highProbability = true;
     else if (tab === 'high-value') qf.highValue = true;
-    else if (tab === 'recent') qf.recentlyCreated = true;
     setFilters(qf);
   };
 
-  const filteredDeals = deals;
-  const allSelected = deals.length > 0 && selectedIds.length === deals.length;
-
-  const quickTabs = [
-    { id: 'all', label: 'All Deals' },
-    { id: 'my', label: 'My Deals' },
-    { id: 'open', label: 'Open' },
-    { id: 'won', label: 'Won' },
-    { id: 'lost', label: 'Lost' },
-    { id: 'closing', label: 'Closing' },
-    { id: 'high-prob', label: 'High Probability' },
-    { id: 'high-value', label: 'High Value' },
-    { id: 'recent', label: 'Recent' },
-  ];
-
-  const validateForm = () => {
-    const errs: Record<string, string> = {};
-    if (!formData.name.trim()) errs.name = 'Deal name is required';
-    setFormErrors(errs);
-    if (Object.keys(errs).length > 0) {
-      if (errs.name || errs.customerId) setFormStep(1);
-      else if (errs.pipelineId || errs.stageId) setFormStep(2);
-      toast.error('Validation Error', Object.values(errs)[0]);
-    }
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleCreate = async () => {
-    if (!validateForm()) return;
-    try {
-      await createDeal(formData);
-      toast.success('Deal Created', 'The deal has been created successfully.');
-      setShowCreateModal(false);
-      resetForm();
-      fetchDeals();
-      fetchStatistics();
-    } catch (err: any) {
-      toast.error('Failed', err.response?.data?.message || 'Could not create deal.');
-    }
-  };
-
-  const handleUpdate = async () => {
-    if (!editingDeal) return;
-    if (!formData.name.trim()) { toast.error('Validation', 'Deal name is required.'); return; }
-    try {
-      await updateDeal(editingDeal, formData);
-      toast.success('Deal Updated', 'Changes saved successfully.');
-      setEditingDeal(null);
-      resetForm();
-      fetchDeals();
-    } catch (err: any) {
-      toast.error('Failed', err.response?.data?.message || 'Could not update deal.');
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteDeal(id);
-      toast.success('Deal Deleted', 'The deal has been removed.');
-      setDeleteConfirm(null);
-      fetchDeals();
-      fetchStatistics();
-    } catch (err: any) {
-      toast.error('Failed', err.response?.data?.message || 'Could not delete deal.');
-    }
-  };
-
-  const handleBulkStatus = async () => {
-    await bulkUpdateStatus(selectedIds, bulkStatusVal);
-    toast.success('Status Updated', `${selectedIds.length} deals updated.`);
-    setShowBulkStatus(false);
-    clearSelection();
-    fetchStatistics();
-  };
-
-  const handleBulkOwner = async () => {
-    await bulkUpdateOwner(selectedIds, bulkOwnerVal);
-    toast.success('Owner Updated', `${selectedIds.length} deals reassigned.`);
-    setShowBulkOwner(false);
-    clearSelection();
-  };
-
-  const handleEdit = (deal: any) => {
-    setFormData({
-      name: deal.name || '',
-      opportunityName: deal.opportunityName || '',
-      customerId: deal.customerId || '',
-      companyId: deal.companyId || '',
-      primaryContactId: deal.primaryContactId || '',
-      leadId: deal.leadId || '',
-      pipelineId: deal.pipelineId || '',
-      stageId: deal.stageId || '',
-      assignedToId: deal.assignedToId || '',
-      status: deal.status || 'Open',
-      priority: deal.priority || 'Medium',
-      probability: deal.probability || 0,
-      value: deal.value || 0,
-      expectedRevenue: deal.expectedRevenue || 0,
-      expectedCloseDate: deal.expectedCloseDate?.split('T')[0] || '',
-      currency: deal.currency || 'USD',
-      source: deal.source || 'Other',
-      industry: deal.industry || '',
-      businessType: deal.businessType || '',
-      description: deal.description || '',
-      tags: deal.tags || [],
-    });
-    setSelectedPipeline(pipelines.find(p => p.id === deal.pipelineId) || null);
-    setEditingDeal(deal.id);
-    setFormStep(1);
-  };
-
-  const handleView = (deal: any) => {
-    setViewDeal(deal.id);
-    setFormData({
-      name: deal.name || '',
-      opportunityName: deal.opportunityName || '',
-      customerId: deal.customerId || '',
-      companyId: deal.companyId || '',
-      primaryContactId: deal.primaryContactId || '',
-      leadId: deal.leadId || '',
-      pipelineId: deal.pipelineId || '',
-      stageId: deal.stageId || '',
-      assignedToId: deal.assignedToId || '',
-      status: deal.status || 'Open',
-      priority: deal.priority || 'Medium',
-      probability: deal.probability || 0,
-      value: deal.value || 0,
-      expectedRevenue: deal.expectedRevenue || 0,
-      expectedCloseDate: deal.expectedCloseDate?.split('T')[0] || '',
-      currency: deal.currency || 'USD',
-      source: deal.source || 'Other',
-      industry: deal.industry || '',
-      businessType: deal.businessType || '',
-      description: deal.description || '',
-      tags: deal.tags || [],
-    });
-  };
-
-  const resetForm = () => {
-    const defaultPipeline = pipelines[0];
-    const defaultStage = defaultPipeline?.stages?.[0];
-    const defaultCustomer = customers[0];
-
-    setFormData({
-      name: '', opportunityName: '', customerId: defaultCustomer?.id || '', companyId: '',
-      primaryContactId: '', leadId: '', pipelineId: defaultPipeline?.id || '', stageId: defaultStage?.id || '',
-      assignedToId: '', status: 'Open', priority: 'Medium',
-      probability: defaultStage?.probability || 0, value: 0, expectedRevenue: 0,
-      expectedCloseDate: '', currency: 'USD', source: 'Other',
-      industry: '', businessType: '', description: '', tags: [],
-    });
-    setSelectedPipeline(defaultPipeline || null);
-    setFormErrors({});
-    setFormStep(1);
+  const handleSort = (field: string) => {
+    const newDir = sortField === field && sortDir === 'asc' ? 'desc' : 'asc';
+    setSortField(field);
+    setSortDir(newDir);
+    setFilters({ sortBy: field, sortDir: newDir });
   };
 
   const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData({ ...formData, tags: [...formData.tags, tagInput.trim()] });
+    const t = tagInput.trim();
+    if (t && !form.tags.includes(t)) {
+      setForm({ ...form, tags: [...form.tags, t] });
       setTagInput('');
     }
   };
-  const removeTag = (t: string) => setFormData({ ...formData, tags: formData.tags.filter((x: string) => x !== t) });
 
-  const getStageOptions = () => {
-    if (selectedPipeline) return selectedPipeline.stages || [];
-    if (formData.pipelineId) {
-      const p = pipelines.find(pl => pl.id === formData.pipelineId);
-      return p?.stages || [];
-    }
-    return [];
+  /* ─── Derived Data ──────────────────────────────────────── */
+  const breadcrumbs = [{ label: 'Deals' }];
+  const allSelected = deals.length > 0 && selectedIds.length === deals.length;
+  const stats = statistics || { totalDeals: 0, openDeals: 0, wonDeals: 0, lostDeals: 0, pipelineValue: 0, wonRevenue: 0, averageDealValue: 0, averageProbability: 0 };
+
+  /* ─── Badge Renderers ───────────────────────────────────── */
+  const StatusBadge = ({ status }: { status: string }) => {
+    const t = STATUS_THEME[status] || STATUS_THEME.Open;
+    return (
+      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${t.bg} ${t.text} ${t.border}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${status === 'Won' ? 'bg-emerald-500' : status === 'Lost' ? 'bg-rose-500' : 'bg-current'} animate-pulse`} />
+        {status}
+      </span>
+    );
   };
 
-  const renderForm = () => (
-    <div className="space-y-5">
-      {/* Form Step Navigation */}
-      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-        {[
-          { step: 1, label: '1. Basic Information' },
-          { step: 2, label: '2. Pipeline & Financial' },
-          { step: 3, label: '3. Details & Tags' },
-        ].map((s) => (
-          <button
-            key={s.step}
-            type="button"
-            onClick={() => setFormStep(s.step)}
-            className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all ${
-              formStep === s.step ? 'bg-brand-550 text-white shadow-glossy-sm' : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
+  const PriorityBadge = ({ priority }: { priority: string }) => {
+    const t = PRIORITY_THEME[priority] || PRIORITY_THEME.Medium;
+    return (
+      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border ${t.bg} ${t.text} ${t.border}`}>
+        {priority}
+      </span>
+    );
+  };
 
-      {formStep === 1 && (
-        <div className="space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Deal Name *</label>
-              <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550" placeholder="e.g. Acme Enterprise SaaS Expansion" />
-              {formErrors.name && <p className="text-[10px] text-rose-500 font-semibold mt-1">{formErrors.name}</p>}
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Opportunity Name</label>
-              <input value={formData.opportunityName} onChange={e => setFormData({...formData, opportunityName: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Source</label>
-              <select value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-                <option value="Other">Other</option><option value="Referral">Referral</option>
-                <option value="Website">Website</option><option value="Email">Email</option>
-                <option value="Call">Call</option><option value="Social">Social</option>
-                <option value="Partner">Partner</option>
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Customer</label>
-              <select value={formData.customerId} onChange={e => setFormData({...formData, customerId: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-                <option value="">Select Customer</option>
-                {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Company</label>
-              <select value={formData.companyId} onChange={e => setFormData({...formData, companyId: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-                <option value="">Select Company</option>
-                {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Primary Contact</label>
-              <select value={formData.primaryContactId} onChange={e => setFormData({...formData, primaryContactId: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-                <option value="">Select Contact</option>
-                {contacts.map(c => <option key={c.id} value={c.id}>{c.fullName}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Lead</label>
-              <select value={formData.leadId} onChange={e => setFormData({...formData, leadId: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-                <option value="">Select Lead</option>
-                {leads.map(l => <option key={l.id} value={l.id}>{l.fullName} ({l.leadNumber})</option>)}
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {formStep === 2 && (
-        <div className="space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Pipeline</label>
-              <select value={formData.pipelineId} onChange={e => {
-                const p = pipelines.find(pl => pl.id === e.target.value);
-                setSelectedPipeline(p || null);
-                setFormData({...formData, pipelineId: e.target.value, stageId: ''});
-              }}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-                <option value="">Select Pipeline</option>
-                {pipelines.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Stage</label>
-              <select value={formData.stageId} onChange={e => setFormData({...formData, stageId: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-                <option value="">Select Stage</option>
-                {getStageOptions().map((s: any) => <option key={s.id} value={s.id}>{s.name} ({s.probability}%)</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Value ($)</label>
-              <input type="number" value={formData.value} onChange={e => setFormData({...formData, value: Number(e.target.value)})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Expected Revenue ($)</label>
-              <input type="number" value={formData.expectedRevenue} onChange={e => setFormData({...formData, expectedRevenue: Number(e.target.value)})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Probability (%)</label>
-              <input type="number" min={0} max={100} value={formData.probability} onChange={e => setFormData({...formData, probability: Number(e.target.value)})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Expected Close Date</label>
-              <input type="date" value={formData.expectedCloseDate} onChange={e => setFormData({...formData, expectedCloseDate: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Currency</label>
-              <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-                <option value="USD">USD</option><option value="EUR">EUR</option>
-                <option value="GBP">GBP</option><option value="INR">INR</option>
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Status</label>
-              <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-                <option value="Open">Open</option><option value="Qualified">Qualified</option>
-                <option value="Proposal Sent">Proposal Sent</option><option value="Negotiation">Negotiation</option>
-                <option value="Won">Won</option><option value="Lost">Lost</option>
-                <option value="Cancelled">Cancelled</option><option value="On Hold">On Hold</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Priority</label>
-              <select value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-                <option value="Low">Low</option><option value="Medium">Medium</option>
-                <option value="High">High</option><option value="Critical">Critical</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {formStep === 3 && (
-        <div className="space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Industry</label>
-              <input value={formData.industry} onChange={e => setFormData({...formData, industry: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Business Type</label>
-              <input value={formData.businessType} onChange={e => setFormData({...formData, businessType: e.target.value})}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Deal Owner</label>
-            <select value={formData.assignedToId} onChange={e => setFormData({...formData, assignedToId: e.target.value})}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550">
-              <option value="">Unassigned</option>
-              {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Description</label>
-            <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={3}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 focus:outline-none focus:border-brand-550" />
-          </div>
-          <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Tags</label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {formData.tags.map((t: string) => (
-                <span key={t} className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 text-brand-700 rounded-lg text-[10px] font-semibold border border-brand-100">
-                  {t}
-                  <button type="button" onClick={() => removeTag(t)} className="text-brand-400 hover:text-brand-600"><X size={10} /></button>
-                </span>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <input value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
-                placeholder="Add tag and press Enter" className="flex-grow px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-slate-50/50" />
-              <Button type="button" variant="outline" size="sm" onClick={addTag}>Add</Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Controls */}
-      <div className="flex justify-between items-center pt-3 border-t border-slate-100">
-        <div>
-          {formStep > 1 && (
-            <Button type="button" variant="outline" size="sm" onClick={() => setFormStep(formStep - 1)}>
-              Back
-            </Button>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => { setShowCreateModal(false); setEditingDeal(null); resetForm(); }}>
-            Cancel
-          </Button>
-          {formStep < 3 ? (
-            <Button type="button" variant="primary" size="sm" onClick={() => setFormStep(formStep + 1)}>
-              Next Step
-            </Button>
-          ) : (
-            <Button type="button" variant="primary" size="sm" onClick={editingDeal ? handleUpdate : handleCreate}>
-              {editingDeal ? 'Update Deal' : 'Save Deal'}
-            </Button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const dealDetail = deals.find(d => d.id === viewDeal);
-
+  /* ═══════════════════════════════════════════════════════════
+     RENDER
+     ═══════════════════════════════════════════════════════════ */
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      {/* Header Toolbar */}
-      <motion.div variants={itemVariants} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <Breadcrumb items={breadcrumbs} />
-          <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-slate-100 mt-1 flex items-center gap-2">
-            <Briefcase className="text-brand-550" size={24} /> Commercial Deals Hub
-          </h1>
-          <p className="text-sm font-medium text-slate-400">Manage enterprise opportunities, sales pipelines, and commercial revenue forecasts</p>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6 p-1"
+    >
+      {/* ─── Breadcrumb ──────────────────────────────────────── */}
+      <Breadcrumb items={breadcrumbs} />
+
+      {/* ─── Hero Header ─────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700 p-7 shadow-xl"
+      >
+        {/* Decorative Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-violet-400/10 rounded-full blur-2xl" />
+          <div className="absolute top-1/2 right-1/3 w-32 h-32 bg-indigo-300/8 rounded-full blur-xl animate-pulse" />
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 50, repeat: Infinity, ease: 'linear' }}
+            className="absolute -top-10 right-20 w-40 h-40 border border-white/5 rounded-full"
+          />
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/deals/insights')} className="flex items-center gap-1.5 border-slate-200">
-            <BarChart3 size={14} className="text-indigo-500" /> Executive Insights
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/deals/workflows')} className="flex items-center gap-1.5 border-slate-200">
-            <TrendingUp size={14} className="text-emerald-500" /> Workflows
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/deals/playbooks')} className="flex items-center gap-1.5 border-slate-200">
-            <Briefcase size={14} className="text-amber-500" /> Playbooks
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/deals/pipeline')} className="flex items-center gap-1.5 border-slate-200">
-            <Kanban size={14} className="text-brand-550" /> Pipeline Board
-          </Button>
-          <Button variant="primary" size="sm" onClick={() => { resetForm(); setShowCreateModal(true); }}>
-            <Plus size={14} className="mr-1.5" /> New Deal
-          </Button>
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+              className="flex items-center gap-3 mb-2"
+            >
+              <div className="w-11 h-11 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                <Briefcase className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">Deal Hub</h1>
+                <p className="text-violet-200/80 text-xs font-medium">Enterprise Pipeline & Revenue Intelligence</p>
+              </div>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.25 }}
+            className="flex flex-wrap gap-2"
+          >
+            <Button
+              variant="glass"
+              size="sm"
+              onClick={() => navigate('/deals/pipeline')}
+              className="!bg-white/15 !text-white !border-white/25 hover:!bg-white/25 backdrop-blur-sm"
+            >
+              <Kanban className="w-3.5 h-3.5" /> Pipeline Board
+            </Button>
+            <Button
+              variant="glass"
+              size="sm"
+              onClick={() => { fetchDeals(); fetchStatistics(); }}
+              className="!bg-white/15 !text-white !border-white/25 hover:!bg-white/25 backdrop-blur-sm"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Refresh
+            </Button>
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={openCreateModal}
+              className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold rounded-xl bg-white text-indigo-700 shadow-lg shadow-indigo-900/30 hover:shadow-xl hover:shadow-indigo-900/40 border border-white/80 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" /> New Deal
+            </motion.button>
+          </motion.div>
         </div>
       </motion.div>
 
-      {/* KPI Statistics */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4 bg-white/80 backdrop-blur-md border border-slate-150 shadow-glossy-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100">
-              <Briefcase size={18} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Opportunities</p>
-              <p className="text-xl font-black text-slate-800">{statistics?.totalDeals || deals.length || 0}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-white/80 backdrop-blur-md border border-slate-150 shadow-glossy-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
-              <TrendingUp size={18} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Open Deals</p>
-              <p className="text-xl font-black text-slate-800">{statistics?.openDeals || 0}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-white/80 backdrop-blur-md border border-slate-150 shadow-glossy-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-amber-50 text-amber-600 rounded-2xl border border-amber-100">
-              <DollarSign size={18} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pipeline Volume</p>
-              <p className="text-xl font-black text-slate-800">${(statistics?.pipelineValue || 0).toLocaleString()}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-white/80 backdrop-blur-md border border-slate-150 shadow-glossy-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-violet-50 text-violet-600 rounded-2xl border border-violet-100">
-              <Sparkles size={18} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Deal Size</p>
-              <p className="text-xl font-black text-slate-800">${(statistics?.averageDealValue || 0).toLocaleString()}</p>
-            </div>
-          </div>
-        </Card>
+      {/* ─── KPI Cards ────────────────────────────────────────── */}
+      <motion.div variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {KPI_CARDS.map((kpi) => {
+          const Icon = kpi.icon;
+          const val = (stats as any)[kpi.key] ?? 0;
+          return (
+            <motion.div key={kpi.key} variants={fadeUp}>
+              <div className="relative group bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl p-5 shadow-glossy hover:shadow-glossy-lg transition-all duration-300 overflow-hidden">
+                <div className={`absolute inset-0 bg-gradient-to-br ${kpi.gradient} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500`} />
+                <div className="relative z-10 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{kpi.label}</p>
+                    <motion.p
+                      key={val}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-2xl font-extrabold text-slate-800"
+                    >
+                      {kpi.isCurrency ? fmt(val) : val.toLocaleString()}
+                    </motion.p>
+                  </div>
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${kpi.iconBg} shadow-sm`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                </div>
+                {/* Animated bottom accent bar */}
+                <div className="absolute bottom-0 left-0 right-0 h-0.5">
+                  <motion.div
+                    initial={{ width: '0%' }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 1.2, delay: 0.3, ease: 'easeOut' }}
+                    className={`h-full bg-gradient-to-r ${kpi.gradient} rounded-full`}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </motion.div>
 
-      {/* Main Deals Table & Search Card */}
-      <motion.div variants={itemVariants} className="bg-white border border-slate-150 rounded-2xl p-5 shadow-glossy-sm space-y-4">
-        {/* Quick Filter Tabs */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex gap-1 bg-slate-50 border border-slate-200/60 p-1 rounded-xl overflow-x-auto">
-            {quickTabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`px-3 py-1.5 text-[10px] font-bold rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === tab.id ? 'bg-brand-550 text-white shadow-glossy-sm' : 'text-slate-500 hover:text-slate-700 bg-transparent'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+      {/* ─── Quick Filter Tabs ────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide"
+      >
+        {QUICK_TABS.map(tab => {
+          const Icon = tab.icon;
+          const active = activeTab === tab.id;
+          return (
+            <motion.button
+              key={tab.id}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => handleTabChange(tab.id)}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap cursor-pointer border ${
+                active
+                  ? 'bg-indigo-50 text-indigo-700 border-indigo-200 shadow-sm shadow-indigo-100/60'
+                  : 'bg-white/60 text-slate-500 border-slate-100 hover:bg-slate-50 hover:text-slate-700'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {tab.label}
+            </motion.button>
+          );
+        })}
+      </motion.div>
 
-          <div className="flex items-center gap-2">
-            <form onSubmit={handleSearch} className="relative flex-grow max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-              <input
-                type="text"
-                placeholder="Search deals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 border border-slate-200 rounded-xl bg-slate-50/50 text-xs font-medium focus:outline-none focus:bg-white focus:border-brand-550"
-              />
-            </form>
-            <Button onClick={fetchDeals} variant="outline" size="sm" className="p-2 border-slate-200" title="Refresh">
-              <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-            </Button>
-          </div>
-        </div>
+      {/* ─── Search & Actions Bar ─────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+        className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+      >
+        <form onSubmit={handleSearch} className="flex-1 relative group">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search deals by name, company, contact..."
+            className="w-full pl-10 pr-4 py-2.5 text-xs font-medium bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-xl shadow-glossy-sm focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all placeholder:text-slate-400"
+          />
+        </form>
 
-        {/* Deals Table */}
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 space-y-3">
-            <Loader2 className="w-8 h-8 text-brand-550 animate-spin" />
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Loading commercial opportunities...</p>
-          </div>
-        ) : deals.length === 0 ? (
-          <div className="py-16 flex flex-col items-center justify-center space-y-3 text-center">
-            <Briefcase className="w-12 h-12 text-slate-300" />
-            <h3 className="text-sm font-bold text-slate-700">No Deals Found</h3>
-            <p className="text-xs text-slate-400 max-w-sm">Create your first deal or adjust your search parameter filters.</p>
-            <Button onClick={() => { resetForm(); setShowCreateModal(true); }} variant="primary" size="sm">
-              <Plus size={14} className="mr-1" /> New Deal
-            </Button>
-          </div>
-        ) : (
-          <div className="overflow-x-auto border border-slate-150 rounded-xl">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] font-bold text-slate-500 uppercase tracking-wider select-none">
-                  <th className="px-4 py-3">Deal Name</th>
-                  <th className="px-4 py-3">Company / Client</th>
-                  <th className="px-4 py-3">Stage</th>
-                  <th className="px-4 py-3">Deal Value</th>
-                  <th className="px-4 py-3">Probability</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                {deals.map((d) => (
-                  <tr key={d.id} className="hover:bg-slate-25/50 transition-colors">
-                    <td className="px-4 py-3 font-bold text-slate-800">
-                      <button onClick={() => handleView(d)} className="hover:text-brand-550 text-left transition-colors">
-                        {d.name}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3 text-slate-500 font-semibold">{d.company?.name || d.customer?.name || '—'}</td>
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold border border-slate-200">
-                        {d.stage?.name || 'Qualification'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-bold text-slate-800">${(d.value || 0).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-slate-500 font-semibold">{d.probability || 0}%</td>
-                    <td className="px-4 py-3">
-                      <Badge variant="custom" className={`${statusColors[d.status] || 'bg-slate-100 text-slate-600'} text-[10px] font-bold px-2 py-0.5`}>
-                        {d.status}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handleView(d)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors" title="View Deal">
-                          <Eye size={14} />
-                        </button>
-                        <button onClick={() => handleEdit(d)} className="p-1.5 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-400 transition-colors" title="Edit Deal">
-                          <Edit2 size={14} />
-                        </button>
-                        <button onClick={() => setDeleteConfirm(d.id)} className="p-1.5 hover:bg-rose-50 hover:text-rose-600 rounded-lg text-slate-400 transition-colors" title="Delete Deal">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {selectedIds.length > 0 && (
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex gap-2">
+            <Badge variant="custom" className="bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 text-[11px] font-bold">
+              {selectedIds.length} selected
+            </Badge>
+            <Button variant="secondary" size="sm" onClick={clearSelection}>Clear</Button>
+          </motion.div>
         )}
       </motion.div>
 
-      {/* Create / Edit Modal */}
-      {showCreateModal || editingDeal ? (
-        <Modal onClose={() => { setShowCreateModal(false); setEditingDeal(null); resetForm(); }} title={editingDeal ? 'Edit Deal' : 'Create New Deal'} size="lg">
-          {renderForm()}
-        </Modal>
-      ) : null}
-
-      {/* View Deal Modal */}
-      {viewDeal && dealDetail && (
-        <Modal onClose={() => setViewDeal(null)} title={dealDetail.name} size="lg">
-          <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Status</p>
-                <Badge variant="custom" className={`${statusColors[dealDetail.status] || ''} mt-1 text-[10px] font-bold`}>{dealDetail.status}</Badge>
+      {/* ─── Data Table ───────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-glossy overflow-hidden"
+      >
+        {loading ? (
+          <div className="flex items-center justify-center py-24">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            >
+              <Loader2 className="w-8 h-8 text-indigo-500" />
+            </motion.div>
+            <span className="ml-3 text-sm font-medium text-slate-500">Loading deals...</span>
+          </div>
+        ) : deals.length === 0 ? (
+          <div className="py-20 text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            >
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center">
+                <Briefcase className="w-7 h-7 text-indigo-500" />
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Priority</p>
-                <Badge variant="custom" className={`${priorityColors[dealDetail.priority] || ''} mt-1 text-[10px] font-bold`}>{dealDetail.priority}</Badge>
+              <h3 className="text-base font-bold text-slate-700 mb-1">No deals yet</h3>
+              <p className="text-xs text-slate-400 mb-5 max-w-xs mx-auto">
+                Start building your sales pipeline by creating your first deal.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.06, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={openCreateModal}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200/50 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" /> Create First Deal
+              </motion.button>
+            </motion.div>
+          </div>
+        ) : (
+          <>
+            {/* Table Header */}
+            <div className="px-5 py-3 bg-slate-50/60 border-b border-slate-100/80 grid grid-cols-12 gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+              <div className="col-span-1 flex items-center">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleAllSelection}
+                  className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-200 cursor-pointer"
+                />
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Value</p>
-                <p className="text-sm font-bold text-slate-800 mt-0.5">${(dealDetail.value || 0).toLocaleString()}</p>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Probability</p>
-                <p className="text-sm font-bold text-slate-800 mt-0.5">{dealDetail.probability}%</p>
-              </div>
+              <button onClick={() => handleSort('name')} className="col-span-3 flex items-center gap-1 cursor-pointer hover:text-slate-700 transition-colors">
+                Deal Name
+                {sortField === 'name' && (sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+              </button>
+              <div className="col-span-2">Status / Priority</div>
+              <button onClick={() => handleSort('value')} className="col-span-2 flex items-center gap-1 cursor-pointer hover:text-slate-700 transition-colors">
+                Value
+                {sortField === 'value' && (sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+              </button>
+              <div className="col-span-2">Pipeline / Stage</div>
+              <div className="col-span-2 text-right">Actions</div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <div><p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Company</p><p className="font-semibold text-slate-700">{dealDetail.company?.name || '-'}</p></div>
-              <div><p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Primary Contact</p><p className="font-semibold text-slate-700">{dealDetail.primaryContact?.fullName || '-'}</p></div>
-              <div><p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Deal Owner</p><p className="font-semibold text-slate-700">{dealDetail.assignedTo ? `${dealDetail.assignedTo.firstName} ${dealDetail.assignedTo.lastName}` : 'Unassigned'}</p></div>
-              <div><p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Expected Close</p><p className="font-semibold text-slate-700">{dealDetail.expectedCloseDate ? new Date(dealDetail.expectedCloseDate).toLocaleDateString() : '-'}</p></div>
-            </div>
+            {/* Table Rows */}
+            <motion.div variants={stagger} initial="hidden" animate="visible">
+              {deals.map((deal: any, idx: number) => (
+                <motion.div
+                  key={deal.id}
+                  variants={fadeUp}
+                  layout
+                  className={`group px-5 py-3.5 grid grid-cols-12 gap-3 items-center border-b border-slate-50 hover:bg-indigo-50/30 transition-all duration-200 cursor-pointer ${
+                    selectedIds.includes(deal.id) ? 'bg-indigo-50/50' : ''
+                  }`}
+                  onClick={() => setViewDeal(deal)}
+                >
+                  {/* Checkbox */}
+                  <div className="col-span-1" onClick={e => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(deal.id)}
+                      onChange={() => toggleSelection(deal.id)}
+                      className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-200 cursor-pointer"
+                    />
+                  </div>
 
-            {dealDetail.description && (
-              <div className="pt-2 border-t border-slate-100"><p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Description</p><p className="text-slate-600 font-medium">{dealDetail.description}</p></div>
+                  {/* Deal Name + Company */}
+                  <div className="col-span-3 min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate group-hover:text-indigo-700 transition-colors">
+                      {deal.name}
+                    </p>
+                    <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                      {deal.company?.name || deal.customer?.name || deal.dealNumber || '—'}
+                    </p>
+                  </div>
+
+                  {/* Status + Priority */}
+                  <div className="col-span-2 flex flex-col gap-1">
+                    <StatusBadge status={deal.status || 'Open'} />
+                    <PriorityBadge priority={deal.priority || 'Medium'} />
+                  </div>
+
+                  {/* Value */}
+                  <div className="col-span-2">
+                    <p className="text-xs font-extrabold text-slate-800">{fmt(deal.value || 0)}</p>
+                    <p className="text-[10px] text-slate-400">{deal.probability || 0}% probability</p>
+                  </div>
+
+                  {/* Pipeline / Stage */}
+                  <div className="col-span-2 min-w-0">
+                    <p className="text-[11px] font-semibold text-slate-700 truncate">{deal.pipeline?.name || '—'}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{deal.stage?.name || '—'}</p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="col-span-2 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setViewDeal(deal)}
+                      className="p-1.5 rounded-lg hover:bg-indigo-100 text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"
+                      title="View"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => openEditModal(deal)}
+                      className="p-1.5 rounded-lg hover:bg-amber-100 text-slate-400 hover:text-amber-600 transition-colors cursor-pointer"
+                      title="Edit"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setDeleteConfirmId(deal.id)}
+                      className="p-1.5 rounded-lg hover:bg-rose-100 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="px-5 py-3 border-t border-slate-100/60 flex items-center justify-between">
+                <p className="text-[10px] font-medium text-slate-400">
+                  Showing page {pagination.page} of {pagination.totalPages} ({pagination.totalItems} total)
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={pagination.page <= 1}
+                    onClick={() => setPage(pagination.page - 1)}
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={pagination.page >= pagination.totalPages}
+                    onClick={() => setPage(pagination.page + 1)}
+                  >
+                    Next <ChevronRight className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
             )}
+          </>
+        )}
+      </motion.div>
 
-            <div className="flex gap-2 justify-end pt-3 border-t border-slate-100">
-              <Button variant="primary" size="sm" onClick={() => { setViewDeal(null); handleEdit(dealDetail); }}>
-                <Edit2 size={13} className="mr-1" /> Edit Deal
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => setViewDeal(null)}>Close</Button>
+      {/* ═══════════════════════════════════════════════════════
+         CREATE / EDIT MODAL
+         ═══════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <Modal
+            isOpen={showCreateModal}
+            onClose={() => { setShowCreateModal(false); setEditingDeal(null); }}
+            title={editingDeal ? '✏️ Edit Deal' : '✨ Create New Deal'}
+            size="lg"
+          >
+            <div className="space-y-5">
+              {/* Deal Name — most important field */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1.5">
+                  Deal Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  placeholder="e.g. Enterprise SaaS Platform — Q3 2026"
+                  className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all"
+                  autoFocus
+                />
+              </div>
+
+              {/* Two-column grid */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Value */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Deal Value ($)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.value}
+                    onChange={e => setForm({ ...form, value: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all"
+                  />
+                </div>
+
+                {/* Probability */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Win Probability (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={form.probability}
+                    onChange={e => setForm({ ...form, probability: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all"
+                  />
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Status</label>
+                  <select
+                    value={form.status}
+                    onChange={e => setForm({ ...form, status: e.target.value })}
+                    className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all cursor-pointer"
+                  >
+                    {['Open', 'Qualified', 'Proposal Sent', 'Negotiation', 'Won', 'Lost', 'On Hold'].map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Priority */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Priority</label>
+                  <select
+                    value={form.priority}
+                    onChange={e => setForm({ ...form, priority: e.target.value })}
+                    className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all cursor-pointer"
+                  >
+                    {['Low', 'Medium', 'High', 'Critical'].map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Pipeline */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Pipeline</label>
+                  <select
+                    value={form.pipelineId}
+                    onChange={e => {
+                      const pipe = pipelines.find(p => p.id === e.target.value);
+                      setForm({
+                        ...form,
+                        pipelineId: e.target.value,
+                        stageId: pipe?.stages?.[0]?.id || '',
+                      });
+                    }}
+                    className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all cursor-pointer"
+                  >
+                    <option value="">Auto-assign</option>
+                    {pipelines.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+
+                {/* Stage */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Stage</label>
+                  <select
+                    value={form.stageId}
+                    onChange={e => setForm({ ...form, stageId: e.target.value })}
+                    className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all cursor-pointer"
+                  >
+                    <option value="">Auto-assign</option>
+                    {stageOptions.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </div>
+
+                {/* Customer */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Customer</label>
+                  <select
+                    value={form.customerId}
+                    onChange={e => setForm({ ...form, customerId: e.target.value })}
+                    className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all cursor-pointer"
+                  >
+                    <option value="">Auto-assign</option>
+                    {customers.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+
+                {/* Company */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Company</label>
+                  <select
+                    value={form.companyId}
+                    onChange={e => setForm({ ...form, companyId: e.target.value })}
+                    className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all cursor-pointer"
+                  >
+                    <option value="">None</option>
+                    {companies.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+
+                {/* Assigned To */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Assigned To</label>
+                  <select
+                    value={form.assignedToId}
+                    onChange={e => setForm({ ...form, assignedToId: e.target.value })}
+                    className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all cursor-pointer"
+                  >
+                    <option value="">Unassigned</option>
+                    {employees.map((e: any) => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
+                  </select>
+                </div>
+
+                {/* Expected Close Date */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Expected Close Date</label>
+                  <input
+                    type="date"
+                    value={form.expectedCloseDate}
+                    onChange={e => setForm({ ...form, expectedCloseDate: e.target.value })}
+                    className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Description</label>
+                <textarea
+                  value={form.description}
+                  onChange={e => setForm({ ...form, description: e.target.value })}
+                  rows={3}
+                  placeholder="Brief overview of this deal opportunity..."
+                  className="w-full px-4 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all resize-none"
+                />
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Tags</label>
+                <div className="flex items-center gap-2 flex-wrap mb-2">
+                  {form.tags.map(t => (
+                    <motion.span
+                      key={t}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-[10px] font-bold"
+                    >
+                      {t}
+                      <button onClick={() => setForm({ ...form, tags: form.tags.filter(x => x !== t) })} className="hover:text-rose-500 cursor-pointer">
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </motion.span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={e => setTagInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
+                    placeholder="Add tag..."
+                    className="flex-1 px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
+                  />
+                  <Button variant="secondary" size="sm" onClick={addTag}>
+                    <Tag className="w-3 h-3" /> Add
+                  </Button>
+                </div>
+              </div>
+
+              {/* Submit */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <Button variant="secondary" size="sm" onClick={() => { setShowCreateModal(false); setEditingDeal(null); }}>
+                  Cancel
+                </Button>
+                <motion.button
+                  whileHover={{ scale: 1.03, y: -1 }}
+                  whileTap={{ scale: 0.97 }}
+                  disabled={creating || !form.name.trim()}
+                  onClick={handleSubmit}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200/50 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
+                >
+                  {creating ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      {editingDeal ? 'Saving...' : 'Creating...'}
+                    </>
+                  ) : (
+                    <>
+                      {editingDeal ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+                      {editingDeal ? 'Save Changes' : 'Create Deal'}
+                    </>
+                  )}
+                </motion.button>
+              </div>
             </div>
-          </div>
-        </Modal>
-      )}
+          </Modal>
+        )}
+      </AnimatePresence>
 
-      {/* Delete Confirmation */}
-      {deleteConfirm && (
-        <Modal onClose={() => setDeleteConfirm(null)} title="Confirm Deletion" size="sm">
-          <p className="text-xs text-slate-600 mb-4 font-medium">Are you sure you want to delete this deal? This action cannot be undone.</p>
-          <div className="flex justify-end gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
-            <Button variant="danger" size="sm" onClick={() => handleDelete(deleteConfirm)}>Delete</Button>
+      {/* ═══════════════════════════════════════════════════════
+         VIEW DEAL DRAWER
+         ═══════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {viewDeal && (
+          <div className="fixed inset-0 z-50 flex justify-end">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setViewDeal(null)}
+              className="absolute inset-0 bg-slate-900/25 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="relative w-full max-w-md bg-white/95 backdrop-blur-2xl shadow-2xl border-l border-slate-200/40 flex flex-col"
+            >
+              {/* Drawer Header */}
+              <div className="p-5 border-b border-slate-100 bg-gradient-to-r from-indigo-50/50 to-violet-50/50">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-base font-extrabold text-slate-800">Deal Details</h3>
+                  <motion.button
+                    whileHover={{ rotate: 90, scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setViewDeal(null)}
+                    className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </motion.button>
+                </div>
+                <h2 className="text-lg font-extrabold text-slate-900 mb-1">{viewDeal.name}</h2>
+                <p className="text-xs text-slate-500 font-medium">{viewDeal.dealNumber}</p>
+              </div>
+
+              {/* Drawer Body */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-5">
+                {/* Value Card */}
+                <div className="bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl p-4 text-white">
+                  <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Deal Value</p>
+                  <p className="text-2xl font-extrabold">{fmt(viewDeal.value || 0)}</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <div className="text-[10px] text-white/80 font-medium">
+                      <span className="font-bold text-white">{viewDeal.probability || 0}%</span> Win Probability
+                    </div>
+                    <div className="text-[10px] text-white/80 font-medium">
+                      <span className="font-bold text-white">{viewDeal.currency || 'USD'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Grid */}
+                {[
+                  { label: 'Status',       value: <StatusBadge status={viewDeal.status || 'Open'} /> },
+                  { label: 'Priority',      value: <PriorityBadge priority={viewDeal.priority || 'Medium'} /> },
+                  { label: 'Pipeline',      value: viewDeal.pipeline?.name || 'Default' },
+                  { label: 'Stage',         value: viewDeal.stage?.name || '—' },
+                  { label: 'Customer',      value: viewDeal.customer?.name || '—' },
+                  { label: 'Company',       value: viewDeal.company?.name || '—' },
+                  { label: 'Assigned To',   value: viewDeal.assignedTo ? `${viewDeal.assignedTo.firstName} ${viewDeal.assignedTo.lastName}` : 'Unassigned' },
+                  { label: 'Expected Close', value: viewDeal.expectedCloseDate?.split('T')[0] || '—' },
+                  { label: 'Source',        value: viewDeal.source || '—' },
+                  { label: 'Created',       value: viewDeal.createdAt?.split('T')[0] || '—' },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="flex items-center justify-between py-2 border-b border-slate-50"
+                  >
+                    <span className="text-[11px] font-bold text-slate-500">{item.label}</span>
+                    <span className="text-[11px] font-semibold text-slate-700">{item.value}</span>
+                  </motion.div>
+                ))}
+
+                {/* Description */}
+                {viewDeal.description && (
+                  <div>
+                    <p className="text-[11px] font-bold text-slate-500 mb-1">Description</p>
+                    <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 rounded-lg p-3">{viewDeal.description}</p>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {viewDeal.tags?.length > 0 && (
+                  <div>
+                    <p className="text-[11px] font-bold text-slate-500 mb-1.5">Tags</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {viewDeal.tags.map((t: string) => (
+                        <span key={t} className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md text-[10px] font-bold">{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex gap-2">
+                <Button variant="primary" size="sm" className="flex-1" onClick={() => { setViewDeal(null); openEditModal(viewDeal); }}>
+                  <Edit2 className="w-3.5 h-3.5" /> Edit
+                </Button>
+                <Button variant="glass" size="sm" className="flex-1" onClick={() => navigate(`/deals/${viewDeal.id}`)}>
+                  <Eye className="w-3.5 h-3.5" /> Full Workspace
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => { setViewDeal(null); setDeleteConfirmId(viewDeal.id); }}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </motion.div>
           </div>
-        </Modal>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* ═══════════════════════════════════════════════════════
+         DELETE CONFIRMATION MODAL
+         ═══════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {deleteConfirmId && (
+          <Modal isOpen={true} onClose={() => setDeleteConfirmId(null)} title="⚠️ Confirm Deletion" size="sm">
+            <p className="text-xs text-slate-600 mb-5 font-medium leading-relaxed">
+              Are you sure you want to permanently delete this deal? This action cannot be undone and all associated data will be removed.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setDeleteConfirmId(null)}>Cancel</Button>
+              <Button variant="danger" size="sm" onClick={() => handleDelete(deleteConfirmId)}>
+                <Trash2 className="w-3 h-3" /> Delete Deal
+              </Button>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
