@@ -50,6 +50,12 @@ import GDPR from '../pages/GDPR';
 import Surveys from '../pages/Surveys';
 import Commissions from '../pages/Commissions';
 
+// Public Experience Pages
+import LandingPage from '../pages/public/LandingPage';
+import Onboarding from '../pages/public/Onboarding';
+import AboutPage from '../pages/public/AboutPage';
+import SplashScreen from '../components/public/SplashScreen';
+
 // Authentication Pages
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
@@ -66,6 +72,24 @@ import ProtectedRoute from '../components/auth/ProtectedRoute';
 import PublicRoute from '../components/auth/PublicRoute';
 
 export const router = createBrowserRouter([
+  // Public Landing & Experience Pages
+  {
+    path: '/landing',
+    element: <LandingPage />,
+  },
+  {
+    path: '/onboarding',
+    element: <Onboarding />,
+  },
+  {
+    path: '/about',
+    element: <AboutPage />,
+  },
+  {
+    path: '/splash',
+    element: <SplashScreen onComplete={() => { window.location.href = '/landing'; }} />,
+  },
+
   // Public Auth Pages
   {
     path: '/login',

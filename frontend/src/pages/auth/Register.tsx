@@ -270,7 +270,7 @@ export const Register: React.FC = () => {
           </Button>
         </form>
 
-        <div className="mt-8 text-center border-t border-slate-100/60 pt-5">
+        <div className="mt-8 text-center border-t border-slate-100/60 pt-5 space-y-3">
           <p className="text-xs text-slate-400 font-medium">
             Already have an account?{' '}
             <Link
@@ -280,6 +280,13 @@ export const Register: React.FC = () => {
               Sign In
             </Link>
           </p>
+          <div className="flex items-center justify-center gap-4 text-xs font-bold text-slate-400">
+            <Link to="/landing" className="hover:text-brand-600 transition-colors">Landing Page</Link>
+            <span>•</span>
+            <Link to="/onboarding" className="hover:text-brand-600 transition-colors">Onboarding Tour</Link>
+            <span>•</span>
+            <Link to="/about" className="hover:text-brand-600 transition-colors">About Us</Link>
+          </div>
         </div>
       </div>
     </div>
