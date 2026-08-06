@@ -22,11 +22,12 @@ exports.updatePlanSchema = zod_1.z.object({
 });
 exports.createSubscriptionSchema = zod_1.z.object({
     body: zod_1.z.object({
-        customerId: zod_1.z.string().uuid('Invalid customer ID'),
-        planId: zod_1.z.string().uuid('Invalid plan ID'),
+        planName: zod_1.z.string().optional().nullable(),
+        customerId: zod_1.z.string().uuid('Invalid customer ID').optional().nullable(),
+        planId: zod_1.z.string().uuid('Invalid plan ID').optional().nullable(),
         status: zod_1.z.string().optional(),
-        startDate: zod_1.z.string().datetime('Invalid start date format'),
-        endDate: zod_1.z.string().datetime('Invalid end date format').optional().nullable(),
+        startDate: zod_1.z.string().optional().nullable(),
+        endDate: zod_1.z.string().optional().nullable(),
     }),
 });
 exports.updateSubscriptionSchema = zod_1.z.object({

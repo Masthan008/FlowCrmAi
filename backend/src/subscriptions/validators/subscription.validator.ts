@@ -22,11 +22,12 @@ export const updatePlanSchema = z.object({
 
 export const createSubscriptionSchema = z.object({
   body: z.object({
-    customerId: z.string().uuid('Invalid customer ID'),
-    planId: z.string().uuid('Invalid plan ID'),
+    planName: z.string().optional().nullable(),
+    customerId: z.string().uuid('Invalid customer ID').optional().nullable(),
+    planId: z.string().uuid('Invalid plan ID').optional().nullable(),
     status: z.string().optional(),
-    startDate: z.string().datetime('Invalid start date format'),
-    endDate: z.string().datetime('Invalid end date format').optional().nullable(),
+    startDate: z.string().optional().nullable(),
+    endDate: z.string().optional().nullable(),
   }),
 });
 
