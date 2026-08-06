@@ -9,12 +9,26 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
+import SplashScreen from '../../components/public/SplashScreen';
+
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'pipeline' | 'intelligence' | 'leads' | 'tickets'>('pipeline');
+  const [showSplash, setShowSplash] = useState(() => {
+    return !sessionStorage.getItem('flowcrm_splash_viewed');
+  });
+
+  const handleSplashComplete = () => {
+    sessionStorage.setItem('flowcrm_splash_viewed', 'true');
+    setShowSplash(false);
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-indigo-500 selection:text-white overflow-x-hidden font-sans">
+      {showSplash && (
+        <SplashScreen onComplete={handleSplashComplete} autoDismissMs={2600} />
+      )}
+
       {/* ─── Top Navbar ────────────────────────────────────────── */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-2xl border-b border-slate-800/60">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -116,7 +130,7 @@ export const LandingPage: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/register')}
+              onClick={() => navigate('/onboarding')}
               className="inline-flex items-center gap-2.5 px-8 py-4 text-sm font-extrabold rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 cursor-pointer transition-all"
             >
               Get Started Free <ArrowRight className="w-4 h-4" />

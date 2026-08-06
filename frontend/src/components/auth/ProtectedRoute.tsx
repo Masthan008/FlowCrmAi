@@ -17,8 +17,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const location = useLocation();
 
   if (!isAuthenticated) {
-    // Redirect to login, saving the original location for post-login return
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // Redirect to landing page, saving original location
+    return <Navigate to="/landing" state={{ from: location }} replace />;
   }
 
   // Enforce role guards if specified
