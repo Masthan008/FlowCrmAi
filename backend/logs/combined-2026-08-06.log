@@ -1,0 +1,7 @@
+{"level":"info","message":"=========================================","timestamp":"2026-08-06 15:14:25"}
+{"level":"info","message":"FlowCRM AI Enterprise Backend Initialized","timestamp":"2026-08-06 15:14:25"}
+{"level":"info","message":"Port: 5000","timestamp":"2026-08-06 15:14:25"}
+{"level":"info","message":"Environment: development","timestamp":"2026-08-06 15:14:25"}
+{"level":"info","message":"=========================================","timestamp":"2026-08-06 15:14:25"}
+{"level":"info","message":"PostgreSQL connection client pool initialized and active.","timestamp":"2026-08-06 15:14:47"}
+{"level":"info","message":"GET /api/v1/health 200 337 - 3593.792 ms","timestamp":"2026-08-06 15:23:07"}
