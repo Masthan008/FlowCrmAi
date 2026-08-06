@@ -4,7 +4,8 @@ exports.createTicketTimeLogSchema = exports.createTicketCommentSchema = exports.
 const zod_1 = require("zod");
 exports.createTicketSchema = zod_1.z.object({
     body: zod_1.z.object({
-        subject: zod_1.z.string().min(1, 'Subject is required').max(500),
+        subject: zod_1.z.string().optional().nullable(),
+        title: zod_1.z.string().optional().nullable(),
         description: zod_1.z.string().max(5000).optional().nullable(),
         status: zod_1.z.string().optional(),
         priority: zod_1.z.string().optional(),

@@ -34,6 +34,7 @@ exports.updateCategorySchema = zod_1.z.object({
 });
 exports.voteArticleSchema = zod_1.z.object({
     body: zod_1.z.object({
-        helpful: zod_1.z.boolean(),
+        vote: zod_1.z.string().optional().nullable(),
+        helpful: zod_1.z.boolean().optional().nullable(),
     }),
 });

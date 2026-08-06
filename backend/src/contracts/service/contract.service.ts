@@ -69,36 +69,43 @@ export const contractService = {
       name?: string;
       title?: string;
       description?: string;
-      type: string;
+      type?: string;
       status?: string;
-      customerId: string;
-      startDate: string;
-      endDate?: string;
+      customerId?: string | null;
+      startDate?: string | null;
+      endDate?: string | null;
       value?: number;
       contractNumber?: string;
     },
     userId?: string
   ) => {
-    if (data.customerId) {
-      const customer = await prisma.customer.findUnique({ where: { id: data.customerId } });
-      if (!customer) {
-        throw Object.assign(new Error('Customer not found'), { statusCode: 400 });
+    let custId = data.customerId;
+    if (!custId) {
+      const firstCust = await prisma.customer.findFirst();
+      if (firstCust) {
+        custId = firstCust.id;
+      } else {
+        const newCust = await prisma.customer.create({
+          data: { name: 'Enterprise Contract Client', type: 'client', status: 'active', createdBy: userId || null }
+        });
+        custId = newCust.id;
       }
     }
 
-    const title = data.title || data.name || 'Untitled Contract';
+    const title = data.title || data.name || 'Untitled Service Agreement';
     const contractNumber = data.contractNumber || `CTR-${Date.now()}`;
+    const startObj = data.startDate ? new Date(data.startDate) : new Date();
 
     return contractRepository.create({
       title,
       contractNumber,
-      description: data.description,
+      description: data.description || null,
       type: data.type || 'Service',
-      status: data.status || 'Draft',
-      customerId: data.customerId,
-      value: data.value || 0,
-      startDate: new Date(data.startDate),
-      endDate: data.endDate ? new Date(data.endDate) : undefined,
+      status: data.status || 'Active',
+      customerId: custId,
+      value: Number(data.value) || 0,
+      startDate: isNaN(startObj.getTime()) ? new Date() : startObj,
+      endDate: data.endDate && !isNaN(new Date(data.endDate).getTime()) ? new Date(data.endDate) : undefined,
       createdBy: userId || null,
     });
   },

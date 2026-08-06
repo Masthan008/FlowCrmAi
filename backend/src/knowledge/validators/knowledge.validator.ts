@@ -36,6 +36,7 @@ export const updateCategorySchema = z.object({
 
 export const voteArticleSchema = z.object({
   body: z.object({
-    helpful: z.boolean(),
+    vote: z.string().optional().nullable(),
+    helpful: z.boolean().optional().nullable(),
   }),
 });

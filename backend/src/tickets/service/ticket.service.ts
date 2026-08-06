@@ -71,7 +71,8 @@ export const ticketService = {
 
   createTicket: async (
     data: {
-      subject: string;
+      subject?: string;
+      title?: string;
       description?: string;
       status?: string;
       priority?: string;
@@ -82,9 +83,17 @@ export const ticketService = {
     },
     userId?: string
   ) => {
+    const subject = data.subject || data.title || 'Support Ticket';
+    const ticketNumber = data.ticketNumber || `TCK-${Date.now()}`;
     return ticketRepository.create({
-      ...data,
-      ticketNumber: data.ticketNumber || `TCK-${Date.now()}`,
+      subject,
+      description: data.description || null,
+      status: data.status || 'Open',
+      priority: data.priority || 'Medium',
+      category: data.category || 'General',
+      customerId: data.customerId || null,
+      assignedToId: data.assignedToId || null,
+      ticketNumber,
       createdBy: userId || null,
     });
   },

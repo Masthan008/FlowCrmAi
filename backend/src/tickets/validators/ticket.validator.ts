@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 export const createTicketSchema = z.object({
   body: z.object({
-    subject: z.string().min(1, 'Subject is required').max(500),
+    subject: z.string().optional().nullable(),
+    title: z.string().optional().nullable(),
     description: z.string().max(5000).optional().nullable(),
     status: z.string().optional(),
     priority: z.string().optional(),

@@ -53,9 +53,17 @@ exports.ticketService = {
         return ticket;
     },
     createTicket: async (data, userId) => {
+        const subject = data.subject || data.title || 'Support Ticket';
+        const ticketNumber = data.ticketNumber || `TCK-${Date.now()}`;
         return ticket_repository_1.ticketRepository.create({
-            ...data,
-            ticketNumber: data.ticketNumber || `TCK-${Date.now()}`,
+            subject,
+            description: data.description || null,
+            status: data.status || 'Open',
+            priority: data.priority || 'Medium',
+            category: data.category || 'General',
+            customerId: data.customerId || null,
+            assignedToId: data.assignedToId || null,
+            ticketNumber,
             createdBy: userId || null,
         });
     },

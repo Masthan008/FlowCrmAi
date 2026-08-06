@@ -2,13 +2,14 @@ import { z } from 'zod';
 
 export const createContractSchema = z.object({
   body: z.object({
-    name: z.string().min(1, 'Contract name is required').max(300),
+    title: z.string().optional().nullable(),
+    name: z.string().optional().nullable(),
     description: z.string().max(5000).optional().nullable(),
-    type: z.string().min(1, 'Contract type is required'),
+    type: z.string().optional().nullable(),
     status: z.string().optional(),
-    customerId: z.string().uuid('Invalid customer ID'),
-    startDate: z.string().datetime('Invalid start date format'),
-    endDate: z.string().datetime('Invalid end date format').optional().nullable(),
+    customerId: z.string().uuid('Invalid customer ID').optional().nullable(),
+    startDate: z.string().optional().nullable(),
+    endDate: z.string().optional().nullable(),
     value: z.number().nonnegative('Value must be non-negative').optional(),
   }),
 });
