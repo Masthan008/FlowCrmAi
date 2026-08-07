@@ -69,4 +69,15 @@ exports.paymentController = {
             next(error);
         }
     },
+    processPayment: async (req, res, next) => {
+        try {
+            const userId = req.user?.id;
+            const result = await payment_service_1.paymentService.processSubscriptionPayment({ ...req.body, userId });
+            response_1.ResponseHelper.sendSuccess(req, res, 200, 'Payment processed & subscription activated successfully.', result);
+        }
+        catch (error) {
+            next(error);
+        }
+    },
 };
+exports.default = exports.paymentController;

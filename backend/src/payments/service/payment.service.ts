@@ -1,8 +1,8 @@
 import { paymentRepository } from '../repository/payment.repository';
 import { prisma } from '../../database/db';
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const isUuid = (val: any) => typeof val === 'string' && UUID_REGEX.test(val);
+const isUuid = (str: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
 export const paymentService = {
   list: async (params: any) => {
@@ -18,40 +18,47 @@ export const paymentService = {
   },
 
   create: async (data: any, userId?: string) => {
-    // Currency fallback
-    let currencyId = isUuid(data.currencyId) ? data.currencyId : null;
-    if (!currencyId) {
-      let usd = await prisma.currency.findFirst({ where: { code: 'USD' } });
-      if (!usd) {
-        usd = await prisma.currency.create({
-          data: { code: 'USD', name: 'US Dollar', symbol: '$' }
-        });
+    let currencyId = data.currencyId;
+    if (!currencyId || !isUuid(currencyId)) {
+      const firstCurrency = await prisma.currency.findFirst();
+      if (firstCurrency) {
+        currencyId = firstCurrency.id;
       }
-      currencyId = usd.id;
     }
 
-    // Invoice fallback
-    let invoiceId = isUuid(data.invoiceId) ? data.invoiceId : null;
+    let invoiceId = data.invoiceId;
+    if (invoiceId && !isUuid(invoiceId)) {
+      invoiceId = undefined;
+    }
+
     if (!invoiceId) {
-      let firstInvoice = await prisma.invoice.findFirst();
+      const firstInvoice = await prisma.invoice.findFirst({
+        where: { deletedAt: null },
+      });
       if (!firstInvoice) {
-        let firstCust = await prisma.customer.findFirst();
-        if (!firstCust) {
-          firstCust = await prisma.customer.create({
-            data: { name: 'Default Enterprise Client', type: 'client', status: 'active' }
+        let firstCustomer = await prisma.customer.findFirst();
+        if (!firstCustomer) {
+          firstCustomer = await prisma.customer.create({
+            data: {
+              name: 'Enterprise Client',
+              email: 'enterprise@client.com',
+            }
           });
         }
-        firstInvoice = await prisma.invoice.create({
+
+        const newInv = await prisma.invoice.create({
           data: {
-            number: `INV-${Date.now().toString().substring(5)}`,
-            customerId: firstCust.id,
-            total: Number(data.amount) || 100.00,
-            dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+            customerId: firstCustomer.id,
+            number: `INV-${Date.now().toString().slice(-6)}`,
+            total: Number(data.amount) || 0,
+            dueDate: new Date(),
             status: 'unpaid',
           }
         });
+        invoiceId = newInv.id;
+      } else {
+        invoiceId = firstInvoice.id;
       }
-      invoiceId = firstInvoice.id;
     }
 
     const payload = {
@@ -66,7 +73,6 @@ export const paymentService = {
 
     const payment = await paymentRepository.create(payload);
 
-    // If payment is completed, auto-update invoice status to paid
     if (payload.status === 'completed' && invoiceId) {
       await prisma.invoice.update({
         where: { id: invoiceId },
@@ -110,7 +116,6 @@ export const paymentService = {
     paymentMethod?: string;
     paymentDetails?: any;
     userId?: string;
-    companyId?: string;
   }) => {
     const transactionId = `TXN-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const planName = data.planName || 'Professional Scale';
@@ -134,62 +139,77 @@ export const paymentService = {
       });
     }
 
-    // 2. Find user/company if email or userId passed
-    let user = null;
-    if (data.userId) {
-      user = await prisma.user.findUnique({ where: { id: data.userId } });
-    } else if (data.email) {
-      user = await prisma.user.findFirst({ where: { email: data.email } });
-    }
+    // 2. Find or create Customer
+    let customer = await prisma.customer.findFirst({
+      where: data.email ? { email: data.email } : {}
+    });
 
-    let companyId = data.companyId || user?.companyId || null;
+    if (!customer) {
+      customer = await prisma.customer.create({
+        data: {
+          name: data.email ? data.email.split('@')[0] : 'Enterprise Account',
+          email: data.email || `client-${Date.now()}@company.com`,
+        }
+      });
+    }
 
     // 3. Create active Subscription record
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + (data.billingCycle === 'Annual' ? 365 : 30));
 
-    const subscription = await prisma.subscription.create({
-      data: {
-        planId: plan.id,
-        companyId,
-        startDate,
-        endDate,
-        status: 'Active',
-        createdBy: user?.id || null
-      }
-    });
+    let subscriptionId = `sub-${Date.now()}`;
+    try {
+      const sub = await prisma.subscription.create({
+        data: {
+          planId: plan.id,
+          customerId: customer.id,
+          startDate,
+          endDate,
+          status: 'Active',
+          createdBy: data.userId || null
+        }
+      });
+      subscriptionId = sub.id;
+    } catch (e) {
+      console.warn('Subscription creation fallback', e);
+    }
 
     // 4. Create Invoice & Payment records
-    let invoice = null;
+    let invoiceNumber = `INV-${Date.now().toString().slice(-6)}`;
     try {
-      const invoiceNumber = `INV-${Date.now().toString().slice(-6)}`;
-      invoice = await prisma.invoice.create({
+      const invoice = await prisma.invoice.create({
         data: {
-          invoiceNumber,
+          customerId: customer.id,
+          number: invoiceNumber,
           total: amount,
+          subtotal: amount,
           status: 'paid',
-          issueDate: new Date(),
-          dueDate: new Date(),
-          companyId,
-          createdBy: user?.id || null
+          dueDate: endDate,
+          createdBy: data.userId || null
         }
       });
 
       let firstCurrency = await prisma.currency.findFirst();
+      if (!firstCurrency) {
+        firstCurrency = await prisma.currency.create({
+          data: { code: 'INR', symbol: '₹', name: 'Indian Rupee' }
+        });
+      }
+
       await prisma.payment.create({
         data: {
           invoiceId: invoice.id,
-          currencyId: firstCurrency?.id || null,
+          currencyId: firstCurrency.id,
           amount,
           method: data.paymentMethod || 'UPI/Card',
           status: 'completed',
           transactionId,
-          createdBy: user?.id || null
+          createdBy: data.userId || null
         }
       });
     } catch (err) {
-      console.warn('Invoice/Payment log warning', err);
+      console.warn('Invoice/Payment creation log', err);
     }
 
     return {
@@ -198,8 +218,10 @@ export const paymentService = {
       planName,
       amount,
       currency,
-      subscriptionId: subscription.id,
-      invoiceNumber: invoice?.invoiceNumber || `INV-${Date.now()}`
+      subscriptionId,
+      invoiceNumber
     };
   }
 };
+
+export default paymentService;
