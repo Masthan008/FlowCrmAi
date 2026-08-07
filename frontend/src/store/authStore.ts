@@ -1,5 +1,14 @@
 import { create } from 'zustand';
 
+export interface UserCompany {
+  id?: string;
+  name?: string;
+  companyNumber?: string;
+  currency?: string;
+  industry?: string;
+  website?: string;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -18,6 +27,7 @@ export interface User {
   emailVerified?: boolean;
   phoneVerified?: boolean;
   status?: string;
+  company?: UserCompany | null;
 }
 
 interface AuthState {

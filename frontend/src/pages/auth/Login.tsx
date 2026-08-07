@@ -49,12 +49,14 @@ export const Login: React.FC = () => {
         password: data.password,
       });
 
-      const { accessToken, refreshToken, user, role, permissions } = response.data.data;
+      const { accessToken, refreshToken, user, role, permissions, company } = response.data.data;
+      const userWithCompany = company ? { ...user, company } : user;
       
       // Update state
-      setAuth(accessToken, refreshToken, user, role, permissions);
+      setAuth(accessToken, refreshToken, userWithCompany, role, permissions);
       
-      toast.success('Welcome Back!', `Logged in successfully as ${user.fullName}`);
+      const compBadge = company?.name ? ` • ${company.name}` : '';
+      toast.success('Welcome Back!', `Logged in successfully as ${user.fullName}${compBadge}`);
       navigate(from, { replace: true });
     } catch (error: any) {
       const message = error.response?.data?.message || 'Invalid email or password. Please try again.';

@@ -22,10 +22,13 @@ interface ClientInfo {
 
 export class AuthService {
   /**
-   * Register a new user
+   * Register a new user & provision Organization/Company Workspace
    */
   async register(data: any) {
-    const { email, password, firstName, lastName, phone, department, jobTitle } = data;
+    const {
+      email, password, firstName, lastName, phone, department, jobTitle,
+      companyName, companyLegalName, industry, employeeCount, gstNumber, taxNumber, currency, timezone, website, primaryPhone
+    } = data;
 
     // 1. Check duplicate email
     const duplicateEmail = await prisma.user.findUnique({ where: { email } });
@@ -61,7 +64,28 @@ export class AuthService {
       defaultRole = await prisma.role.findFirst();
     }
 
-    // 5. Create user
+    // 5. Create Company / Organization Workspace
+    const compNumber = `COMP-${Date.now().toString().substring(5)}`;
+    const compName = companyName || `${firstName}'s Enterprise`;
+
+    const company = await prisma.company.create({
+      data: {
+        companyNumber: compNumber,
+        name: compName,
+        legalName: companyLegalName || compName,
+        industry: industry || 'Technology & Services',
+        employeeCount: employeeCount ? parseInt(String(employeeCount), 10) : 10,
+        gstNumber: gstNumber || taxNumber || null,
+        currency: currency || 'INR',
+        timezone: timezone || 'Asia/Kolkata',
+        website: website || null,
+        primaryEmail: email,
+        primaryPhone: primaryPhone || phone || null,
+        status: 'Active',
+      }
+    });
+
+    // 6. Create User
     const hashedPassword = await PasswordUtility.hashPassword(password);
     const user = await prisma.user.create({
       data: {
@@ -71,29 +95,69 @@ export class AuthService {
         lastName,
         fullName: `${firstName} ${lastName}`,
         phone: phone || null,
-        department: department || null,
-        jobTitle: jobTitle || null,
+        department: department || 'Management',
+        jobTitle: jobTitle || 'Administrator',
         roleId: defaultRole!.id,
         preferences: {
           create: {
             theme: 'white-glossy',
             language: 'en',
-            timezone: 'UTC',
+            timezone: timezone || 'Asia/Kolkata',
           }
         }
       },
       include: { role: true }
     });
 
+    // 7. Create Employee record linking User to Company
+    const employee = await prisma.employee.create({
+      data: {
+        userId: user.id,
+        companyId: company.id,
+        firstName,
+        lastName,
+        email,
+        phone: phone || null,
+        department: department || 'Management',
+        designation: jobTitle || 'Administrator',
+      }
+    });
+
+    // 8. Set ownerId on Company
+    await prisma.company.update({
+      where: { id: company.id },
+      data: { ownerId: employee.id }
+    }).catch(() => null);
+
+    // 9. Seed default Customer Journey entry for Organization
+    await prisma.companyCustomerJourney.create({
+      data: {
+        companyId: company.id,
+        type: 'Company Registered',
+        title: 'FlowCRM AI Enterprise Workspace Provisioned',
+        description: `Organization ${compName} provisioned by ${user.fullName} (${user.email})`,
+      }
+    }).catch(() => null);
+
     // Write audit log
     await auditLogRepository.logEvent({
       userId: user.id,
-      action: 'USER_REGISTRATION',
+      action: 'ORGANIZATION_REGISTRATION',
       module: 'auth',
-      details: { email: user.email, name: user.fullName }
+      details: { email: user.email, name: user.fullName, companyId: company.id, companyName: company.name }
     });
 
-    return user;
+    return {
+      ...user,
+      company: {
+        id: company.id,
+        name: company.name,
+        companyNumber: company.companyNumber,
+        currency: company.currency,
+        industry: company.industry,
+        website: company.website
+      }
+    };
   }
 
   /**
@@ -185,6 +249,27 @@ export class AuthService {
       details: { historyId: history.id }
     });
 
+    // 8. Fetch user's linked Organization / Company profile
+    let companyInfo = null;
+    try {
+      const emp = await prisma.employee.findFirst({
+        where: { userId: user.id, deletedAt: null },
+        include: { company: true }
+      });
+      if (emp && emp.company) {
+        companyInfo = {
+          id: emp.company.id,
+          name: emp.company.name,
+          companyNumber: emp.company.companyNumber,
+          currency: emp.company.currency || 'INR',
+          industry: emp.company.industry || 'Technology',
+          website: emp.company.website
+        };
+      }
+    } catch (err) {
+      console.error('Company info lookup error during login:', err);
+    }
+
     return {
       accessToken,
       refreshToken,
@@ -202,6 +287,7 @@ export class AuthService {
         language: user.language,
         themePreference: user.themePreference
       },
+      company: companyInfo,
       role: roleName,
       permissions
     };
