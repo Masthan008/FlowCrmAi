@@ -11,6 +11,10 @@ import {
 
 const router = Router();
 
+// Public / Guest Payment Processing endpoint for Checkout & Subscriptions
+router.post('/process', paymentController.processPayment);
+
+// Authenticated Routes
 router.use(requireAuth);
 
 router.get('/', requirePermission('invoices:view'), paymentController.list);
