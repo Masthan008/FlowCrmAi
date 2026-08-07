@@ -5,7 +5,7 @@ import {
   Sparkles, ShieldCheck, Zap, DollarSign, Target, Users, ArrowRight,
   Kanban, BarChart3, Lock, Globe2, Layers, Briefcase, CheckCircle2,
   TrendingUp, Award, Star, Compass, Play, ChevronRight, MessageSquare,
-  FileText, ArrowUpRight, Cpu, Activity, Smartphone
+  FileText, ArrowUpRight, Cpu, Activity, Smartphone, Check, HelpCircle
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
@@ -19,8 +19,7 @@ import { Logo } from '../../components/ui/Logo';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'pipeline' | 'intelligence' | 'leads' | 'tickets'>('pipeline');
-  const [isAnnual, setIsAnnual] = useState(true);
+  const [activeTab, setActiveTab] = useState<'pipeline' | 'intelligence' | 'omnichannel' | 'security'>('pipeline');
   const [showSplash, setShowSplash] = useState(() => {
     return !sessionStorage.getItem('flowcrm_splash_viewed');
   });
@@ -31,13 +30,20 @@ export const LandingPage: React.FC = () => {
     navigate('/onboarding');
   };
 
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-white selection:bg-indigo-500 selection:text-white overflow-x-hidden font-sans">
+    <div className="min-h-screen bg-slate-950 text-white selection:bg-brand-550 selection:text-white overflow-x-hidden font-sans select-none">
       {showSplash && (
         <SplashScreen onComplete={handleSplashComplete} autoDismissMs={2600} />
       )}
 
-      {/* ─── Top Navbar ────────────────────────────────────────── */}
+      {/* ─── Top Navigation Bar ────────────────────────────────────────── */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-2xl border-b border-slate-800/60">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <motion.div
@@ -50,13 +56,16 @@ export const LandingPage: React.FC = () => {
           </motion.div>
 
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-slate-400">
-            <button onClick={() => navigate('/landing')} className="hover:text-white transition-colors cursor-pointer text-white">
+            <button onClick={() => navigate('/landing')} className="hover:text-white transition-colors cursor-pointer text-white font-extrabold">
               Overview
             </button>
-            <button onClick={() => navigate('/onboarding')} className="hover:text-white transition-colors cursor-pointer">
-              Interactive Tour
+            <button onClick={() => scrollToSection('features')} className="hover:text-white transition-colors cursor-pointer font-extrabold">
+              Core Capabilities
             </button>
-            <button onClick={() => navigate('/about')} className="hover:text-white transition-colors cursor-pointer">
+            <button onClick={() => scrollToSection('pricing')} className="hover:text-white transition-colors cursor-pointer font-extrabold">
+              INR Pricing Calculator
+            </button>
+            <button onClick={() => navigate('/about')} className="hover:text-white transition-colors cursor-pointer font-extrabold">
               About Us
             </button>
           </nav>
@@ -66,7 +75,7 @@ export const LandingPage: React.FC = () => {
               variant="ghost"
               size="sm"
               onClick={() => navigate('/login')}
-              className="!text-slate-300 hover:!text-white hover:!bg-slate-800/60"
+              className="!text-slate-300 hover:!text-white hover:!bg-slate-800/60 font-bold"
             >
               Sign In
             </Button>
@@ -74,9 +83,9 @@ export const LandingPage: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/register')}
-              className="px-5 py-2 text-xs font-extrabold rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 cursor-pointer transition-all"
+              className="px-5 py-2.5 text-xs font-extrabold rounded-xl bg-gradient-to-r from-brand-550 via-teal-600 to-emerald-600 text-white shadow-glossy hover:shadow-glossy-lg cursor-pointer transition-all border border-white/20"
             >
-              Start Free Trial
+              Provision Free Workspace
             </motion.button>
           </div>
         </div>
@@ -86,7 +95,7 @@ export const LandingPage: React.FC = () => {
       <section className="relative pt-36 pb-24 px-6 overflow-hidden">
         {/* Background Glow Orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-tr from-indigo-600/20 via-purple-600/20 to-pink-600/10 rounded-full blur-[180px]" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-tr from-brand-550/20 via-teal-600/20 to-purple-600/10 rounded-full blur-[180px]" />
         </div>
 
         <div className="max-w-7xl mx-auto text-center relative z-10 space-y-8">
@@ -132,7 +141,7 @@ export const LandingPage: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/onboarding')}
+              onClick={() => navigate('/register')}
               className="inline-flex items-center gap-2.5 px-8 py-4 text-xs font-extrabold rounded-2xl bg-gradient-to-r from-brand-550 via-teal-600 to-emerald-600 text-white shadow-glossy-xl hover:shadow-glossy-2xl cursor-pointer transition-all border border-white/20"
             >
               <span>Provision Free Workspace</span>
@@ -142,10 +151,10 @@ export const LandingPage: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/onboarding')}
+              onClick={() => scrollToSection('features')}
               className="inline-flex items-center gap-2.5 px-7 py-4 text-xs font-extrabold rounded-2xl bg-slate-900 text-slate-200 border border-slate-700/80 hover:bg-slate-800 hover:text-white shadow-xl backdrop-blur-xl cursor-pointer transition-all"
             >
-              <Play className="w-4 h-4 text-brand-400 fill-brand-400" /> Interactive Onboarding Tour
+              <Play className="w-4 h-4 text-brand-400 fill-brand-400" /> Explore Capabilities
             </motion.button>
           </motion.div>
 
@@ -157,166 +166,229 @@ export const LandingPage: React.FC = () => {
             className="pt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
           >
             {[
-              { val: '$4.2B+', label: 'Pipeline Volume Managed' },
-              { val: '99.99%', label: 'Enterprise Uptime SLA' },
-              { val: '15,000+', label: 'Active Business Users' },
-              { val: '4.9 / 5', label: 'Customer CSAT Score' },
+              { val: '₹420Cr+', label: 'Pipeline Managed' },
+              { val: '99.8%', label: 'Support SLA Met' },
+              { val: '100%', label: 'Tax Reconciled' },
+              { val: '0.00ms', label: 'Cross-Tenant Leak' },
             ].map((stat, i) => (
-              <div key={i} className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl">
-                <p className="text-2xl sm:text-3xl font-black text-white font-mono">{stat.val}</p>
-                <p className="text-[11px] font-bold text-slate-400 mt-1 uppercase tracking-wider">{stat.label}</p>
+              <div key={i} className="p-5 rounded-3xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl space-y-1">
+                <span className="text-2xl sm:text-3xl font-black text-white font-mono">{stat.val}</span>
+                <p className="text-xs text-slate-400 font-medium">{stat.label}</p>
               </div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* ─── Interactive Product Preview ───────────────────────── */}
-      <section className="py-20 px-6 relative">
-        <div className="max-w-6xl mx-auto space-y-8">
+      {/* ─── Interactive Feature Capabilities Section ───────────────── */}
+      <section id="features" className="py-24 px-6 relative bg-slate-950/60 border-t border-slate-900">
+        <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center space-y-3">
-            <h2 className="text-3xl font-black text-white">Experience the Enterprise Intelligence</h2>
-            <p className="text-sm text-slate-400">Click tabs to preview real-time CRM capabilities.</p>
-
-            <div className="flex items-center justify-center gap-2 pt-4 flex-wrap">
-              {[
-                { id: 'pipeline', label: 'Sales Pipeline', icon: Kanban },
-                { id: 'intelligence', label: 'AI Forecasting', icon: Sparkles },
-                { id: 'leads', label: 'Lead Scoring', icon: Target },
-                { id: 'tickets', label: 'Support Desk', icon: ShieldCheck },
-              ].map(tab => {
-                const Icon = tab.icon;
-                const active = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      active
-                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/40'
-                        : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
+            <span className="px-3.5 py-1 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 text-xs font-extrabold uppercase tracking-wider">
+              ENTERPRISE CAPABILITIES
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-display">
+              Autonomous Growth Engine for Modern Teams
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto font-medium">
+              Click through core modules to preview real-time pipeline automation, deal win scores, and security controls.
+            </p>
           </div>
 
-          <div className="relative group rounded-3xl bg-slate-900/90 border border-slate-800 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl opacity-20 blur-xl group-hover:opacity-30 transition-opacity" />
-            <div className="relative">
+          {/* Interactive Feature Tabs */}
+          <div className="flex justify-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {[
+              { id: 'pipeline', label: 'Lead-to-Cash Engine', icon: DollarSign },
+              { id: 'intelligence', label: 'Grounded AI Win Score', icon: Sparkles },
+              { id: 'omnichannel', label: 'Support Desk & Chat', icon: Users },
+              { id: 'security', label: 'Multi-Tenant Shield', icon: ShieldCheck },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-5 py-3 rounded-2xl text-xs font-extrabold flex items-center gap-2 cursor-pointer transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-r from-brand-550 to-teal-600 text-white shadow-glossy-lg border border-white/20'
+                      : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active Tab Preview Display */}
+          <div className="bg-slate-900/90 rounded-3xl border border-slate-800 p-8 shadow-2xl backdrop-blur-xl">
+            <AnimatePresence mode="wait">
               {activeTab === 'pipeline' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <div>
-                      <h3 className="text-base font-extrabold text-white">Enterprise Kanban Pipeline</h3>
-                      <p className="text-xs text-slate-400">Drag-and-drop opportunity management with probability velocity</p>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-emerald-400">$1,450,000 Volume</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {['Qualification ($450k)', 'Proposal Sent ($600k)', 'Negotiation ($400k)'].map((col, i) => (
-                      <div key={i} className="bg-slate-950/70 rounded-xl p-3 border border-slate-800/80 space-y-2">
-                        <span className="text-[11px] font-bold text-slate-300 block">{col}</span>
-                        <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs space-y-1">
-                          <p className="font-bold text-white">Acme Global Cloud</p>
-                          <p className="text-[10px] text-slate-400">$180,000 • 85% Win Prob</p>
+                <motion.div
+                  key="pipeline"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
+                >
+                  <div className="space-y-4 text-left">
+                    <h3 className="text-2xl font-black text-white">Full Lifecycle Revenue Reconciliation</h3>
+                    <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                      Automate lead qualification, quote generation, customer order processing, GST tax invoices, and instant subscription payment reconciliation in INR.
+                    </p>
+                    <div className="space-y-2 pt-2">
+                      {['Automatic lead scoring & SLA breach warnings', 'One-click quote conversion into official customer orders', 'Automated GST tax invoice generation & payment status syncing'].map((f, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs text-slate-300 font-semibold">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>{f}</span>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                  <div className="p-6 bg-slate-950 rounded-2xl border border-slate-800 space-y-3 font-mono text-xs">
+                    <div className="flex justify-between text-slate-400 pb-2 border-b border-slate-800">
+                      <span>Pipeline Event</span>
+                      <span>Status</span>
+                    </div>
+                    <div className="flex justify-between text-emerald-400">
+                      <span>Lead Qualified: Acme Tech</span>
+                      <span className="font-bold">₹1,20,000</span>
+                    </div>
+                    <div className="flex justify-between text-brand-300">
+                      <span>Quote Approved: Enterprise Scope</span>
+                      <span className="font-bold">Issued</span>
+                    </div>
+                    <div className="flex justify-between text-purple-300">
+                      <span>GST Tax Invoice Reconciled</span>
+                      <span className="font-bold">Paid (INR)</span>
+                    </div>
+                  </div>
+                </motion.div>
               )}
 
               {activeTab === 'intelligence' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <div>
-                      <h3 className="text-base font-extrabold text-white">Grounded Win Probability Engine</h3>
-                      <p className="text-xs text-slate-400">Calculated strictly from engagement, decision speed, and deal age</p>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-indigo-400">Accuracy Score: 94.2%</span>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div className="p-4 bg-slate-950/70 rounded-xl border border-slate-800">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">Weighted Pipeline</p>
-                      <p className="text-xl font-extrabold text-white mt-1">$945,000</p>
-                    </div>
-                    <div className="p-4 bg-slate-950/70 rounded-xl border border-slate-800">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">Win Rate</p>
-                      <p className="text-xl font-extrabold text-emerald-400 mt-1">68.4%</p>
-                    </div>
-                    <div className="p-4 bg-slate-950/70 rounded-xl border border-slate-800">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">Avg Sales Cycle</p>
-                      <p className="text-xl font-extrabold text-indigo-400 mt-1">18 Days</p>
-                    </div>
-                    <div className="p-4 bg-slate-950/70 rounded-xl border border-slate-800">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">Risk Alerts</p>
-                      <p className="text-xl font-extrabold text-amber-400 mt-1">2 Deals</p>
+                <motion.div
+                  key="intelligence"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
+                >
+                  <div className="space-y-4 text-left">
+                    <h3 className="text-2xl font-black text-white">Grounded AI Opportunity Win Predictions</h3>
+                    <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                      Machine intelligence grounded strictly in historical deal velocity, touchpoint frequency, and sales rep activity logs. No black-box guesswork.
+                    </p>
+                    <div className="space-y-2 pt-2">
+                      {['Explainable win-probability score with key factor drivers', 'AI next-best-action recommendations for sales reps', 'Stalled opportunity risk flags & quiet lead detection'].map((f, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs text-slate-300 font-semibold">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>{f}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
+                  <div className="p-6 bg-slate-950 rounded-2xl border border-slate-800 space-y-4">
+                    <div className="flex justify-between text-xs text-white font-extrabold">
+                      <span>AI Win Probability</span>
+                      <span className="text-emerald-400 font-mono">94 / 100 (HIGH WIN SCORE)</span>
+                    </div>
+                    <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                      <div className="h-full bg-gradient-to-r from-brand-550 to-emerald-500 rounded-full w-[94%]" />
+                    </div>
+                    <p className="text-xs text-slate-400 font-mono">Decision velocity +38% faster than baseline</p>
+                  </div>
+                </motion.div>
               )}
 
-              {activeTab === 'leads' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <div>
-                      <h3 className="text-base font-extrabold text-white">Automated Lead Routing & Scoring</h3>
-                      <p className="text-xs text-slate-400">Instant assignment based on territory, deal size, and workload</p>
+              {activeTab === 'omnichannel' && (
+                <motion.div
+                  key="omnichannel"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
+                >
+                  <div className="space-y-4 text-left">
+                    <h3 className="text-2xl font-black text-white">360° Omnichannel Support Desk & Live Chat</h3>
+                    <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                      Unify customer support tickets, live concierge chat, web forms, customer portal logins, and NPS satisfaction surveys into one agent workspace.
+                    </p>
+                    <div className="space-y-2 pt-2">
+                      {['Support SLA response velocity tracking (< 38s)', 'Embedded visitor live chat concierge with public API', 'Automated CSAT / NPS survey distribution'].map((f, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs text-slate-300 font-semibold">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>{f}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <div className="p-4 bg-slate-950/70 rounded-xl border border-slate-800 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-white">Enterprise FinTech Opportunity</p>
-                      <p className="text-[10px] text-slate-400">Assigned to Sarah Connor (Sales Exec)</p>
+                  <div className="p-6 bg-slate-950 rounded-2xl border border-slate-800 space-y-3 font-mono text-xs">
+                    <div className="flex justify-between text-slate-400">
+                      <span>Support SLA Met</span>
+                      <span className="text-emerald-400 font-bold">99.8% Adherence</span>
                     </div>
-                    <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold rounded-full">
-                      Score: 96 / 100
-                    </span>
+                    <div className="flex justify-between text-slate-400">
+                      <span>Average CSAT Score</span>
+                      <span className="text-amber-400 font-bold">5.0 / 5.0 ⭐</span>
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               )}
 
-              {activeTab === 'tickets' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <div>
-                      <h3 className="text-base font-extrabold text-white">360° Omnichannel Support Desk</h3>
-                      <p className="text-xs text-slate-400">Integrated tickets, live chat, knowledge base, and CSAT</p>
+              {activeTab === 'security' && (
+                <motion.div
+                  key="security"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
+                >
+                  <div className="space-y-4 text-left">
+                    <h3 className="text-2xl font-black text-white">Multi-Tenant Isolation & Security Shield</h3>
+                    <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                      Strict organization-scoped database boundary controls, TOTP 2FA authenticator verification, and tamper-evident audit log streaming.
+                    </p>
+                    <div className="space-y-2 pt-2">
+                      {['Automatic Tenant Context Middleware on every backend request', 'TOTP Authenticator MFA & encrypted recovery keys', 'Tamper-evident audit log streaming for compliance'].map((f, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs text-slate-300 font-semibold">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>{f}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <div className="p-4 bg-slate-950/70 rounded-xl border border-slate-800 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-white">SLA Critical Ticket #TK-8891</p>
-                      <p className="text-[10px] text-slate-400">Resolved in 8 mins • CSAT 5.0 Rating</p>
+                  <div className="p-6 bg-slate-950 rounded-2xl border border-slate-800 space-y-3 font-mono text-xs">
+                    <div className="flex justify-between text-emerald-400">
+                      <span>Tenant Boundary</span>
+                      <span className="font-bold">0 Cross-Tenant Leak</span>
                     </div>
-                    <span className="px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold rounded-full">
-                      SLA Met
-                    </span>
+                    <div className="flex justify-between text-brand-300">
+                      <span>Authentication</span>
+                      <span className="font-bold">TOTP MFA Active</span>
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
           </div>
         </div>
       </section>
 
-      {/* ─── Mobile CRM Phone Mockup Section ────────────────────── */}
-      <section className="py-20 px-6 relative bg-slate-900/40 border-t border-slate-900 overflow-hidden">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-4 max-w-2xl mx-auto">
-            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-extrabold tracking-widest uppercase">
-              <Smartphone className="w-3.5 h-3.5" /> ANYWHERE ENTERPRISE CONTROL
+      {/* ─── Mobile Interactive Mockup Section ────────────────────── */}
+      <section className="py-24 px-6 relative bg-slate-950">
+        <div className="max-w-7xl mx-auto text-center space-y-12">
+          <div className="space-y-3">
+            <span className="px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-extrabold uppercase tracking-wider">
+              MOBILE & WEB SYNCHRONIZATION
             </span>
             <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-display">
-              FlowCRM Mobile Executive Suite
+              FlowCRM Mobile Companion
             </h2>
-            <p className="text-sm text-slate-400 font-normal">
-              Manage pipeline velocity, real-time AI win probability, and support SLA tickets seamlessly from your iOS or Android device.
+            <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto font-medium">
+              Access deals, review quotes, approve invoices, and chat with clients directly from your iOS and Android devices.
             </p>
           </div>
 
@@ -325,7 +397,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ─── Real Feature INR Pricing Section ───────────────────── */}
-      <section className="py-24 px-6 relative bg-slate-950/80 border-t border-slate-900">
+      <section id="pricing" className="py-24 px-6 relative bg-slate-950/80 border-t border-slate-900">
         <div className="max-w-7xl mx-auto">
           {/* Interactive Pricing Calculator */}
           <PricingCalculator />
