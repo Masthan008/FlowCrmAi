@@ -94,11 +94,11 @@ export const LandingPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-900/90 border border-indigo-500/30 text-indigo-300 text-xs font-bold shadow-2xl backdrop-blur-xl"
+            className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-900/90 border border-brand-500/30 text-brand-300 text-xs font-bold shadow-2xl backdrop-blur-xl"
           >
-            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>FlowCRM AI Enterprise v2.5 Released</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <Sparkles className="w-3.5 h-3.5 text-brand-400" />
+            <span>FlowCRM AI Enterprise — Reconciled Lead-to-Cash Ready</span>
             <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
           </motion.div>
 
@@ -109,8 +109,8 @@ export const LandingPage: React.FC = () => {
             className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] max-w-5xl mx-auto font-display"
           >
             The Autonomous{' '}
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
-              Lead-to-Cash & Customer AI Platform
+            <span className="bg-gradient-to-r from-brand-400 via-teal-300 to-purple-400 bg-clip-text text-transparent">
+              Lead-to-Cash & Customer AI Engine
             </span>
           </motion.h1>
 
@@ -118,7 +118,7 @@ export const LandingPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-base sm:text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed font-normal"
+            className="text-base sm:text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed font-medium"
           >
             Unify your enterprise sales pipelines, revenue forecasting, support desk, and multi-tenant security into a single, lightning-fast workspace with grounded AI intelligence.
           </motion.p>
@@ -133,18 +133,19 @@ export const LandingPage: React.FC = () => {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/onboarding')}
-              className="inline-flex items-center gap-2.5 px-8 py-4 text-sm font-extrabold rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 cursor-pointer transition-all"
+              className="inline-flex items-center gap-2.5 px-8 py-4 text-xs font-extrabold rounded-2xl bg-gradient-to-r from-brand-550 via-teal-600 to-emerald-600 text-white shadow-glossy-xl hover:shadow-glossy-2xl cursor-pointer transition-all border border-white/20"
             >
-              Get Started Free <ArrowRight className="w-4 h-4" />
+              <span>Provision Free Workspace</span>
+              <ArrowRight className="w-4 h-4" />
             </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/onboarding')}
-              className="inline-flex items-center gap-2.5 px-7 py-4 text-sm font-bold rounded-2xl bg-slate-900 text-slate-200 border border-slate-700/80 hover:bg-slate-800 hover:text-white shadow-xl backdrop-blur-xl cursor-pointer transition-all"
+              className="inline-flex items-center gap-2.5 px-7 py-4 text-xs font-extrabold rounded-2xl bg-slate-900 text-slate-200 border border-slate-700/80 hover:bg-slate-800 hover:text-white shadow-xl backdrop-blur-xl cursor-pointer transition-all"
             >
-              <Play className="w-4 h-4 text-indigo-400 fill-indigo-400" /> Interactive Feature Tour
+              <Play className="w-4 h-4 text-brand-400 fill-brand-400" /> Interactive Onboarding Tour
             </motion.button>
           </motion.div>
 
