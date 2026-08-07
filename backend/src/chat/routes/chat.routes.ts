@@ -12,6 +12,13 @@ import {
 
 const router = Router();
 
+// Public routes for guest website widget
+router.post('/public/start', chatController.create);
+router.post('/public/:id/messages', chatController.sendMessage);
+router.get('/public/:id', chatController.getById);
+router.patch('/public/:id/rate', validateRequest(rateConversationSchema), chatController.rate);
+
+// Authenticated Agent / Admin routes
 router.use(requireAuth);
 
 router.get('/', requirePermission('chat:view'), chatController.list);

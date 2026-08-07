@@ -53,6 +53,8 @@ import { useThemeStore } from '../store/themeStore';
 import { useToast } from '../components/ui/ToastProvider';
 import { Avatar } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
+import { Logo } from '../components/ui/Logo';
+import ChatWidget from '../components/chat/ChatWidget';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
 import { api } from '../services/api';
@@ -764,6 +766,9 @@ export const DashboardLayout: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Floating Live Chat Concierge Widget */}
+      <ChatWidget />
     </div>
   );
 };

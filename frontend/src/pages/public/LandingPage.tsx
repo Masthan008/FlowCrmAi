@@ -13,6 +13,7 @@ import SplashScreen from '../../components/public/SplashScreen';
 import PhoneMockupBasic from '../../components/ui/phone-mockups-1';
 import PricingCalculator from '../../components/public/PricingCalculator';
 import Footer from '../../components/public/Footer';
+import ChatWidget from '../../components/chat/ChatWidget';
 
 import { Logo } from '../../components/ui/Logo';
 
@@ -332,6 +333,9 @@ export const LandingPage: React.FC = () => {
 
       {/* ─── Multi-Column Enterprise Footer ───────────────────── */}
       <Footer />
+
+      {/* Floating Live Chat Concierge Widget */}
+      <ChatWidget />
     </div>
   );
 };

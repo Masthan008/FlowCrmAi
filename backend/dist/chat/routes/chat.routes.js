@@ -7,6 +7,12 @@ const permission_1 = require("../../middlewares/permission");
 const validate_1 = require("../../middlewares/validate");
 const chat_validator_1 = require("../validators/chat.validator");
 const router = (0, express_1.Router)();
+// Public routes for guest website widget
+router.post('/public/start', chat_controller_1.chatController.create);
+router.post('/public/:id/messages', chat_controller_1.chatController.sendMessage);
+router.get('/public/:id', chat_controller_1.chatController.getById);
+router.patch('/public/:id/rate', (0, validate_1.validateRequest)(chat_validator_1.rateConversationSchema), chat_controller_1.chatController.rate);
+// Authenticated Agent / Admin routes
 router.use(auth_1.requireAuth);
 router.get('/', (0, permission_1.requirePermission)('chat:view'), chat_controller_1.chatController.list);
 router.get('/conversations', (0, permission_1.requirePermission)('chat:view'), chat_controller_1.chatController.list);
