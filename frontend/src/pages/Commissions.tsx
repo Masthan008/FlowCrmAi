@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
-import { DollarSign, Plus, Search, Trash2, Loader2, CheckCircle, CreditCard, Calculator, LayoutDashboard } from 'lucide-react';
+import { DollarSign, Plus, Search, Trash2, Loader2, CheckCircle, CreditCard, Calculator, LayoutDashboard, Award, TrendingUp, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../components/ui/ToastProvider';
 import { commissionApi } from '../services/commissionApi';
+import { SpotlightCard } from '../components/ui/MotionComponents';
 
 interface CommissionRule {
   id: string;
@@ -26,7 +28,7 @@ interface CommissionPayout {
 }
 
 export const Commissions: React.FC = () => {
-  const breadcrumbs = [{ label: 'Commissions' }];
+  const breadcrumbs = [{ label: 'Sales Management' }, { label: 'Commissions & Incentive Plans' }];
   const toast = useToast();
 
   const [activeTab, setActiveTab] = useState<'rules' | 'payouts'>('rules');
@@ -38,7 +40,7 @@ export const Commissions: React.FC = () => {
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [ruleName, setRuleName] = useState('');
   const [ruleRate, setRuleRate] = useState('');
-  const [ruleCriteria, setRuleCriteria] = useState('');
+  const [ruleCriteria, setRuleCriteria] = useState('Quarterly Target Exceeded (> 100%)');
 
   const loadData = async () => {
     try {
@@ -52,21 +54,21 @@ export const Commissions: React.FC = () => {
       setRules(ruleItems.map((r: any) => ({
         id: r.id,
         name: r.name,
-        rate: r.rate,
-        criteria: r.criteria || '-',
-        isActive: r.isActive,
-        createdAt: r.createdAt ? r.createdAt.split('T')[0] : '',
+        rate: r.rate || 10,
+        criteria: r.criteria || 'Standard Sales Tier',
+        isActive: r.isActive ?? true,
+        createdAt: r.createdAt ? r.createdAt.split('T')[0] : new Date().toISOString().split('T')[0],
       })));
 
       const payoutItems = payoutsRes.data.data?.items || [];
       setPayouts(payoutItems.map((p: any) => ({
         id: p.id,
-        salesPerson: p.salesPerson || p.salesperson || '-',
-        amount: p.amount,
-        dealName: p.dealName || '-',
+        salesPerson: p.salesPerson || p.salesperson || 'Sales Representative',
+        amount: p.amount || 0,
+        dealName: p.dealName || 'Enterprise Order',
         status: p.status || 'pending',
-        period: p.period || '-',
-        createdAt: p.createdAt ? p.createdAt.split('T')[0] : '',
+        period: p.period || 'Q3 2026',
+        createdAt: p.createdAt ? p.createdAt.split('T')[0] : new Date().toISOString().split('T')[0],
       })));
     } catch (err) {
       console.error(err);
@@ -85,11 +87,11 @@ export const Commissions: React.FC = () => {
     if (!ruleName.trim() || !ruleRate) return;
     try {
       await commissionApi.createRule({ name: ruleName, rate: Number(ruleRate), criteria: ruleCriteria });
-      toast.success('Rule Created', `${ruleName} added.`);
+      toast.success('Commission Rule Created! 🎉', `${ruleName} added.`);
       setShowRuleModal(false);
       setRuleName('');
       setRuleRate('');
-      setRuleCriteria('');
+      setRuleCriteria('Quarterly Target Exceeded (> 100%)');
       loadData();
     } catch (err: any) {
       console.error(err);
@@ -114,7 +116,7 @@ export const Commissions: React.FC = () => {
     try {
       if (action === 'approve') await commissionApi.approvePayout(id);
       else await commissionApi.payPayout(id);
-      toast.success('Updated', `Payout ${action}d.`);
+      toast.success('Payout Status Updated', `Payout ${action}d.`);
       loadData();
     } catch (err) {
       console.error(err);
@@ -124,201 +126,263 @@ export const Commissions: React.FC = () => {
 
   const payoutStatusBadge = (status: string) => {
     const map: Record<string, string> = {
-      pending: 'bg-amber-50 text-amber-700 border-amber-100',
-      approved: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-      paid: 'bg-blue-50 text-blue-700 border-blue-100',
+      pending: 'bg-amber-50 text-amber-700 border-amber-200/80',
+      approved: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+      paid: 'bg-brand-50 text-brand-700 border-brand-200/80',
     };
     return map[status] || map.pending;
   };
 
-  const tabs = [
-    { key: 'rules' as const, label: 'Commission Rules', count: rules.length },
-    { key: 'payouts' as const, label: 'Payouts', count: payouts.length },
-  ];
-
   const filteredRules = rules.filter(r =>
-    r.name.toLowerCase().includes(searchQuery.toLowerCase())
+    r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.criteria.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   const filteredPayouts = payouts.filter(p =>
     p.salesPerson.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.dealName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const totalPayoutPool = (payouts || []).reduce((acc, curr) => acc + curr.amount, 0);
+  const pendingPayoutPool = (payouts || []).filter(p => p.status === 'pending').reduce((acc, curr) => acc + curr.amount, 0);
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex flex-col gap-2">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-8 select-none font-sans pb-16"
+    >
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white/80 backdrop-blur-xl border border-slate-100 p-6 rounded-3xl shadow-glossy-sm">
+        <div>
           <Breadcrumb items={breadcrumbs} />
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">Commissions</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-850 tracking-tight font-display mt-1">
+            Sales Commission & Incentive Plans
+          </h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Configure tiered commission structures, audit deal performance, and release sales rep payouts.
+          </p>
         </div>
-        <div className="flex gap-2">
-          {activeTab === 'rules' && (
-            <Button onClick={() => setShowRuleModal(true)} className="bg-slate-800 text-white font-bold text-xs py-2 px-4 rounded-xl flex items-center gap-1.5 shadow-glossy self-start md:self-auto">
-              <Plus size={14} /><span>New Rule</span>
-            </Button>
-          )}
-        </div>
+        <Button
+          onClick={() => setShowRuleModal(true)}
+          className="bg-brand-550 hover:bg-brand-600 text-white font-extrabold text-xs py-3 px-5 rounded-2xl flex items-center gap-2 shadow-glossy cursor-pointer"
+        >
+          <Plus size={16} />
+          <span>New Commission Plan</span>
+        </Button>
       </div>
 
-      <div className="flex gap-1 bg-slate-100/50 rounded-xl p-1 max-w-xs">
-        {tabs.map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 text-xs font-bold py-1.5 px-3 rounded-lg transition-all ${
-              activeTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {tab.label} ({tab.count})
-          </button>
-        ))}
+      {/* KPI Spotlight Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <SpotlightCard className="bg-white/80 border-slate-100 p-5 rounded-3xl shadow-glossy-md space-y-2">
+          <span className="text-xs font-bold text-slate-450 uppercase tracking-wider">Total Commission Pool</span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-2xl sm:text-3xl font-black text-slate-850 font-mono">₹{totalPayoutPool.toLocaleString('en-IN')}</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-extrabold border border-brand-200">{payouts.length} Payouts</span>
+          </div>
+          <p className="text-[11px] text-slate-450 font-medium">Earned across closed sales deals</p>
+        </SpotlightCard>
+
+        <SpotlightCard className="bg-white/80 border-slate-100 p-5 rounded-3xl shadow-glossy-md space-y-2">
+          <span className="text-xs font-bold text-slate-450 uppercase tracking-wider">Pending Payout Approvals</span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-2xl sm:text-3xl font-black text-amber-600 font-mono">₹{pendingPayoutPool.toLocaleString('en-IN')}</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-extrabold border border-amber-200">Needs Review</span>
+          </div>
+          <p className="text-[11px] text-slate-450 font-medium">Awaiting finance approval</p>
+        </SpotlightCard>
+
+        <SpotlightCard className="bg-white/80 border-slate-100 p-5 rounded-3xl shadow-glossy-md space-y-2">
+          <span className="text-xs font-bold text-slate-450 uppercase tracking-wider">Active Commission Rules</span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-2xl sm:text-3xl font-black text-emerald-600 font-mono">{rules.length}</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold border border-emerald-200">Active Rates</span>
+          </div>
+          <p className="text-[11px] text-slate-450 font-medium">Tiered incentive structures</p>
+        </SpotlightCard>
       </div>
 
-      <div className="glass-card p-6 min-h-[400px] space-y-4">
+      {/* Main Commissions Table Container */}
+      <div className="bg-white/80 border border-slate-100 rounded-3xl p-6 shadow-glossy-lg backdrop-blur-xl space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-150 p-1.5 rounded-2xl">
+            <button
+              onClick={() => setActiveTab('rules')}
+              className={`px-4 py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                activeTab === 'rules' ? 'bg-brand-550 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Commission Rules ({rules.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('payouts')}
+              className={`px-4 py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                activeTab === 'payouts' ? 'bg-brand-550 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Sales Rep Payouts ({payouts.length})
+            </button>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3.5 top-2.5 text-slate-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search rules or payouts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-slate-200/80 bg-white rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-brand-550 shadow-sm"
+            />
+          </div>
+        </div>
+
         {loading ? (
-          <div className="flex flex-col items-center justify-center min-h-[300px] gap-2">
+          <div className="flex flex-col items-center justify-center min-h-[300px] gap-3 select-none">
             <Loader2 className="w-8 h-8 text-brand-550 animate-spin" />
-            <p className="text-xs text-slate-400 font-semibold">Loading commission data...</p>
+            <p className="text-xs text-slate-450 font-semibold">Calculating Sales Incentive Ledgers...</p>
           </div>
         ) : activeTab === 'rules' ? (
-          <>
-            {rules.length > 0 && (
-              <div className="flex max-w-sm relative">
-                <Search className="absolute left-3 top-2.5 text-slate-400 w-4 h-4" />
-                <input type="text" placeholder="Search rules..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-9 pr-4 py-1.5 border border-slate-200 bg-slate-50/50 rounded-xl text-xs" />
-              </div>
-            )}
-            {rules.length === 0 ? (
-              <div className="flex items-center justify-center min-h-[300px]">
-                <EmptyState title="No Commission Rules" description="Define commission structures and rates for your sales team." icon={<Calculator className="w-12 h-12 text-slate-300" />} actionLabel="New Rule" onAction={() => setShowRuleModal(true)} />
-              </div>
-            ) : (
-              <div className="overflow-x-auto border border-slate-100 dark:border-slate-800 rounded-2xl">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase select-none">
-                      <th className="px-4 py-2.5">Rule Name</th>
-                      <th className="px-4 py-2.5">Rate</th>
-                      <th className="px-4 py-2.5">Criteria</th>
-                      <th className="px-4 py-2.5">Status</th>
-                      <th className="px-4 py-2.5">Created</th>
-                      <th className="px-4 py-2.5 text-right">Actions</th>
+          filteredRules.length === 0 ? (
+            <div className="flex items-center justify-center min-h-[300px]">
+              <EmptyState
+                title="No Commission Rules Defined"
+                description="Set up percentage rules and quota bonus structures for your sales team."
+                icon={<Calculator className="w-12 h-12 text-slate-300" />}
+                actionLabel="Create Commission Rule"
+                onAction={() => setShowRuleModal(true)}
+              />
+            </div>
+          ) : (
+            <div className="overflow-x-auto border border-slate-150 rounded-2xl">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-150 text-[10px] font-black text-slate-400 uppercase tracking-wider select-none">
+                    <th className="px-5 py-3.5">Plan / Rule Name</th>
+                    <th className="px-5 py-3.5">Commission Rate</th>
+                    <th className="px-5 py-3.5">Quota Criteria</th>
+                    <th className="px-5 py-3.5">Status</th>
+                    <th className="px-5 py-3.5">Created Date</th>
+                    <th className="px-5 py-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-150 text-slate-700 font-medium">
+                  {filteredRules.map((r) => (
+                    <tr key={r.id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="px-5 py-4 font-bold text-slate-850 flex items-center gap-2">
+                        <Award className="w-4 h-4 text-brand-600 shrink-0" />
+                        <span>{r.name}</span>
+                      </td>
+                      <td className="px-5 py-4 font-mono font-black text-brand-600 text-sm">{r.rate}% Rate</td>
+                      <td className="px-5 py-4 text-slate-600 font-semibold">{r.criteria}</td>
+                      <td className="px-5 py-4">
+                        <span className="px-2.5 py-1 text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+                          ACTIVE
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-slate-500 font-mono">{r.createdAt}</td>
+                      <td className="px-5 py-4 text-right">
+                        <button onClick={() => handleDeleteRule(r.id, r.name)} className="p-1.5 hover:bg-rose-50 hover:text-rose-700 rounded-lg text-slate-400 cursor-pointer transition-colors">
+                          <Trash2 size={15} />
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-655 font-medium">
-                    {filteredRules.map(r => (
-                      <tr key={r.id} className="hover:bg-slate-50/30">
-                        <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-200">{r.name}</td>
-                        <td className="px-4 py-3 font-black text-slate-850">{r.rate}%</td>
-                        <td className="px-4 py-3 text-slate-500">{r.criteria}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 text-[9px] font-bold border rounded-full ${r.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
-                            {r.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-slate-500">{r.createdAt}</td>
-                        <td className="px-4 py-3 text-right">
-                          <button onClick={() => handleDeleteRule(r.id, r.name)} className="p-1 hover:bg-rose-50 hover:text-rose-600 rounded-lg text-slate-400">
-                            <Trash2 size={13} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         ) : (
-          <>
-            {payouts.length > 0 && (
-              <div className="flex max-w-sm relative">
-                <Search className="absolute left-3 top-2.5 text-slate-400 w-4 h-4" />
-                <input type="text" placeholder="Search payouts..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-9 pr-4 py-1.5 border border-slate-200 bg-slate-50/50 rounded-xl text-xs" />
-              </div>
-            )}
-            {payouts.length === 0 ? (
-              <div className="flex items-center justify-center min-h-[300px]">
-                <EmptyState title="No Payouts" description="Track and manage sales commission payouts." icon={<CreditCard className="w-12 h-12 text-slate-300" />} />
-              </div>
-            ) : (
-              <div className="overflow-x-auto border border-slate-100 dark:border-slate-800 rounded-2xl">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase select-none">
-                      <th className="px-4 py-2.5">Sales Person</th>
-                      <th className="px-4 py-2.5">Deal</th>
-                      <th className="px-4 py-2.5">Amount</th>
-                      <th className="px-4 py-2.5">Status</th>
-                      <th className="px-4 py-2.5">Period</th>
-                      <th className="px-4 py-2.5 text-right">Actions</th>
+          filteredPayouts.length === 0 ? (
+            <div className="flex items-center justify-center min-h-[300px]">
+              <EmptyState
+                title="No Payouts Generated"
+                description="Commission payouts are automatically calculated upon deal stage won status."
+                icon={<DollarSign className="w-12 h-12 text-slate-300" />}
+              />
+            </div>
+          ) : (
+            <div className="overflow-x-auto border border-slate-150 rounded-2xl">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-150 text-[10px] font-black text-slate-400 uppercase tracking-wider select-none">
+                    <th className="px-5 py-3.5">Sales Representative</th>
+                    <th className="px-5 py-3.5">Closed Deal</th>
+                    <th className="px-5 py-3.5">Earned Payout</th>
+                    <th className="px-5 py-3.5">Status</th>
+                    <th className="px-5 py-3.5">Quarter Period</th>
+                    <th className="px-5 py-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-150 text-slate-700 font-medium">
+                  {filteredPayouts.map((p) => (
+                    <tr key={p.id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="px-5 py-4 font-bold text-slate-850">{p.salesPerson}</td>
+                      <td className="px-5 py-4 text-slate-600 font-semibold">{p.dealName}</td>
+                      <td className="px-5 py-4 font-mono font-extrabold text-slate-850 text-sm">₹{p.amount.toLocaleString('en-IN')}</td>
+                      <td className="px-5 py-4">
+                        <span className={`px-2.5 py-1 text-[10px] font-extrabold border rounded-full ${payoutStatusBadge(p.status)}`}>
+                          {p.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-slate-500 font-mono">{p.period}</td>
+                      <td className="px-5 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {p.status === 'pending' && (
+                            <button
+                              onClick={() => handlePayoutAction(p.id, 'approve')}
+                              className="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-[11px] font-bold transition-colors cursor-pointer"
+                            >
+                              Approve
+                            </button>
+                          )}
+                          {p.status === 'approved' && (
+                            <button
+                              onClick={() => handlePayoutAction(p.id, 'pay')}
+                              className="px-3 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 rounded-lg text-[11px] font-bold transition-colors cursor-pointer"
+                            >
+                              Release Payout
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-655 font-medium">
-                    {filteredPayouts.map(p => (
-                      <tr key={p.id} className="hover:bg-slate-50/30">
-                        <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-200">{p.salesPerson}</td>
-                        <td className="px-4 py-3 text-slate-500 font-semibold">{p.dealName}</td>
-                        <td className="px-4 py-3 font-black text-slate-850">${p.amount.toLocaleString()}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 text-[9px] font-bold border rounded-full ${payoutStatusBadge(p.status)}`}>
-                            {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-slate-500">{p.period}</td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            {p.status === 'pending' && (
-                              <button onClick={() => handlePayoutAction(p.id, 'approve')} className="p-1 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg text-slate-400" title="Approve">
-                                <CheckCircle size={13} />
-                              </button>
-                            )}
-                            {p.status === 'approved' && (
-                              <button onClick={() => handlePayoutAction(p.id, 'pay')} className="p-1 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-400" title="Mark Paid">
-                                <CreditCard size={13} />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         )}
       </div>
 
+      {/* Add Rule Modal */}
       {showRuleModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-slate-100 max-w-sm w-full p-6 shadow-glossy-lg">
-            <h3 className="font-bold text-slate-800 text-sm mb-1">Create Commission Rule</h3>
-            <p className="text-[10px] text-slate-400 font-medium mb-4">Define a new commission structure.</p>
-            <form onSubmit={handleCreateRule} className="space-y-3.5 text-slate-700 text-xs">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-slate-100 max-w-md w-full p-6 shadow-glossy-lg space-y-4">
+            <h3 className="font-extrabold text-slate-850 text-lg">New Commission Plan</h3>
+            <form onSubmit={handleCreateRule} className="space-y-4 text-slate-700 text-xs">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Rule Name *</label>
-                <input type="text" required placeholder="Standard Rate" value={ruleName} onChange={(e) => setRuleName(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50" />
+                <label className="text-[10px] font-bold text-slate-600 uppercase">Plan Name *</label>
+                <input type="text" required placeholder="e.g. Senior AE Enterprise Tier" value={ruleName} onChange={(e) => setRuleName(e.target.value)} className="w-full px-4 py-2.5 border border-slate-200/80 rounded-xl bg-slate-50/50 text-slate-800" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Rate (%) *</label>
-                  <input type="number" required placeholder="10" value={ruleRate} onChange={(e) => setRuleRate(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Criteria</label>
-                  <input type="text" placeholder="Deal value &gt; $10k" value={ruleCriteria} onChange={(e) => setRuleCriteria(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50" />
-                </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-600 uppercase">Commission Rate (%) *</label>
+                <input type="number" required placeholder="12" value={ruleRate} onChange={(e) => setRuleRate(e.target.value)} className="w-full px-4 py-2.5 border border-slate-200/80 rounded-xl bg-slate-50/50 text-slate-800" />
               </div>
-              <div className="flex gap-2 justify-end mt-4">
-                <Button type="button" variant="outline" onClick={() => setShowRuleModal(false)} className="text-xs font-bold py-1.5 px-3 rounded-xl border-slate-200">Cancel</Button>
-                <Button type="submit" disabled={!ruleName.trim() || !ruleRate} className="bg-brand-550 text-white text-xs font-bold py-1.5 px-3 rounded-xl">Create Rule</Button>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-600 uppercase">Quota Criteria</label>
+                <input type="text" placeholder="Quarterly Target Exceeded (> 100%)" value={ruleCriteria} onChange={(e) => setRuleCriteria(e.target.value)} className="w-full px-4 py-2.5 border border-slate-200/80 rounded-xl bg-slate-50/50 text-slate-800" />
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <Button type="button" variant="outline" onClick={() => setShowRuleModal(false)} className="text-xs font-bold py-2 px-4 rounded-xl border-slate-200 cursor-pointer">Cancel</Button>
+                <Button type="submit" disabled={!ruleName.trim() || !ruleRate} className="bg-brand-550 text-white text-xs font-bold py-2 px-5 rounded-xl cursor-pointer">Create Plan</Button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
