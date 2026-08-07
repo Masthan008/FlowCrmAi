@@ -49,6 +49,7 @@ import Assets from '../pages/Assets';
 import GDPR from '../pages/GDPR';
 import Surveys from '../pages/Surveys';
 import Commissions from '../pages/Commissions';
+import Workflows from '../pages/Workflows';
 
 // Public Experience Pages
 import LandingPage from '../pages/public/LandingPage';
@@ -492,6 +493,7 @@ export const router = createBrowserRouter([
       { path: 'profile', element: <Profile /> },
       { path: 'account-settings', element: <AccountSettings /> },
       { path: 'sessions', element: <MySessions /> },
+      { path: 'workflows', element: <Workflows /> },
       
       // Fallback
       { path: '*', element: <Navigate to="/" replace /> },

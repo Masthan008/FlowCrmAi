@@ -55,6 +55,8 @@ import { Avatar } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
 import { Logo } from '../components/ui/Logo';
 import ChatWidget from '../components/chat/ChatWidget';
+import AICopilotDrawer from '../components/ai/AICopilotDrawer';
+import { GitBranch } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
 import { api } from '../services/api';
@@ -189,6 +191,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'GDPR & Privacy', icon: <ShieldCheck size={18} />, path: '/gdpr', requiredPermission: 'gdpr:view' },
     { label: 'Surveys (NPS)', icon: <ClipboardCheck size={18} />, path: '/surveys', requiredPermission: 'surveys:view' },
     { label: 'Commissions', icon: <DollarSign size={18} />, path: '/commissions', requiredPermission: 'commissions:view' },
+    { label: 'Workflow Rules', icon: <GitBranch size={18} />, path: '/workflows' },
   ];
 
   // Dynamically filter menu items based on assigned user permissions
@@ -767,8 +770,9 @@ export const DashboardLayout: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Floating Live Chat Concierge Widget */}
+      {/* Floating Live Chat Concierge & Universal AI Co-Pilot Drawer */}
       <ChatWidget />
+      <AICopilotDrawer />
     </div>
   );
 };
