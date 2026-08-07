@@ -240,24 +240,26 @@ export const Dashboard: React.FC = () => {
     );
   }
 
-  const hiddenWidgetsList = widgetsList.filter(w => widgetLayout[w.id]?.hidden);
+  const hiddenWidgetsList = (widgetsList || []).filter(w => widgetLayout?.[w.id]?.hidden);
 
-  const filteredDeals = deals.filter(d => {
+  const filteredDeals = (deals || []).filter(d => {
+    if (!d) return false;
     if (!searchQuery.trim()) return true;
     return (
-      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.stage.toLowerCase().includes(searchQuery.toLowerCase())
+      (d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (d.company || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (d.owner || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (d.stage || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 
-  const filteredActivities = activities.filter(act => {
+  const filteredActivities = (activities || []).filter(act => {
+    if (!act) return false;
     if (!searchQuery.trim()) return true;
     return (
-      act.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      act.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      act.module.toLowerCase().includes(searchQuery.toLowerCase())
+      (act.userName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (act.action || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (act.module || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 

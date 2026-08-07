@@ -69,6 +69,7 @@ import MySessions from '../pages/auth/MySessions';
 
 // Guards
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
+import { RouteErrorFallback } from '../components/ui/RouteErrorFallback';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import PublicRoute from '../components/auth/PublicRoute';
 
@@ -77,22 +78,27 @@ export const router = createBrowserRouter([
   {
     path: '/landing',
     element: <LandingPage />,
+    errorElement: <RouteErrorFallback />,
   },
   {
     path: '/onboarding',
     element: <Onboarding />,
+    errorElement: <RouteErrorFallback />,
   },
   {
     path: '/about',
     element: <AboutPage />,
+    errorElement: <RouteErrorFallback />,
   },
   {
     path: '/checkout',
     element: <CheckoutPage />,
+    errorElement: <RouteErrorFallback />,
   },
   {
     path: '/splash',
     element: <SplashScreen onComplete={() => { window.location.href = '/onboarding'; }} />,
+    errorElement: <RouteErrorFallback />,
   },
 
   // Public Auth Pages
@@ -103,6 +109,7 @@ export const router = createBrowserRouter([
         <Login />
       </PublicRoute>
     ),
+    errorElement: <RouteErrorFallback />,
   },
   {
     path: '/register',
@@ -111,6 +118,7 @@ export const router = createBrowserRouter([
         <Register />
       </PublicRoute>
     ),
+    errorElement: <RouteErrorFallback />,
   },
   {
     path: '/forgot-password',
@@ -119,6 +127,7 @@ export const router = createBrowserRouter([
         <ForgotPassword />
       </PublicRoute>
     ),
+    errorElement: <RouteErrorFallback />,
   },
   {
     path: '/reset-password',
@@ -127,10 +136,12 @@ export const router = createBrowserRouter([
         <ResetPassword />
       </PublicRoute>
     ),
+    errorElement: <RouteErrorFallback />,
   },
   {
     path: '/unauthorized',
     element: <Unauthorized />,
+    errorElement: <RouteErrorFallback />,
   },
 
   // Private Dashboard Layout & Child Routes
@@ -141,6 +152,7 @@ export const router = createBrowserRouter([
         <DashboardLayout />
       </ProtectedRoute>
     ),
+    errorElement: <RouteErrorFallback />,
     children: [
       { index: true, element: <Dashboard /> },
       
