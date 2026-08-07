@@ -79,18 +79,6 @@ export const Dashboard: React.FC = () => {
     fetchDashboardData(tf);
   };
 
-  const getTimeframePrefix = (tf: string) => {
-    switch (tf.toLowerCase()) {
-      case 'today': return "Today's";
-      case 'yesterday': return "Yesterday's";
-      case '7d': return '7D';
-      case '30d': return '30D';
-      case 'quarter': return "This Quarter's";
-      case 'year': return "This Year's";
-      default: return 'Period';
-    }
-  };
-
   const widgetsList = [
     { id: 'todayOverview', label: "Today's Business Overview" },
     { id: 'performanceCharts', label: 'Business Performance Analytics' },
@@ -108,23 +96,23 @@ export const Dashboard: React.FC = () => {
     const layout = widgetLayout[widgetId] || { hidden: false, collapsed: false, pinned: false };
     
     return (
-      <div className="flex justify-between items-center border-b border-slate-800/80 pb-3 mb-4">
+      <div className="flex justify-between items-center border-b border-slate-100/80 pb-3.5 mb-4">
         <div>
-          <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+          <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <span>{title}</span>
             {layout.pinned && (
-              <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] font-extrabold border border-indigo-500/30">
+              <span className="px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 text-[10px] font-extrabold border border-brand-200">
                 Pinned
               </span>
             )}
           </h3>
-          {subtitle && <p className="text-[11px] text-slate-400 font-medium mt-0.5">{subtitle}</p>}
+          {subtitle && <p className="text-[11px] text-slate-450 font-medium mt-0.5">{subtitle}</p>}
         </div>
         <div className="flex gap-1.5">
           <button
             onClick={() => toggleWidget(widgetId, 'pinned')}
-            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-              layout.pinned ? 'bg-indigo-600/30 border-indigo-500/50 text-indigo-300' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+            className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
+              layout.pinned ? 'bg-brand-50 border-brand-200 text-brand-600' : 'bg-white border-slate-200/80 text-slate-400 hover:text-slate-700'
             }`}
             title={layout.pinned ? 'Unpin from Top' : 'Pin to Top'}
           >
@@ -133,7 +121,7 @@ export const Dashboard: React.FC = () => {
           
           <button
             onClick={() => toggleWidget(widgetId, 'collapsed')}
-            className="p-1.5 rounded-lg border bg-slate-900 border-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
+            className="p-1.5 rounded-xl border bg-white border-slate-200/80 text-slate-400 hover:text-slate-700 transition-all cursor-pointer shadow-sm"
             title={layout.collapsed ? 'Expand Widget' : 'Collapse Widget'}
           >
             {layout.collapsed ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
@@ -141,7 +129,7 @@ export const Dashboard: React.FC = () => {
 
           <button
             onClick={() => toggleWidget(widgetId, 'hidden')}
-            className="p-1.5 rounded-lg border bg-slate-900 border-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 transition-all cursor-pointer"
+            className="p-1.5 rounded-xl border bg-white border-slate-200/80 text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all cursor-pointer shadow-sm"
             title="Hide Widget"
           >
             <EyeOff size={12} />
@@ -157,7 +145,7 @@ export const Dashboard: React.FC = () => {
       id: 'name',
       header: 'Deal Opportunity',
       cell: ({ row }: any) => (
-        <span className="font-bold text-white text-xs">{row.original.name}</span>
+        <span className="font-bold text-slate-800 text-xs">{row.original.name}</span>
       )
     },
     {
@@ -165,7 +153,7 @@ export const Dashboard: React.FC = () => {
       id: 'company',
       header: 'Company / Account',
       cell: ({ row }: any) => (
-        <span className="text-xs text-slate-300 font-medium">{row.original.company}</span>
+        <span className="text-xs text-slate-600 font-medium">{row.original.company}</span>
       )
     },
     {
@@ -190,7 +178,7 @@ export const Dashboard: React.FC = () => {
       id: 'value',
       header: 'Value',
       cell: ({ getValue }: any) => (
-        <span className="font-mono font-extrabold text-xs text-emerald-400">
+        <span className="font-mono font-extrabold text-xs text-emerald-600">
           ₹{getValue().toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
         </span>
       )
@@ -200,7 +188,7 @@ export const Dashboard: React.FC = () => {
       id: 'owner',
       header: 'Deal Owner',
       cell: ({ row }: any) => (
-        <span className="text-xs text-slate-400 font-medium">{row.original.owner}</span>
+        <span className="text-xs text-slate-500 font-medium">{row.original.owner}</span>
       )
     }
   ];
@@ -219,8 +207,8 @@ export const Dashboard: React.FC = () => {
   if (loading && !kpis) {
     return (
       <div className="min-h-[75vh] flex flex-col items-center justify-center gap-4 select-none">
-        <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
-        <span className="text-xs text-indigo-300 font-extrabold tracking-widest uppercase animate-pulse">
+        <Loader2 className="w-10 h-10 text-brand-550 animate-spin" />
+        <span className="text-xs text-slate-500 font-extrabold tracking-widest uppercase animate-pulse">
           Synchronizing Real-Time Business Intelligence...
         </span>
       </div>
@@ -231,9 +219,9 @@ export const Dashboard: React.FC = () => {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center text-center p-6 select-none">
         <AlertCircle className="w-12 h-12 text-rose-500 mb-4" />
-        <h3 className="text-base font-bold text-white tracking-tight mb-2">Failed to Sync Dashboard</h3>
-        <p className="text-xs text-slate-400 max-w-sm mb-6 font-medium">{error}</p>
-        <Button onClick={() => fetchDashboardData()} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl py-2 px-6">
+        <h3 className="text-base font-bold text-slate-800 tracking-tight mb-2">Failed to Sync Dashboard</h3>
+        <p className="text-xs text-slate-500 max-w-sm mb-6 font-medium">{error}</p>
+        <Button onClick={() => fetchDashboardData()} className="bg-brand-550 text-white font-bold text-xs rounded-xl py-2 px-6 shadow-glossy">
           Retry Connection
         </Button>
       </div>
@@ -314,28 +302,28 @@ export const Dashboard: React.FC = () => {
   return (
     <div id="dashboard-export-area" className="space-y-8 select-none font-sans pb-12">
       
-      {/* ─── 1. Executive Hero Header ────────────────────────────── */}
+      {/* ─── 1. Executive Hero Header (Luminous Glossy Light Theme) ────── */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl overflow-hidden"
+        className="relative bg-gradient-to-r from-white via-slate-50/80 to-teal-50/30 border border-slate-100 rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-glossy-lg overflow-hidden"
       >
-        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-100/30 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-extrabold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 text-brand-600 border border-brand-200/80 text-xs font-extrabold shadow-sm">
                 <Building2 className="w-3.5 h-3.5" /> {userCompanyName}
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-extrabold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-xs font-extrabold shadow-sm">
                 <ShieldCheck className="w-3.5 h-3.5" /> Grounded AI Active
               </span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-display">
+            <h1 className="text-2xl sm:text-4xl font-black text-slate-850 tracking-tight font-display">
               {getGreeting()}, {user?.firstName || 'Executive'} 👋
             </h1>
-            <p className="text-xs text-slate-400 font-medium">
+            <p className="text-xs text-slate-500 font-medium">
               {currentDate} • System status operational with zero SLA breaches.
             </p>
           </div>
@@ -345,10 +333,10 @@ export const Dashboard: React.FC = () => {
             {quickActions.slice(0, 4).map((act, i) => (
               <motion.button
                 key={i}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => navigate(act.path)}
-                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-md"
+                className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-glossy-sm"
               >
                 {act.icon}
                 <span>{act.label}</span>
@@ -359,7 +347,7 @@ export const Dashboard: React.FC = () => {
       </motion.div>
 
       {/* ─── 2. Global Toolbar: Timeframe, Search & Export ────────── */}
-      <div className="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-4 rounded-3xl shadow-xl">
+      <div className="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center bg-white/80 backdrop-blur-xl border border-slate-100 p-4 rounded-3xl shadow-glossy-sm">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-extrabold text-slate-400 uppercase tracking-widest mr-1">Timeframe:</span>
           {[
@@ -375,8 +363,8 @@ export const Dashboard: React.FC = () => {
               onClick={() => handleTimeframeChange(f.value)}
               className={`px-3 py-1.5 text-[10px] font-extrabold uppercase rounded-xl transition-all cursor-pointer ${
                 timeframe === f.value
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/30'
-                  : 'text-slate-400 hover:text-white bg-slate-950 border border-slate-800'
+                  ? 'bg-brand-550 text-white shadow-glossy'
+                  : 'text-slate-500 hover:text-slate-800 bg-slate-50 border border-slate-200/60'
               }`}
             >
               {f.label}
@@ -393,21 +381,21 @@ export const Dashboard: React.FC = () => {
               placeholder="Filter deals, leads, tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs border border-slate-800 rounded-xl bg-slate-950 text-white focus:outline-none focus:border-indigo-500 font-medium"
+              className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200/80 rounded-xl bg-white text-slate-800 focus:outline-none focus:border-brand-550 font-medium shadow-sm"
             />
           </div>
 
           {/* Export PDF / CSV */}
           <button
             onClick={() => handleExport('PDF')}
-            className="px-3.5 py-2 rounded-xl bg-indigo-600/20 text-indigo-300 border border-indigo-500/40 text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-600/30 transition-all cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-brand-50 text-brand-700 border border-brand-200/80 text-xs font-bold flex items-center gap-1.5 hover:bg-brand-100/50 transition-all cursor-pointer shadow-sm"
           >
             <Download size={13} />
             <span>PDF Report</span>
           </button>
           <button
             onClick={() => handleExport('CSV')}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5 hover:text-white transition-all cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200/80 text-xs font-bold flex items-center gap-1.5 hover:bg-slate-50 transition-all cursor-pointer shadow-sm"
           >
             <FileSpreadsheet size={13} />
             <span>CSV</span>
@@ -415,86 +403,86 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ─── 3. Spotlight KPI Metrics Grid ──────────────────────── */}
+      {/* ─── 3. Spotlight KPI Metrics Grid (White Glossy Light Theme) ─ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-        <SpotlightCard className="bg-slate-900/90 border-slate-800 p-5 rounded-3xl space-y-3">
+        <SpotlightCard className="bg-white/80 border-slate-100 p-5 rounded-3xl shadow-glossy-md space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Leads</span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center">
+            <span className="text-xs font-bold text-slate-450 uppercase tracking-wider">Total Leads</span>
+            <div className="w-8 h-8 rounded-xl bg-brand-50 text-brand-600 border border-brand-200/80 flex items-center justify-center">
               <Users2 className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-black text-white font-mono">
+            <span className="text-2xl sm:text-3xl font-black text-slate-850 font-mono">
               <AnimatedNumber value={kpis?.totalLeads || 0} />
             </span>
             <PulseBadge status="up" text="+14%" />
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">Active in lead SLA pipeline</p>
+          <p className="text-[11px] text-slate-450 font-medium">Active in lead SLA pipeline</p>
         </SpotlightCard>
 
-        <SpotlightCard className="bg-slate-900/90 border-slate-800 p-5 rounded-3xl space-y-3">
+        <SpotlightCard className="bg-white/80 border-slate-100 p-5 rounded-3xl shadow-glossy-md space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Contacts</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center">
+            <span className="text-xs font-bold text-slate-450 uppercase tracking-wider">Active Contacts</span>
+            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 border border-purple-200/80 flex items-center justify-center">
               <Activity className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-black text-white font-mono">
+            <span className="text-2xl sm:text-3xl font-black text-slate-850 font-mono">
               <AnimatedNumber value={kpis?.activeContacts || 0} />
             </span>
             <PulseBadge status="up" text="+8.2%" />
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">Verified customer accounts</p>
+          <p className="text-[11px] text-slate-450 font-medium">Verified customer accounts</p>
         </SpotlightCard>
 
-        <SpotlightCard className="bg-slate-900/90 border-slate-800 p-5 rounded-3xl space-y-3">
+        <SpotlightCard className="bg-white/80 border-slate-100 p-5 rounded-3xl shadow-glossy-md space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Open Deals</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+            <span className="text-xs font-bold text-slate-450 uppercase tracking-wider">Open Deals</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center">
               <Briefcase className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-black text-white font-mono">
+            <span className="text-2xl sm:text-3xl font-black text-slate-850 font-mono">
               <AnimatedNumber value={kpis?.openDeals || 0} />
             </span>
             <PulseBadge status="up" text="+19%" />
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">Pipeline opportunity volume</p>
+          <p className="text-[11px] text-slate-450 font-medium">Pipeline opportunity volume</p>
         </SpotlightCard>
 
-        <SpotlightCard className="bg-slate-900/90 border-slate-800 p-5 rounded-3xl space-y-3">
+        <SpotlightCard className="bg-white/80 border-slate-100 p-5 rounded-3xl shadow-glossy-md space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Revenue (MTD)</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+            <span className="text-xs font-bold text-slate-450 uppercase tracking-wider">Revenue (MTD)</span>
+            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 border border-amber-200/80 flex items-center justify-center">
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-black text-white font-mono">
+            <span className="text-2xl sm:text-3xl font-black text-slate-850 font-mono">
               {currencySymbol}<AnimatedNumber value={kpis?.revenueThisMonth || 0} />
             </span>
             <PulseBadge status="up" text="+24%" />
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">Closed paid revenue</p>
+          <p className="text-[11px] text-slate-450 font-medium">Closed paid revenue</p>
         </SpotlightCard>
 
-        <SpotlightCard className="bg-slate-900/90 border-slate-800 p-5 rounded-3xl space-y-3">
+        <SpotlightCard className="bg-white/80 border-slate-100 p-5 rounded-3xl shadow-glossy-md space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Tasks</span>
-            <div className="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center">
+            <span className="text-xs font-bold text-slate-450 uppercase tracking-wider">Pending Tasks</span>
+            <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 border border-rose-200/80 flex items-center justify-center">
               <CheckSquare className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-black text-white font-mono">
+            <span className="text-2xl sm:text-3xl font-black text-slate-850 font-mono">
               <AnimatedNumber value={kpis?.pendingTasks || 0} />
             </span>
             <PulseBadge status="neutral" text="0 Breaches" />
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">Team execution queue</p>
+          <p className="text-[11px] text-slate-450 font-medium">Team execution queue</p>
         </SpotlightCard>
       </div>
 
@@ -502,7 +490,7 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Performance Chart */}
         {!widgetLayout.performanceCharts?.hidden && (
-          <div className="lg:col-span-8 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl backdrop-blur-2xl shadow-xl space-y-4">
+          <div className="lg:col-span-8 bg-white/80 border border-slate-100 p-6 rounded-3xl backdrop-blur-2xl shadow-glossy-lg space-y-4">
             {renderWidgetHeader('performanceCharts', 'Business Performance Analytics', 'Revenue & Lead trend velocity')}
             {!widgetLayout.performanceCharts?.collapsed && (
               <div className="h-72 w-full pt-2">
@@ -516,7 +504,7 @@ export const Dashboard: React.FC = () => {
                     { label: 'Jun', value: 110000 },
                   ]}
                   dataKey="value"
-                  color="#6366f1"
+                  color="#0d9488"
                 />
               </div>
             )}
@@ -525,33 +513,33 @@ export const Dashboard: React.FC = () => {
 
         {/* CRM Health & Grounded AI Score */}
         {!widgetLayout.healthScore?.hidden && (
-          <div className="lg:col-span-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl backdrop-blur-2xl shadow-xl space-y-4">
+          <div className="lg:col-span-4 bg-white/80 border border-slate-100 p-6 rounded-3xl backdrop-blur-2xl shadow-glossy-lg space-y-4">
             {renderWidgetHeader('healthScore', 'CRM Health & AI Accuracy', 'Calculated strictly from real DB records')}
             {!widgetLayout.healthScore?.collapsed && (
               <div className="space-y-6 pt-2">
-                <div className="text-center p-6 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-black">
+                <div className="text-center p-6 bg-slate-50/80 rounded-2xl border border-slate-150 space-y-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-xs font-black">
                     <Sparkles className="w-3.5 h-3.5" /> Grounded AI Accuracy: 94.8%
                   </div>
-                  <h4 className="text-4xl font-black text-white font-mono pt-2">94 / 100</h4>
-                  <p className="text-xs font-bold text-emerald-400">Excellent CRM Operational Health</p>
+                  <h4 className="text-4xl font-black text-slate-850 font-mono pt-2">94 / 100</h4>
+                  <p className="text-xs font-bold text-emerald-600">Excellent CRM Operational Health</p>
                 </div>
 
                 <div className="space-y-3 text-xs">
-                  <div className="flex justify-between items-center text-slate-300">
+                  <div className="flex justify-between items-center text-slate-700 font-medium">
                     <span>Communication Frequency</span>
-                    <span className="font-mono font-bold text-emerald-400">96%</span>
+                    <span className="font-mono font-bold text-emerald-600">96%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: '96%' }} />
                   </div>
 
-                  <div className="flex justify-between items-center text-slate-300 pt-1">
+                  <div className="flex justify-between items-center text-slate-700 font-medium pt-1">
                     <span>Lead SLA Adherence</span>
-                    <span className="font-mono font-bold text-indigo-400">99.2%</span>
+                    <span className="font-mono font-bold text-brand-600">99.2%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-500 rounded-full" style={{ width: '99.2%' }} />
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-brand-550 rounded-full" style={{ width: '99.2%' }} />
                   </div>
                 </div>
               </div>
@@ -564,7 +552,7 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Watchlist Recent Deals Table */}
         {!widgetLayout.watchlist?.hidden && (
-          <div className="lg:col-span-8 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl backdrop-blur-2xl shadow-xl space-y-4">
+          <div className="lg:col-span-8 bg-white/80 border border-slate-100 p-6 rounded-3xl backdrop-blur-2xl shadow-glossy-lg space-y-4">
             {renderWidgetHeader('watchlist', 'High Value Pipeline Opportunities', 'Filtered in real time')}
             {!widgetLayout.watchlist?.collapsed && (
               <div className="overflow-x-auto">
@@ -579,7 +567,7 @@ export const Dashboard: React.FC = () => {
 
         {/* Team Leaderboard */}
         {!widgetLayout.teamLeaderboard?.hidden && (
-          <div className="lg:col-span-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl backdrop-blur-2xl shadow-xl space-y-4">
+          <div className="lg:col-span-4 bg-white/80 border border-slate-100 p-6 rounded-3xl backdrop-blur-2xl shadow-glossy-lg space-y-4">
             {renderWidgetHeader('teamLeaderboard', 'Team Leaderboard', 'Top performers by closed revenue')}
             {!widgetLayout.teamLeaderboard?.collapsed && (
               <div className="space-y-3">
@@ -588,15 +576,15 @@ export const Dashboard: React.FC = () => {
                   { rank: '🥈', name: 'Rahul Sharma', volume: '₹3,200,000', deals: 11 },
                   { rank: '🥉', name: 'Alex Mercer', volume: '₹2,650,000', deals: 8 },
                 ].map((rep, idx) => (
-                  <div key={idx} className="p-3.5 bg-slate-950/70 rounded-2xl border border-slate-800 flex items-center justify-between">
+                  <div key={idx} className="p-3.5 bg-slate-50/70 rounded-2xl border border-slate-150 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-lg">{rep.rank}</span>
                       <div>
-                        <p className="text-xs font-bold text-white">{rep.name}</p>
-                        <p className="text-[10px] text-slate-400">{rep.deals} Closed Deals</p>
+                        <p className="text-xs font-bold text-slate-800">{rep.name}</p>
+                        <p className="text-[10px] text-slate-450">{rep.deals} Closed Deals</p>
                       </div>
                     </div>
-                    <span className="text-xs font-mono font-extrabold text-emerald-400">{rep.volume}</span>
+                    <span className="text-xs font-mono font-extrabold text-emerald-600">{rep.volume}</span>
                   </div>
                 ))}
               </div>
