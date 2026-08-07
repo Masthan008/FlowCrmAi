@@ -207,8 +207,13 @@ exports.authController = {
             response_1.ResponseHelper.sendSuccess(req, res, 200, 'Profile updated successfully', {
                 id: user.id,
                 email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
                 fullName: user.fullName,
                 phone: user.phone,
+                department: user.department,
+                jobTitle: user.jobTitle,
+                profileImage: user.profileImage,
                 language: user.language,
                 timezone: user.timezone,
                 themePreference: user.themePreference

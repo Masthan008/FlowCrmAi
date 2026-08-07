@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,10 +10,12 @@ import { api } from '../services/api';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { Avatar } from '../components/ui/Avatar';
 import {
   Settings as SettingsIcon, Sliders, User, Shield, Bell, Palette,
   Globe, Lock, Moon, Sun, Loader2, Save, Eye, EyeOff, Check,
-  Monitor, Layers, Plus, CheckSquare, Square
+  Monitor, Layers, Plus, CheckSquare, Square, Building2, Key,
+  Sparkles, CheckCircle2, AlertCircle, RefreshCw, Cpu
 } from 'lucide-react';
 
 const profileSchema = z.object({
@@ -22,6 +24,8 @@ const profileSchema = z.object({
   phone: z.string().optional(),
   timezone: z.string(),
   language: z.string(),
+  department: z.string().optional(),
+  jobTitle: z.string().optional(),
 });
 
 const passwordSchema = z.object({
@@ -37,10 +41,9 @@ type ProfileFields = z.infer<typeof profileSchema>;
 type PasswordFields = z.infer<typeof passwordSchema>;
 
 const TIMEZONES = [
-  'UTC', 'America/New_York', 'America/Chicago', 'America/Denver',
+  'UTC', 'Asia/Kolkata', 'America/New_York', 'America/Chicago', 'America/Denver',
   'America/Los_Angeles', 'Europe/London', 'Europe/Berlin', 'Europe/Paris',
-  'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Dubai', 'Asia/Kolkata',
-  'Australia/Sydney', 'Pacific/Auckland',
+  'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Dubai', 'Australia/Sydney',
 ];
 
 const LANGUAGES = [
@@ -48,19 +51,20 @@ const LANGUAGES = [
   { value: 'es', label: 'Español' },
   { value: 'fr', label: 'Français' },
   { value: 'de', label: 'Deutsch' },
-  { value: 'pt', label: 'Português' },
   { value: 'ja', label: '日本語' },
   { value: 'zh', label: '中文' },
 ];
 
-const Settings: React.FC = () => {
+export const Settings: React.FC = () => {
   const { user, updateUser } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
   const toast = useToast();
+
   const [isSaving, setIsSaving] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+
   const [notifications, setNotifications] = useState({
     emailAlerts: true,
     pushNotifications: true,
@@ -68,7 +72,6 @@ const Settings: React.FC = () => {
     leadAssignments: true,
     dealUpdates: true,
     taskReminders: true,
-    marketingEmails: false,
   });
 
   const [cacheExpiry, setCacheExpiry] = useState(300);
@@ -76,26 +79,23 @@ const Settings: React.FC = () => {
   const [rateLimit, setRateLimit] = useState(60);
   const [companyName, setCompanyName] = useState('FlowCRM Enterprise');
   const [supportEmail, setSupportEmail] = useState('support@flowcrm.ai');
-  const [defaultCurrency, setDefaultCurrency] = useState('USD');
+  const [defaultCurrency, setDefaultCurrency] = useState('INR');
 
   // RBAC State
   const [roles, setRoles] = useState<any[]>([]);
   const [permissions, setPermissions] = useState<any[]>([]);
   const [selectedRole, setSelectedRole] = useState<any>(null);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
-
-  // Pipeline State
   const [pipelines, setPipelines] = useState<any[]>([]);
 
-  // Fetch initial System Settings
   useEffect(() => {
     api.get('/settings')
       .then(res => {
         const d = res.data.data;
         if (d) {
-          setCompanyName(d.companyName || 'FlowCRM Enterprise');
+          setCompanyName(d.companyName || user?.company?.name || 'FlowCRM Enterprise');
           setSupportEmail(d.supportEmail || 'support@flowcrm.ai');
-          setDefaultCurrency(d.defaultCurrency || 'USD');
+          setDefaultCurrency(d.defaultCurrency || user?.company?.currency || 'INR');
           setCacheExpiry(d.cacheExpiry || 300);
           setRateLimit(d.rateLimit || 60);
           setWebhooksEnabled(d.webhooksEnabled ?? true);
@@ -104,7 +104,6 @@ const Settings: React.FC = () => {
       .catch(() => {});
   }, []);
 
-  // Fetch Roles, Permissions & Pipelines when tab opens
   useEffect(() => {
     if (activeTab === 'rbac') {
       Promise.all([api.get('/roles'), api.get('/permissions')])
@@ -126,53 +125,16 @@ const Settings: React.FC = () => {
     }
   }, [activeTab]);
 
-  const handleSelectRole = (r: any) => {
-    setSelectedRole(r);
-    const pIds = r.permissions?.map((p: any) => p.permissionId || p.permission?.id) || [];
-    setSelectedPermissions(pIds);
-  };
-
-  const togglePermission = (permId: string) => {
-    setSelectedPermissions(prev =>
-      prev.includes(permId) ? prev.filter(id => id !== permId) : [...prev, permId]
-    );
-  };
-
-  const saveRolePermissions = async () => {
-    if (!selectedRole) return;
-    try {
-      await api.put(`/roles/${selectedRole.id}/permissions`, { permissionIds: selectedPermissions });
-      toast.success('Permissions Saved', `Role "${selectedRole.name}" permissions updated.`);
-    } catch (err: any) {
-      toast.error('Save Failed', err.response?.data?.message || 'Failed to update permissions.');
-    }
-  };
-
-  const handleSaveSystem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await api.put('/settings', {
-        companyName,
-        supportEmail,
-        defaultCurrency,
-        cacheExpiry,
-        rateLimit,
-        webhooksEnabled,
-      });
-      toast.success('Settings Saved', 'System configurations saved successfully.');
-    } catch (err: any) {
-      toast.error('Save Failed', err.response?.data?.message || 'Could not save system settings.');
-    }
-  };
-
   const profileForm = useForm<ProfileFields>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       firstName: user?.firstName || '',
       lastName: user?.lastName || '',
       phone: user?.phone || '',
-      timezone: user?.timezone || 'UTC',
+      timezone: user?.timezone || 'Asia/Kolkata',
       language: user?.language || 'en',
+      department: user?.department || 'Management',
+      jobTitle: user?.jobTitle || 'Administrator',
     },
   });
 
@@ -186,8 +148,10 @@ const Settings: React.FC = () => {
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         phone: user.phone || '',
-        timezone: user.timezone || 'UTC',
+        timezone: user.timezone || 'Asia/Kolkata',
         language: user.language || 'en',
+        department: user.department || 'Management',
+        jobTitle: user.jobTitle || 'Administrator',
       });
     }
   }, [user]);
@@ -196,8 +160,13 @@ const Settings: React.FC = () => {
     setIsSaving(true);
     try {
       const res = await api.put('/auth/profile', data);
-      updateUser(res.data.data);
-      toast.success('Profile Updated', 'Your profile has been saved successfully.');
+      const updatedData = res.data.data;
+      updateUser(updatedData);
+
+      toast.success(
+        'Profile Saved! 🎉',
+        `Your name has been updated to ${updatedData.firstName} ${updatedData.lastName}`
+      );
     } catch (err: any) {
       toast.error('Save Failed', err.response?.data?.message || 'Could not save profile.');
     } finally {
@@ -212,7 +181,7 @@ const Settings: React.FC = () => {
         oldPassword: data.currentPassword,
         newPassword: data.newPassword,
       });
-      toast.success('Password Changed', 'Your password has been updated successfully.');
+      toast.success('Password Updated', 'Your security password has been changed.');
       passwordForm.reset();
     } catch (err: any) {
       toast.error('Update Failed', err.response?.data?.message || 'Could not change password.');
@@ -221,436 +190,392 @@ const Settings: React.FC = () => {
     }
   };
 
-  const toggleNotification = (key: keyof typeof notifications) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
+  const handleSaveSystem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.put('/settings', {
+        companyName,
+        supportEmail,
+        defaultCurrency,
+        cacheExpiry,
+        rateLimit,
+        webhooksEnabled,
+      });
+      toast.success('System Settings Saved', 'Enterprise configuration saved successfully.');
+    } catch (err: any) {
+      toast.error('Save Failed', err.response?.data?.message || 'Could not save settings.');
+    }
   };
 
-  const saveNotifications = async () => {
-    toast.success('Preferences Saved', 'Notification preferences updated locally.');
-  };
-
-  const breadcrumbs = [{ label: 'Settings' }];
+  const breadcrumbs = [{ label: 'Settings & Configurations' }];
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'profile', label: 'User Profile', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'appearance', label: 'Appearance', icon: Palette },
-    { id: 'security', label: 'Security', icon: Lock },
-    { id: 'system', label: 'System', icon: SettingsIcon },
+    { id: 'appearance', label: 'Theme & Styling', icon: Palette },
+    { id: 'security', label: 'Security & 2FA', icon: Lock },
+    { id: 'system', label: 'Enterprise System', icon: SettingsIcon },
     { id: 'rbac', label: 'RBAC Matrix', icon: Shield },
-    { id: 'pipelines', label: 'Pipelines', icon: Layers },
+    { id: 'pipelines', label: 'Sales Pipelines', icon: Layers },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.25 } },
-  };
+  const inputClass = (hasError: boolean) =>
+    `w-full px-4 py-2.5 text-xs sm:text-sm border rounded-xl bg-slate-50/80 focus:outline-none focus:bg-white focus:border-brand-550 focus:ring-4 focus:ring-brand-100/60 transition-all font-medium text-slate-800 shadow-sm ${
+      hasError ? 'border-rose-300 focus:ring-rose-100' : 'border-slate-200/80'
+    }`;
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      className="space-y-6 max-w-5xl mx-auto"
-    >
-      <motion.div variants={itemVariants} className="flex flex-col gap-2">
-        <Breadcrumb items={breadcrumbs} />
-        <h1 className="text-2xl font-bold tracking-tight text-slate-800">Settings</h1>
-        <p className="text-sm text-slate-400 mt-0.5">Manage your account, preferences, and system configuration</p>
-      </motion.div>
+    <div className="space-y-8 select-none font-sans pb-16">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/80 backdrop-blur-xl border border-slate-100 p-6 rounded-3xl shadow-glossy-sm">
+        <div>
+          <Breadcrumb items={breadcrumbs} />
+          <h1 className="text-xl sm:text-3xl font-black text-slate-850 tracking-tight leading-none mt-1.5 font-display flex items-center gap-3">
+            <span>Settings & Preferences</span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 text-brand-700 border border-brand-200 text-xs font-extrabold shadow-sm">
+              <Building2 className="w-3.5 h-3.5" /> {companyName}
+            </span>
+          </h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Manage your personal profile credentials, RBAC matrix, branding, and system defaults.
+          </p>
+        </div>
+      </div>
 
-      {/* Tabs */}
-      <motion.div variants={itemVariants} className="flex gap-1 bg-slate-50 border border-slate-200/60 p-1 rounded-xl overflow-x-auto">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase rounded-lg whitespace-nowrap transition-all ${
-              activeTab === tab.id
-                ? 'bg-brand-550 text-white shadow-glossy-sm'
-                : 'text-slate-400 hover:text-slate-700 bg-transparent'
-            }`}
+      {/* Main Settings Navigation Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-slate-150">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`relative px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
+                isActive
+                  ? 'text-white bg-brand-550 shadow-glossy'
+                  : 'text-slate-600 hover:text-slate-850 hover:bg-slate-50 border border-transparent'
+              }`}
+            >
+              <Icon size={14} />
+              <span>{tab.label}</span>
+              {isActive && (
+                <motion.div
+                  layoutId="activeTabIndicator"
+                  className="absolute inset-0 rounded-2xl bg-brand-550 -z-10"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab Panels */}
+      <AnimatePresence mode="wait">
+        {/* ─── 1. USER PROFILE TAB ──────────────────────────────────── */}
+        {activeTab === 'profile' && (
+          <motion.div
+            key="profile"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-8"
           >
-            <tab.icon size={14} />
-            {tab.label}
-          </button>
-        ))}
-      </motion.div>
-
-      {/* Profile Tab */}
-      {activeTab === 'profile' && (
-        <motion.div key="profile" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="p-2 bg-brand-50 rounded-xl"><User size={18} className="text-brand-600" /></div>
-              <h2 className="text-base font-semibold text-slate-800">Personal Information</h2>
-            </div>
-            <form onSubmit={profileForm.handleSubmit(onSaveProfile)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">First Name</label>
-                  <input {...profileForm.register('firstName')} className="w-full px-4 py-2.5 text-sm border rounded-xl bg-slate-50/50 focus:outline-none focus:ring-4 focus:ring-brand-100/60 transition-all font-medium" />
-                  {profileForm.formState.errors.firstName && <p className="text-xs text-red-500 mt-1">{profileForm.formState.errors.firstName.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Last Name</label>
-                  <input {...profileForm.register('lastName')} className="w-full px-4 py-2.5 text-sm border rounded-xl bg-slate-50/50 focus:outline-none focus:ring-4 focus:ring-brand-100/60 transition-all font-medium" />
-                  {profileForm.formState.errors.lastName && <p className="text-xs text-red-500 mt-1">{profileForm.formState.errors.lastName.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Phone</label>
-                  <input {...profileForm.register('phone')} placeholder="+1 (555) 000-0000" className="w-full px-4 py-2.5 text-sm border rounded-xl bg-slate-50/50 focus:outline-none focus:ring-4 focus:ring-brand-100/60 transition-all font-medium" />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Timezone</label>
-                  <select {...profileForm.register('timezone')} className="w-full px-4 py-2.5 text-sm border rounded-xl bg-slate-50/50 focus:outline-none focus:ring-4 focus:ring-brand-100/60 transition-all font-medium">
-                    {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Language</label>
-                  <select {...profileForm.register('language')} className="w-full px-4 py-2.5 text-sm border rounded-xl bg-slate-50/50 focus:outline-none focus:ring-4 focus:ring-brand-100/60 transition-all font-medium">
-                    {LANGUAGES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
-                  </select>
+            {/* Avatar Profile Preview */}
+            <div className="lg:col-span-4 bg-white/90 border border-slate-100 rounded-3xl p-6 shadow-glossy-lg backdrop-blur-xl space-y-6 text-center">
+              <div className="relative inline-block">
+                <Avatar name={user?.fullName || 'User'} size="xl" className="mx-auto shadow-glossy border-4 border-white" />
+                <div className="absolute bottom-0 right-0 p-2 bg-emerald-500 rounded-full border-2 border-white text-white shadow-md">
+                  <CheckCircle2 size={12} />
                 </div>
               </div>
-              <div className="flex justify-end pt-2">
-                <Button type="submit" disabled={isSaving} variant="primary" size="md">
-                  {isSaving ? <Loader2 size={16} className="animate-spin mr-2" /> : <Save size={16} className="mr-2" />}
-                  Save Changes
-                </Button>
+              <div>
+                <h3 className="text-lg font-black text-slate-850">{user?.fullName}</h3>
+                <p className="text-xs text-brand-600 font-bold mt-0.5">{user?.jobTitle || 'Administrator'}</p>
+                <p className="text-[11px] text-slate-450 font-medium">{user?.email}</p>
               </div>
-            </form>
-          </Card>
-        </motion.div>
-      )}
 
-      {/* Notifications Tab */}
-      {activeTab === 'notifications' && (
-        <motion.div key="notifications" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="p-2 bg-amber-50 rounded-xl"><Bell size={18} className="text-amber-600" /></div>
-              <h2 className="text-base font-semibold text-slate-800">Notification Preferences</h2>
+              <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-150 text-left space-y-2 text-xs">
+                <div className="flex justify-between text-slate-600">
+                  <span>Organization</span>
+                  <span className="font-bold text-slate-850">{user?.company?.name || companyName}</span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span>Currency</span>
+                  <span className="font-mono font-bold text-brand-600">{user?.company?.currency || defaultCurrency}</span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span>Department</span>
+                  <span className="font-bold text-slate-850">{user?.department || 'Management'}</span>
+                </div>
+              </div>
             </div>
-            <div className="space-y-3">
-              {Object.entries(notifications).map(([key, value]) => (
-                <label key={key} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/30 hover:bg-slate-50/60 cursor-pointer transition-all">
-                  <span className="text-sm font-semibold text-slate-700 capitalize">
-                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())}
-                  </span>
-                  <div
-                    onClick={() => toggleNotification(key as keyof typeof notifications)}
-                    className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${value ? 'bg-brand-550' : 'bg-slate-300'}`}
+
+            {/* Profile Edit Form */}
+            <div className="lg:col-span-8 bg-white/90 border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-glossy-lg backdrop-blur-xl space-y-6">
+              <div className="border-b border-slate-150 pb-4">
+                <h3 className="text-lg font-black text-slate-850">Personal Identity Credentials</h3>
+                <p className="text-xs text-slate-500 font-medium">Update your display name, contact phone, and timezone.</p>
+              </div>
+
+              <form onSubmit={profileForm.handleSubmit(onSaveProfile)} className="space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-600 uppercase">First Name *</label>
+                    <input
+                      type="text"
+                      {...profileForm.register('firstName')}
+                      className={inputClass(!!profileForm.formState.errors.firstName)}
+                    />
+                    {profileForm.formState.errors.firstName && (
+                      <p className="text-xs font-bold text-rose-500">{profileForm.formState.errors.firstName.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-600 uppercase">Last Name *</label>
+                    <input
+                      type="text"
+                      {...profileForm.register('lastName')}
+                      className={inputClass(!!profileForm.formState.errors.lastName)}
+                    />
+                    {profileForm.formState.errors.lastName && (
+                      <p className="text-xs font-bold text-rose-500">{profileForm.formState.errors.lastName.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-600 uppercase">Mobile Phone</label>
+                    <input
+                      type="text"
+                      {...profileForm.register('phone')}
+                      className={inputClass(false)}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-600 uppercase">Department</label>
+                    <input
+                      type="text"
+                      {...profileForm.register('department')}
+                      className={inputClass(false)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-600 uppercase">Timezone</label>
+                    <select {...profileForm.register('timezone')} className={inputClass(false)}>
+                      {TIMEZONES.map(tz => (
+                        <option key={tz} value={tz}>{tz}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-600 uppercase">Language</label>
+                    <select {...profileForm.register('language')} className={inputClass(false)}>
+                      {LANGUAGES.map(lang => (
+                        <option key={lang.value} value={lang.value}>{lang.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex justify-end">
+                  <Button
+                    type="submit"
+                    disabled={isSaving}
+                    className="bg-brand-550 hover:bg-brand-600 text-white font-extrabold text-xs py-3 px-6 rounded-xl shadow-glossy flex items-center gap-2 cursor-pointer"
                   >
-                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-glossy-sm transition-transform ${value ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                  </div>
-                </label>
-              ))}
+                    {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                    <span>Save Profile Changes</span>
+                  </Button>
+                </div>
+              </form>
             </div>
-            <div className="flex justify-end pt-4">
-              <Button onClick={() => { saveNotifications(); toast.success('Settings Saved', 'Notification changes saved successfully.'); }} variant="primary" size="sm">
-                <Save size={14} className="mr-1.5" /> Save Changes
-              </Button>
-            </div>
-          </Card>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
 
-      {/* Appearance Tab */}
-      {activeTab === 'appearance' && (
-        <motion.div key="appearance" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="p-2 bg-violet-50 rounded-xl"><Palette size={18} className="text-violet-600" /></div>
-              <h2 className="text-base font-semibold text-slate-800">Theme & Appearance</h2>
+        {/* ─── 2. APPEARANCE TAB ───────────────────────────────────── */}
+        {activeTab === 'appearance' && (
+          <motion.div
+            key="appearance"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-white/90 border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-glossy-lg backdrop-blur-xl space-y-6"
+          >
+            <div className="border-b border-slate-150 pb-4">
+              <h3 className="text-lg font-black text-slate-850">Visual Theme & Display Preferences</h3>
+              <p className="text-xs text-slate-500 font-medium">Switch between White-Glossy Light and Dark theme accents.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { id: 'white-glossy', label: 'White Glossy', icon: Sun, desc: 'Clean light theme with glossy accents' },
-                { id: 'dark', label: 'Dark Mode', icon: Moon, desc: 'Easy on the eyes, low-light optimized' },
-                { id: 'system', label: 'System Default', icon: Monitor, desc: 'Follows your device theme setting' },
-              ].map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => { setTheme?.(t.id); localStorage.setItem('flowcrm_theme', t.id); }}
-                  className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                    theme === t.id
-                      ? 'border-brand-550 bg-brand-50/30 shadow-glossy-sm'
-                      : 'border-slate-150 bg-white hover:border-slate-300'
-                  }`}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div
+                onClick={() => setTheme('white-glossy')}
+                className={`p-6 rounded-3xl border-2 transition-all cursor-pointer space-y-4 ${
+                  theme !== 'dark' ? 'border-brand-550 bg-brand-50/40 shadow-glossy-md' : 'border-slate-200 bg-slate-50/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sun className="w-5 h-5 text-amber-500" />
+                    <h4 className="text-sm font-extrabold text-slate-850">Luminous White-Glossy Light</h4>
+                  </div>
+                  {theme !== 'dark' && <CheckCircle2 className="w-5 h-5 text-brand-600" />}
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Clean, bright glassmorphic layout optimized for maximum contrast, executive readability, and sharp visual polish.
+                </p>
+              </div>
+
+              <div
+                onClick={() => setTheme('dark')}
+                className={`p-6 rounded-3xl border-2 transition-all cursor-pointer space-y-4 ${
+                  theme === 'dark' ? 'border-brand-550 bg-slate-900 text-white shadow-xl' : 'border-slate-200 bg-slate-50/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Moon className="w-5 h-5 text-indigo-400" />
+                    <h4 className="text-sm font-extrabold">Midnight Dark Mode</h4>
+                  </div>
+                  {theme === 'dark' && <CheckCircle2 className="w-5 h-5 text-indigo-400" />}
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  High-contrast dark slate palette designed for low-light environments and long engineering sessions.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ─── 3. SECURITY TAB ─────────────────────────────────────── */}
+        {activeTab === 'security' && (
+          <motion.div
+            key="security"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-white/90 border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-glossy-lg backdrop-blur-xl space-y-6"
+          >
+            <div className="border-b border-slate-150 pb-4">
+              <h3 className="text-lg font-black text-slate-850">Security & Authentication</h3>
+              <p className="text-xs text-slate-500 font-medium">Update your account password and review multi-factor authentication.</p>
+            </div>
+
+            <form onSubmit={passwordForm.handleSubmit(onChangePassword)} className="space-y-4 max-w-xl">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-600 uppercase">Current Password *</label>
+                <input
+                  type="password"
+                  {...passwordForm.register('currentPassword')}
+                  className={inputClass(!!passwordForm.formState.errors.currentPassword)}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-600 uppercase">New Password *</label>
+                <input
+                  type="password"
+                  {...passwordForm.register('newPassword')}
+                  className={inputClass(!!passwordForm.formState.errors.newPassword)}
+                />
+                {passwordForm.formState.errors.newPassword && (
+                  <p className="text-xs font-bold text-rose-500">{passwordForm.formState.errors.newPassword.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-600 uppercase">Confirm New Password *</label>
+                <input
+                  type="password"
+                  {...passwordForm.register('confirmPassword')}
+                  className={inputClass(!!passwordForm.formState.errors.confirmPassword)}
+                />
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  disabled={isUpdatingPassword}
+                  className="bg-brand-550 text-white font-extrabold text-xs py-3 px-6 rounded-xl shadow-glossy flex items-center gap-2 cursor-pointer"
                 >
-                  <div className={`p-2 rounded-xl inline-block mb-3 ${theme === t.id ? 'bg-brand-100 text-brand-600' : 'bg-slate-100 text-slate-500'}`}>
-                    <t.icon size={20} />
-                  </div>
-                  <h4 className="text-sm font-bold text-slate-800 mb-1">{t.label}</h4>
-                  <p className="text-[11px] text-slate-400 font-medium">{t.desc}</p>
-                  {theme === t.id && <Check size={14} className="text-brand-550 mt-2" />}
-                </button>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Security Tab */}
-      {activeTab === 'security' && (
-        <motion.div key="security" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="p-2 bg-rose-50 rounded-xl"><Lock size={18} className="text-rose-600" /></div>
-              <h2 className="text-base font-semibold text-slate-800">Change Password</h2>
-            </div>
-            <form onSubmit={passwordForm.handleSubmit(onChangePassword)} className="space-y-4 max-w-md">
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Current Password</label>
-                <input type="password" {...passwordForm.register('currentPassword')} className="w-full px-4 py-2.5 text-sm border rounded-xl bg-slate-50/50 focus:outline-none focus:ring-4 focus:ring-brand-100/60 transition-all font-medium" />
-                {passwordForm.formState.errors.currentPassword && <p className="text-xs text-red-500 mt-1">{passwordForm.formState.errors.currentPassword.message}</p>}
-              </div>
-              <div className="relative">
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">New Password</label>
-                <input type={showPassword ? 'text' : 'password'} {...passwordForm.register('newPassword')} className="w-full px-4 py-2.5 pr-10 text-sm border rounded-xl bg-slate-50/50 focus:outline-none focus:ring-4 focus:ring-brand-100/60 transition-all font-medium" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-8 text-slate-400 hover:text-slate-600">
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-                {passwordForm.formState.errors.newPassword && <p className="text-xs text-red-500 mt-1">{passwordForm.formState.errors.newPassword.message}</p>}
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Confirm New Password</label>
-                <input type="password" {...passwordForm.register('confirmPassword')} className="w-full px-4 py-2.5 text-sm border rounded-xl bg-slate-50/50 focus:outline-none focus:ring-4 focus:ring-brand-100/60 transition-all font-medium" />
-                {passwordForm.formState.errors.confirmPassword && <p className="text-xs text-red-500 mt-1">{passwordForm.formState.errors.confirmPassword.message}</p>}
-              </div>
-              <div className="flex justify-end pt-2">
-                <Button type="submit" disabled={isUpdatingPassword} variant="primary" size="md">
-                  {isUpdatingPassword ? <Loader2 size={16} className="animate-spin mr-2" /> : <Lock size={16} className="mr-2" />}
-                  Save Changes
+                  {isUpdatingPassword ? <Loader2 size={16} className="animate-spin" /> : <Lock size={16} />}
+                  <span>Update Password</span>
                 </Button>
               </div>
             </form>
-          </Card>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
 
-      {/* System Tab */}
-      {activeTab === 'system' && (
-        <form onSubmit={handleSaveSystem} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="p-6 space-y-4 text-left">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 bg-cyan-50 rounded-xl"><Sliders size={18} className="text-cyan-600" /></div>
-                <h2 className="text-base font-semibold text-slate-800">System Configuration</h2>
-              </div>
-              
+        {/* ─── 4. SYSTEM & BRANDING TAB ───────────────────────────── */}
+        {activeTab === 'system' && (
+          <motion.div
+            key="system"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-white/90 border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-glossy-lg backdrop-blur-xl space-y-6"
+          >
+            <div className="border-b border-slate-150 pb-4">
+              <h3 className="text-lg font-black text-slate-850">System Configurations & Enterprise Branding</h3>
+              <p className="text-xs text-slate-500 font-medium">Configure company name, base currency, and API throttling limits.</p>
+            </div>
+
+            <form onSubmit={handleSaveSystem} className="space-y-5 max-w-xl">
               <div className="space-y-1">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">API Cache Expiry Time (seconds)</label>
-                <input
-                  type="number"
-                  value={cacheExpiry}
-                  onChange={(e) => setCacheExpiry(Number(e.target.value))}
-                  className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-medium"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">API Request Rate Limit (req/min)</label>
-                <input
-                  type="number"
-                  value={rateLimit}
-                  onChange={(e) => setRateLimit(Number(e.target.value))}
-                  className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-medium"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/30">
-                <span className="text-xs font-semibold text-slate-700">Enable Webhooks Dispatcher</span>
-                <div
-                  onClick={() => setWebhooksEnabled(!webhooksEnabled)}
-                  className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${webhooksEnabled ? 'bg-brand-550' : 'bg-slate-300'}`}
-                >
-                  <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-glossy-sm transition-transform ${webhooksEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6 space-y-4 text-left">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 bg-indigo-50 rounded-xl"><Globe size={18} className="text-indigo-600" /></div>
-                <h2 className="text-base font-semibold text-slate-800">Company Preferences</h2>
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">Company Branding Name</label>
+                <label className="text-xs font-bold text-slate-600 uppercase">Workspace Company Name</label>
                 <input
                   type="text"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-medium"
+                  className={inputClass(false)}
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">Primary Support Email</label>
+                <label className="text-xs font-bold text-slate-600 uppercase">Support Email</label>
                 <input
                   type="email"
                   value={supportEmail}
                   onChange={(e) => setSupportEmail(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-medium"
+                  className={inputClass(false)}
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">Default Currency</label>
+                <label className="text-xs font-bold text-slate-600 uppercase">Base Currency</label>
                 <select
                   value={defaultCurrency}
                   onChange={(e) => setDefaultCurrency(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-150 rounded-xl bg-slate-50/50 font-semibold text-slate-700"
+                  className={inputClass(false)}
                 >
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                  <option value="JPY">JPY (¥)</option>
+                  <option value="INR">INR (₹) — Indian Rupee</option>
+                  <option value="USD">USD ($) — US Dollar</option>
+                  <option value="EUR">EUR (€) — Euro</option>
                 </select>
               </div>
-            </Card>
-          </div>
-          <div className="flex justify-end">
-            <Button type="submit" variant="primary" size="md">
-              <Save size={16} className="mr-2" />
-              Save Changes
-            </Button>
-          </div>
-        </form>
-      )}
 
-      {/* RBAC Matrix Tab */}
-      {activeTab === 'rbac' && (
-        <motion.div key="rbac" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-          <Card className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-emerald-50 rounded-xl"><Shield size={18} className="text-emerald-600" /></div>
-                <div>
-                  <h2 className="text-base font-semibold text-slate-800">Role-Based Access Control (RBAC) Matrix</h2>
-                  <p className="text-xs text-slate-400">Configure granular permissions for each user role</p>
-                </div>
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  className="bg-brand-550 text-white font-extrabold text-xs py-3 px-6 rounded-xl shadow-glossy flex items-center gap-2 cursor-pointer"
+                >
+                  <Save size={16} />
+                  <span>Save System Settings</span>
+                </Button>
               </div>
-              <Button onClick={saveRolePermissions} variant="primary" size="sm">
-                <Save size={14} className="mr-1.5" /> Save Role Matrix
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {/* Roles List */}
-              <div className="space-y-2 border-r border-slate-100 pr-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Roles</span>
-                {roles.map(r => (
-                  <button
-                    key={r.id}
-                    onClick={() => handleSelectRole(r)}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
-                      selectedRole?.id === r.id
-                        ? 'bg-brand-50 text-brand-600 border border-brand-200 shadow-sm'
-                        : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    <span>{r.name}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-semibold">
-                      {r.permissions?.length || 0}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Permissions Matrix */}
-              <div className="md:col-span-3 space-y-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Permissions for Role: <span className="text-slate-800 font-extrabold">{selectedRole?.name || 'Select Role'}</span>
-                </span>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2">
-                  {permissions.map(p => {
-                    const isChecked = selectedPermissions.includes(p.id);
-                    return (
-                      <div
-                        key={p.id}
-                        onClick={() => togglePermission(p.id)}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
-                          isChecked
-                            ? 'bg-emerald-50/40 border-emerald-200 text-emerald-900'
-                            : 'bg-slate-50/30 border-slate-150 text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        {isChecked ? (
-                          <CheckSquare size={16} className="text-emerald-600 mt-0.5 flex-shrink-0" />
-                        ) : (
-                          <Square size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
-                        )}
-                        <div>
-                          <div className="text-xs font-bold capitalize">{p.name || `${p.module}:${p.action}`}</div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">{p.description || `Allows ${p.action} on ${p.module}`}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Pipelines Tab */}
-      {activeTab === 'pipelines' && (
-        <motion.div key="pipelines" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-          <Card className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-blue-50 rounded-xl"><Layers size={18} className="text-blue-600" /></div>
-                <div>
-                  <h2 className="text-base font-semibold text-slate-800">Sales Pipeline Configurations</h2>
-                  <p className="text-xs text-slate-400">Manage pipeline stages and deal win probabilities</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              {pipelines.map(pipe => (
-                <div key={pipe.id} className="p-4 rounded-2xl border border-slate-150 bg-slate-50/30 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-800">{pipe.name}</h3>
-                      <p className="text-xs text-slate-400">{pipe.description}</p>
-                    </div>
-                    {pipe.isDefault && (
-                      <span className="px-2.5 py-1 rounded-full bg-brand-50 text-brand-600 font-bold text-[10px] uppercase">
-                        Default Pipeline
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-                    {pipe.stages?.map((stg: any) => (
-                      <div key={stg.id} className="p-3 bg-white border border-slate-100 rounded-xl shadow-xs text-center space-y-1">
-                        <span className="text-[10px] font-bold text-slate-400 block">Stage {stg.order}</span>
-                        <h4 className="text-xs font-bold text-slate-700 truncate">{stg.name}</h4>
-                        <span className="inline-block px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold text-[10px]">
-                          {stg.probability}% Win
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-      )}
-    </motion.div>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
