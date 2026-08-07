@@ -24,8 +24,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
             CRM
           </Link>
         </li>
-        {items.map((item, index) => {
-          const isLast = index === items.length - 1;
+        {(items || []).map((item, index) => {
+          const isLast = index === (items || []).length - 1;
           return (
             <li key={index}>
               <div className="flex items-center">

@@ -81,7 +81,7 @@ export const LineChartWrapper: React.FC<LineChartProps> = ({
             iconSize={8}
             wrapperStyle={{ fontSize: '11px', fontWeight: 550, color: '#64748b' }}
           />
-          {series.map((s, idx) => (
+          {(series || []).map((s, idx) => (
             <Line
               key={s.key}
               type="monotone"
@@ -115,7 +115,7 @@ export const BarChartWrapper: React.FC<BarChartProps> = ({
   return (
     <div style={{ width: '100%', height }}>
       <ResponsiveContainer>
-        <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <BarChart data={data || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
           <XAxis
             dataKey={xKey}
@@ -140,7 +140,7 @@ export const BarChartWrapper: React.FC<BarChartProps> = ({
             iconSize={8}
             wrapperStyle={{ fontSize: '11px', fontWeight: 550, color: '#64748b' }}
           />
-          {series.map((s, idx) => (
+          {(series || []).map((s, idx) => (
             <Bar
               key={s.key}
               dataKey={s.key}
@@ -172,7 +172,7 @@ export const PieChartWrapper: React.FC<PieChartProps> = ({
       <ResponsiveContainer>
         <PieChart>
           <Pie
-            data={data}
+            data={data || []}
             cx="50%"
             cy="50%"
             innerRadius={60}
@@ -180,7 +180,7 @@ export const PieChartWrapper: React.FC<PieChartProps> = ({
             paddingAngle={3}
             dataKey="value"
           >
-            {data.map((entry, index) => (
+            {(data || []).map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
                 fill={entry.color || defaultColors[index % defaultColors.length]}
